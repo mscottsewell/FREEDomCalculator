@@ -1,0 +1,11 @@
+{
+  "name": "financial-freedom-calculators",
+  "homepage": "https://mscottsewell.github.io/freedomcalculator",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b --noCheck && vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  }
+}
