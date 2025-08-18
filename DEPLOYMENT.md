@@ -41,8 +41,8 @@ This is a **GitHub Spark project**, which means it has special dependencies and 
 2. **Update package.json** (add/modify these sections):
    ```json
    {
-     "name": "financial-freedom-calculators",
-     "homepage": "https://YOUR_USERNAME.github.io/YOUR_REPO_NAME",
+     "name": "freedomcalculator",
+     "homepage": "https://mscottsewell.github.io/FREEDomCalculator",
      "scripts": {
        "dev": "vite",
        "build": "tsc -b --noCheck && vite build",
@@ -54,8 +54,8 @@ This is a **GitHub Spark project**, which means it has special dependencies and 
    ```
    
    **⚠️ Replace:**
-   - `YOUR_USERNAME` with your actual GitHub username
-   - `YOUR_REPO_NAME` with your repository name
+   - `mscottsewell` with your actual GitHub mscottsewell
+   - `FREEmscottsewellator` with your repository name
 
 3. **Create a production-ready vite.config.ts:**
    
@@ -73,7 +73,7 @@ This is a **GitHub Spark project**, which means it has special dependencies and 
        react(),
        tailwindcss(),
      ],
-     base: '/YOUR_REPO_NAME/', // CRITICAL: Replace with your repo name
+     base: '/FREEDomCalculator/', // CRITICAL: Replace with your repo name
      resolve: {
        alias: {
          '@': resolve(import.meta.dirname, 'src')
@@ -124,7 +124,7 @@ Since this is a Spark project, we need to handle the special Spark dependencies:
    git branch -M main
    
    # Add your GitHub repository as origin
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   git remote add origin https://github.com/mscottsewell/FREEDomCalculator.git
    ```
 
 2. **Test the build process:**
@@ -177,7 +177,7 @@ Since this is a Spark project, we need to handle the special Spark dependencies:
 ### Step 6: Verify Deployment
 
 After 5-10 minutes, your site should be live at:
-`https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/`
+`https://mscottsewell.github.io/FREEDomCalculator/`
 
 **Check that everything works:**
 - [ ] Site loads without errors
@@ -346,7 +346,7 @@ import { resolve } from 'path';
     react(),
     tailwindcss(),
   ],
-  base: '/YOUR_REPO_NAME/', // MUST match your GitHub repository name
+  base: '/FREEDomCalculator/', // MUST match your GitHub repository name
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, 'src')
@@ -364,7 +364,7 @@ import { resolve } from 'path';
 #### 2. `package.json` Updates
 ```json
 {
-  "homepage": "https://YOUR_USERNAME.github.io/YOUR_REPO_NAME",
+  "homepage": "https://mscottsewell.github.io/FREEDomCalculator",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
@@ -439,7 +439,7 @@ npm run build
 After deployment, verify these items work correctly:
 
 **✅ Basic Functionality:**
-- [ ] Site loads at `https://USERNAME.github.io/REPO_NAME/`
+- [ ] Site loads at `https://mscottsewell.github.io/mscottsewell/`
 - [ ] All 6 calculator tabs are clickable and switch properly
 - [ ] FHU College of Business logo displays correctly
 - [ ] Page title shows "Mrs. Sewell's Financial FREEDom Calculators"
@@ -487,7 +487,7 @@ Once deployed, consider these optimizations:
 ### For Educators
 
 **Direct Access:**
-- **URL:** `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/`
+- **URL:** `https://mscottsewell.github.io/FREEDomCalculator/`
 - **QR Code:** Generate a QR code pointing to your URL for easy mobile access
 - **LMS Integration:** 
   - Canvas: Add as an external tool or embed in course content
@@ -650,7 +650,7 @@ Track student usage with Google Analytics:
 **Manual Backups:**
 ```bash
 # Create a backup of your repository
-git clone --mirror https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git backup-repo
+git clone --mirror https://github.com/mscottsewell/FREEDomCalculator.git backup-repo
 ```
 
 ---

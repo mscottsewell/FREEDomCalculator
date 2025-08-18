@@ -1,30 +1,25 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
-// import { resolve } from 'path';
+import { defineConfig, PluginOption } from "vite";
 
-// Production config for GitHub Pages deployment
+import sparkPlugin from "@github/spark/spark-vite-plugin";
+import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
+import { resolve } from 'path'
+
+const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
+
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-  react(),
+    react(),
+    tailwindcss(),
+    // DO NOT REMOVE
+    createIconImportProxy() as PluginOption,
+    sparkPlugin() as PluginOption,
   ],
-  base: '/freedomcalculator/', // CRITICAL: Replace with your repo name
   resolve: {
     alias: {
-  '@': '/src',
+      '@': resolve(projectRoot, 'src')
     }
   },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          charts: ['recharts', 'd3']
-        }
-      }
-    }
-  }
 });
