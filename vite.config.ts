@@ -7,16 +7,16 @@ import { resolve } from 'path';
     react(),
     tailwindcss(),
   ],
-  base: '/FREEDomCalculator/', // MUST match your GitHub repository name
-  resolve: {
+  base; '/FREEDomCalculator/', // MUST match your GitHub repository name
+  resolve; {
     alias: {
-      '@': resolve(import.meta.dirname, 'src')
+      '@'; resolve(import.meta.dirname, 'src')
     }
-  },
+  }
   build: {
     outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser'
+    assetsDir; 'assets',
+    sourcemap; false,
+    minify; 'terser'
   }
-});
+;
