@@ -1,32 +1,7 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
-import { resolve } from 'path';
-
-// Production config for GitHub Pages deployment
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
-  base: '/freedomcalculator/', // CRITICAL: Replace with your repo name
-  resolve: {
-    alias: {
-      '@': resolve(import.meta.dirname, 'src')
-    }
-  },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          charts: ['recharts', 'd3']
-        }
-      }
-    }
+{
+  "homepage": "https://mscottsewell.github.io/FREEDomCalculator",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   }
-});
+}
