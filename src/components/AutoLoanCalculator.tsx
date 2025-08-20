@@ -140,24 +140,18 @@ export function AutoLoanCalculator() {
         <CardHeader>
           <CardTitle className="text-lg">Loan Summary</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.monthlyPayment)}
-            </div>
-            <div className="text-sm text-muted-foreground">Monthly Payment</div>
+        <CardContent className="flex flex-col gap-2 max-w-xs mx-auto">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground text-left">Monthly Payment</span>
+            <span className="text-xl font-bold currency-blue text-right">{formatCurrency(results.monthlyPayment)}</span>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-red">
-              {formatCurrency(results.totalInterest)}
-            </div>
-            <div className="text-sm text-muted-foreground">Total Interest</div>
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground text-left">Total Interest</span>
+            <span className="text-xl font-bold currency-red text-right">{formatCurrency(results.totalInterest)}</span>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.totalPaid)}
-            </div>
-            <div className="text-sm text-muted-foreground">Total Amount Paid</div>
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground text-left">Total Amount Paid</span>
+            <span className="text-xl font-bold currency-blue text-right">{formatCurrency(results.totalPaid)}</span>
           </div>
         </CardContent>
       </Card>
