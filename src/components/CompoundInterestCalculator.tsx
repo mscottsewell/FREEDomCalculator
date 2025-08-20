@@ -23,11 +23,7 @@ interface ChartDataPoint {
 
 const compoundingOptions = [
   { value: 1, label: 'Annually' },
-  { value: 2, label: 'Semi-annually' },
-  { value: 4, label: 'Quarterly' },
-  { value: 12, label: 'Monthly' },
-  { value: 52, label: 'Weekly' },
-  { value: 365, label: 'Daily' }
+  { value: 12, label: 'Monthly' }
 ]
 
 export function CompoundInterestCalculator() {
@@ -302,9 +298,10 @@ export function CompoundInterestCalculator() {
           <p className="text-lg leading-relaxed font-medium">
               <strong>Albert Einstien called compound interest "the eighth wonder of the world."</strong> 
               The earlier you start investing, the more time your money has to grow exponentially. 
-              Even small amounts invested regularly can become substantial wealth over time due to compounding. The key is starting early and being consistent - 
-              time in the market is more powerful than timing the market. A 25-year-old who saves $200/month will have significantly more at retirement than 
-              a 35-year-old who saves $400/month, simply because of those extra 10 years of compound growth.
+              Even small amounts invested regularly can become substantial wealth over time due to compounding. 
+              The key is starting early and being consistent - <em>time in the market is more powerful than timing the market. </em> 
+              A 25-year-old who saves <b>$200</b>/month will have significantly more at retirement than 
+              a 35-year-old who saves <b>$400</b>/month, simply because of those extra 10 years of compound growth.
           </p>
         </CardContent>
       </Card>
