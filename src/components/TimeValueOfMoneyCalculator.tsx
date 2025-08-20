@@ -17,7 +17,7 @@ interface TVMData {
 export function TimeValueOfMoneyCalculator() {
   const [data, setData] = useKV<TVMData>('tvm-calculator', {
     periods: 20,
-    interestRate: 7,
+    interestRate: 7.5,
     presentValue: -10000,
     payment: -500,
     futureValue: 0,

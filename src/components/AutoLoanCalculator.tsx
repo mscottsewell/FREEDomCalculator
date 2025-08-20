@@ -21,9 +21,9 @@ interface PaymentSchedule {
 
 export function AutoLoanCalculator() {
   const [data, setData] = useKV<AutoLoanData>('autoloan-calculator', {
-    loanAmount: 25000,
-    interestRate: 5.5,
-    loanTerm: 5
+    loanAmount: 75000,
+    interestRate: 6.5,
+    loanTerm: 7
   })
 
   const [results, setResults] = useState({

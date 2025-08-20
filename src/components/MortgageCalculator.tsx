@@ -30,8 +30,8 @@ interface MonthlyPayment {
 
 export function MortgageCalculator() {
   const [data, setData] = useKV<MortgageData>('mortgage-calculator', {
-    homePrice: 400000,
-    downPaymentPercent: 20,
+    homePrice: 450000,
+    downPaymentPercent: 10,
     interestRate: 6.5,
     loanTerm: 30
   })

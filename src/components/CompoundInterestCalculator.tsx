@@ -28,11 +28,11 @@ const compoundingOptions = [
 
 export function CompoundInterestCalculator() {
   const [data, setData] = useKV<CompoundData>('compound-calculator', {
-    principal: 10000,
-    interestRate: 7,
+    principal: 5000,
+    interestRate: 8,
     years: 20,
     compoundingFrequency: 12,
-    additionalDeposit: 500,
+    additionalDeposit: 300,
     depositFrequency: 'monthly'
   })
 
