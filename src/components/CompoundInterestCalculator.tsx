@@ -224,19 +224,19 @@ export function CompoundInterestCalculator() {
               <CardTitle className="text-lg">Results</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-2xl flex justify-between">
+              <div className="flex justify-between">
                 <span>Final Amount:</span>
                 <span className="text-2xl font-semibold currency-blue">
                   {formatCurrency(results.finalAmount)}
                 </span>
               </div>
-              <div className="text-2xl flex justify-between">
+              <div className="flex justify-between">
                 <span>Total Interest Earned:</span>
                 <span className="text-2xl font-semibold currency-green">
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
-              <div className="text-2xl flex justify-between">
+              <div className="flex justify-between">
                 <span>Total Deposits:</span>
                 <span className="text-2xl font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
@@ -299,7 +299,7 @@ export function CompoundInterestCalculator() {
               <strong>Albert Einstien called compound interest "the eighth wonder of the world."</strong> 
               The earlier you start investing, the more time your money has to grow exponentially. 
               Even small amounts invested regularly can become substantial wealth over time due to compounding. 
-              The key is starting early and being consistent - <em>time in the market is more powerful than timing the market. </em> 
+              The key is starting early and being consistent - time in the market is <em>far more powerful</em> than "timing" the market. 
               A 25-year-old who saves <b>$200</b>/month will have significantly more at retirement than 
               a 35-year-old who saves <b>$400</b>/month, simply because of those extra 10 years of compound growth.
           </p>

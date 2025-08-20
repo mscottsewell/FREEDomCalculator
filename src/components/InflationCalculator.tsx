@@ -124,26 +124,26 @@ export function InflationCalculator() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Future Nominal Value:</span>
-              <span className="font-semibold currency-blue">
+              <span className="text-2xl font-semibold currency-blue">
                 {formatCurrency(results.futureNominal)}
               </span>
             </div>
             <hr className="border-t-2 border-gray-400 my-4" />
             <div className="flex justify-between">
               <span>Real Purchasing Power:</span>
-              <span className="font-semibold currency-green">
+              <span className="text-2xl font-semibold currency-green">
                 {formatCurrency(results.realPurchasingPower)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Purchasing Power Lost:</span>
-              <span className="font-semibold currency-red">
+              <span className="text-2xl font-semibold currency-red">
                 {formatCurrency(results.powerLost)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Percentage Lost:</span>
-              <span className="font-semibold currency-red">
+              <span className="text-2xl font-semibold currency-red">
                 {results.percentageLost.toFixed(1)}%
               </span>
             </div>
