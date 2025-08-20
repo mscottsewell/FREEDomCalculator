@@ -236,7 +236,7 @@ export function CompoundInterestCalculator() {
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
-              <div className="ftext-2xl lex justify-between">
+              <div className="text-2xl flex justify-between">
                 <span>Total Deposits:</span>
                 <span className="text-2xl font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
