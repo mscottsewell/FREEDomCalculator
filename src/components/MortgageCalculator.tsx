@@ -32,7 +32,7 @@ export function MortgageCalculator() {
   const [data, setData] = useKV<MortgageData>('mortgage-calculator', {
     homePrice: 450000,
     downPaymentPercent: 10,
-    interestRate: 6.5,
+    interestRate: 6.0,
     loanTerm: 30
   })
 

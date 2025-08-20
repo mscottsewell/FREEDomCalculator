@@ -32,7 +32,7 @@ interface ChartDataPoint {
 export function CreditCardCalculator() {
   const [data, setData] = useKV<CreditCardData>('creditcard-calculator', {
     balance: 5000,
-    apr: 28.99,
+    apr: 22.99,
     paymentType: 'minimum',
     fixedPayment: 150
   })
