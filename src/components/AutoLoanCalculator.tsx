@@ -141,7 +141,7 @@ export function AutoLoanCalculator() {
           <CardHeader>
             <CardTitle className="text-lg">Loan Summary</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 max-w-xs mx-auto">
+          <CardContent className="flex flex-col gap-2">
             <div className="flex justify-between items-center py-1">
               <span className="text-sm text-muted-foreground text-left">Monthly Payment</span>
               <span className="text-2xl font-bold currency-blue text-right">{formatCurrency(results.monthlyPayment)}</span>
