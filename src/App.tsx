@@ -9,7 +9,7 @@ import {
   Car, 
   House 
 } from '@phosphor-icons/react'
-import collegeLogo from '@/assets/images/FHU_COB.jpg'
+import collegeLogo from '@/assets/images/FHU_COB.svg'
 import { InflationCalculator } from '@/components/InflationCalculator'
 import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
 import { TimeValueOfMoneyCalculator } from '@/components/TimeValueOfMoneyCalculator'
