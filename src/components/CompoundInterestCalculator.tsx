@@ -224,21 +224,21 @@ export function CompoundInterestCalculator() {
               <CardTitle className="text-lg">Results</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
+              <div className="text-2xl flex justify-between">
                 <span>Final Amount:</span>
-                <span className="font-semibold currency-blue">
+                <span className="text-2xl font-semibold currency-blue">
                   {formatCurrency(results.finalAmount)}
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className="text-2xl flex justify-between">
                 <span>Total Interest Earned:</span>
-                <span className="font-semibold currency-green">
+                <span className="text-2xl font-semibold currency-green">
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className="ftext-2xl lex justify-between">
                 <span>Total Deposits:</span>
-                <span className="font-semibold currency-orange">
+                <span className="text-2xl font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
                 </span>
               </div>
