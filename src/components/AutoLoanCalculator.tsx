@@ -143,15 +143,15 @@ export function AutoLoanCalculator() {
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <div className="flex justify-between items-center py-1">
-              <span className="text-sm text-muted-foreground text-left">Monthly Payment</span>
+              <span className="text-muted-foreground text-left">Monthly Payment</span>
               <span className="text-2xl font-bold currency-blue text-right">{formatCurrency(results.monthlyPayment)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
-              <span className="text-sm text-muted-foreground text-left">Total Interest</span>
+              <span className="text-muted-foreground text-left">Total Interest</span>
               <span className="text-2xl font-bold currency-red text-right">{formatCurrency(results.totalInterest)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
-              <span className="text-sm text-muted-foreground text-left">Total Amount Paid</span>
+              <span className="text-muted-foreground text-left">Total Amount Paid</span>
               <span className="text-2xl font-bold currency-blue text-right">{formatCurrency(results.totalPaid)}</span>
             </div>
           </CardContent>
@@ -161,7 +161,7 @@ export function AutoLoanCalculator() {
             <CardTitle className="text-lg">Understanding Your Auto Loan</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed">
+            <p className="text-base leading-relaxed">
               For your {formatCurrencyNoDecimals(data.loanAmount)} auto loan at {data.interestRate}% interest for {data.loanTerm} years, 
               you'll pay {formatCurrency(results.monthlyPayment)} per month. Over the life of the loan, you'll pay a total of {formatCurrency(results.totalInterest)} in interest, 
               making your total cost {formatCurrency(results.totalPaid)}. This means the interest adds {((results.totalInterest / data.loanAmount) * 100).toFixed(1)}% to the cost of your vehicle.
