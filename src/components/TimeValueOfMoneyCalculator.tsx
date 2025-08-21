@@ -173,7 +173,17 @@ export function TimeValueOfMoneyCalculator() {
   }, [data])
 
   const updateData = (field: keyof TVMData, value: number | string) => {
-    setData(current => ({ ...current, [field]: value }))
+    setData(current => {
+      const safeCurrent: TVMData = {
+        periods: current?.periods ?? 0,
+        interestRate: current?.interestRate ?? 0,
+        presentValue: current?.presentValue ?? 0,
+        payment: current?.payment ?? 0,
+        futureValue: current?.futureValue ?? 0,
+        solveFor: current?.solveFor ?? 'futureValue',
+      };
+      return { ...safeCurrent, [field]: value };
+    });
   }
 
   const formatResult = () => {
@@ -290,22 +300,51 @@ export function TimeValueOfMoneyCalculator() {
         </div>
       </div>
 
-      {/* Results Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      {/* Results and Instructions Section Side by Side */}
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="w-full md:w-1/3">
           <CardHeader>
-            <CardTitle className="text-xl">Result</CardTitle>
+            <CardTitle className="text-xl">
+              Result: {(() => {
+                switch (data!.solveFor) {
+                  case 'periods': return 'Periods (N)';
+                  case 'interestRate': return 'Interest Rate (%)';
+                  case 'presentValue': return 'Present Value (PV)';
+                  case 'payment': return 'Payment (PMT)';
+                  case 'futureValue': return 'Future Value (FV)';
+                  default: return '';
+                }
+              })()}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {error ? (
               <div className="text-destructive font-semibold">{error}</div>
             ) : (
-              <div className="text-4xl font-bold currency-blue">
+              <div className="text-3xl font-bold currency-blue">
                 {formatResult()}
               </div>
             )}
           </CardContent>
         </Card>
+        <Card className="w-full md:w-2/3">
+          <CardHeader>
+            <CardTitle className="text-xl">Instructions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p>
+              <p><strong>Examples:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Initial investment: Use negative PV (e.g., -10000)</li>
+                <li>Monthly deposits: Use negative PMT (e.g., -500)</li>
+                <li>Loan principal received: Use positive PV</li>
+                <li>Loan payments made: Use negative PMT</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
         <Card>
           <CardHeader>
@@ -320,26 +359,6 @@ export function TimeValueOfMoneyCalculator() {
             </p>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Instructions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Instructions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm">
-            <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p>
-            <p><strong>Examples:</strong></p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Initial investment: Use negative PV (e.g., -10000)</li>
-              <li>Monthly deposits: Use negative PMT (e.g., -500)</li>
-              <li>Loan principal received: Use positive PV</li>
-              <li>Loan payments made: Use negative PMT</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
