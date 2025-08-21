@@ -44,7 +44,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-2xl md:text-2xl font-bold">
-                Mrs. Sewell's Financial FREEDom Calculators
+                Mrs. Sewell's Financial FREED-om Calculators
               </h1>
               <p className="text-primary-foreground/80 text-sm md:text-base">
                 Personal Finance Made Practical
