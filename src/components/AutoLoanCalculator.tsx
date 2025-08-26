@@ -98,6 +98,18 @@ export function AutoLoanCalculator() {
     setData(current => ({ ...current, [field]: value }))
   }
 
+
+  // Estimate depreciation: 20% first year, 15% each subsequent year
+  let estimatedValue = data.loanAmount;
+  if (data.loanTerm > 0) {
+    estimatedValue *= 0.8; // 20% loss first year
+    if (data.loanTerm > 1) {
+      estimatedValue *= Math.pow(0.85, data.loanTerm - 1); // 15% loss each subsequent year
+    }
+  }
+  // Round down to nearest five hundred
+  estimatedValue = Math.floor(estimatedValue / 500) * 500;
+
   return (
     <div className="space-y-6">
       {/* Input Section */}
@@ -162,9 +174,13 @@ export function AutoLoanCalculator() {
           </CardHeader>
           <CardContent>
             <p className="text-base leading-relaxed">
-              For your {formatCurrencyNoDecimals(data.loanAmount)} auto loan at {data.interestRate}% interest for {data.loanTerm} years, 
-              you'll pay {formatCurrency(results.monthlyPayment)} per month. Over the life of the loan, you'll pay a total of {formatCurrency(results.totalInterest)} in interest, 
-              making your total cost {formatCurrency(results.totalPaid)}. This means the interest adds {((results.totalInterest / data.loanAmount) * 100).toFixed(1)}% to the cost of your vehicle.
+            For your {formatCurrencyNoDecimals(data.loanAmount)} auto loan at {data.interestRate}% interest for {data.loanTerm} years, 
+            you'll pay <strong>{formatCurrency(results.monthlyPayment)}</strong> per month.             
+            <br/>
+            Over the life of the loan, you'll pay a total of <strong>{formatCurrency(results.totalInterest)}</strong> in interest, 
+            making your total cost <strong>{formatCurrency(results.totalPaid)}</strong>. 
+            <br/>
+            The interest adds <strong>{((results.totalInterest / data.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
             </p>
           </CardContent>
         </Card>
