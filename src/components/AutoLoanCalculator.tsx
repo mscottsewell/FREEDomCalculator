@@ -173,14 +173,14 @@ export function AutoLoanCalculator() {
             <CardTitle className="text-lg">Understanding Your Auto Loan</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-base leading-relaxed">
-            For your {formatCurrencyNoDecimals(data.loanAmount)} auto loan at {data.interestRate}% interest for {data.loanTerm} years, 
-            you'll pay <strong>{formatCurrency(results.monthlyPayment)}</strong> per month.             
-            <br/>
-            Over the life of the loan, you'll pay a total of <strong>{formatCurrency(results.totalInterest)}</strong> in interest, 
-            making your total cost <strong>{formatCurrency(results.totalPaid)}</strong>. 
-            <br/>
-            The interest adds <strong>{((results.totalInterest / data.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
+              <p className="text-base leading-relaxed">
+                For your {formatCurrencyNoDecimals(data!.loanAmount)} auto loan at {data!.interestRate}% interest for {data!.loanTerm} years, 
+                you'll pay <strong>{formatCurrency(results.monthlyPayment)}</strong> per month.             
+                <br/>
+                Over the life of the loan, you'll pay a total of <strong>{formatCurrency(results.totalInterest)}</strong> in interest, 
+                making your total cost <strong>{formatCurrency(results.totalPaid)}</strong>. 
+                <br/>
+                The interest adds <strong>{((results.totalInterest / data!.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
             </p>
           </CardContent>
         </Card>
