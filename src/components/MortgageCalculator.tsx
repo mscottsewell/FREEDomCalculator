@@ -318,9 +318,11 @@ export function MortgageCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Your home can be your largest investment or your biggest financial mistake.</strong> A mortgage allows you to leverage borrowed money to potentially build wealth through real estate appreciation. 
-              However, the total interest paid over 30 years often equals or exceeds the original loan amount. Making extra principal payments early in the loan dramatically reduces total interest costs. 
-              Remember that a home isn't just an investment - it provides shelter and stability. Buy what you can afford, not what the bank will lend you.
+              <strong>Your home can be your best investment or your biggest financial mistake.</strong> A mortgage 
+              gives you a place to live, providing shelter and stability. It can also potentially help you build wealth 
+              over time through real estate appreciation. However, the total interest paid over 30 years often equals 
+              or exceeds the original loan amount. Making extra principal payments early in the loan dramatically 
+              reduces total interest costs. Buy what you can afford, not what the bank will lend you.
           </p>
         </CardContent>
       </Card>

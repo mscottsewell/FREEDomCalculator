@@ -12,6 +12,7 @@ interface CreditCardData {
   apr: number
   paymentType: 'minimum' | 'fixed'
   fixedPayment: number
+  minimumPayment: number
 }
 
 interface PaymentSchedule {
@@ -34,7 +35,8 @@ export function CreditCardCalculator() {
     balance: 5000,
     apr: 22.99,
     paymentType: 'minimum',
-    fixedPayment: 150
+    fixedPayment: 150,
+    minimumPayment: 25
   })
 
   const [results, setResults] = useState({
@@ -43,8 +45,8 @@ export function CreditCardCalculator() {
     totalPaid: 0
   })
 
-  const [schedule, setSchedule] = useState<PaymentSchedule[]>([])
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [schedule, setSchedule] = useState([])
+  const [chartData, setChartData] = useState([])
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -56,10 +58,10 @@ export function CreditCardCalculator() {
   }
 
   const calculate = () => {
-    if (!data.balance || !data.apr) return
+    if (!data!.balance || !data!.apr) return
 
-    const monthlyRate = data.apr / 100 / 12
-    let balance = data.balance
+    const monthlyRate = data!.apr / 100 / 12
+    let balance = data!.balance
     const paymentHistory: PaymentSchedule[] = []
     const chartPoints: ChartDataPoint[] = []
     let month = 0
@@ -70,11 +72,11 @@ export function CreditCardCalculator() {
       const interestPayment = balance * monthlyRate
       
       let payment: number
-      if (data.paymentType === 'minimum') {
+      if (data!.paymentType === 'minimum') {
         // Interest + 1% of balance (minimum payment calculation)
-        payment = Math.max(25, interestPayment + balance * 0.01) // Minimum $25 payment
+        payment = Math.max(data!.minimumPayment, interestPayment + balance * 0.01) // Use user-defined minimum payment
       } else {
-        payment = data.fixedPayment
+        payment = data!.fixedPayment
       }
 
       // Don't pay more than the remaining balance
@@ -107,7 +109,7 @@ export function CreditCardCalculator() {
     setResults({
       monthsToPayoff: month,
       totalInterest,
-      totalPaid: data.balance + totalInterest
+      totalPaid: data!.balance + totalInterest
     })
 
     setSchedule(paymentHistory)
@@ -119,7 +121,16 @@ export function CreditCardCalculator() {
   }, [data])
 
   const updateData = (field: keyof CreditCardData, value: number | string) => {
-    setData(current => ({ ...current, [field]: value }))
+    setData(current => {
+      const safeCurrent = current || { 
+        balance: 5000, 
+        apr: 22.99, 
+        paymentType: 'minimum', 
+        fixedPayment: 150,
+        minimumPayment: 25
+      };
+      return { ...safeCurrent, [field]: value };
+    })
   }
 
   // Group schedule by year for better display
@@ -151,7 +162,7 @@ export function CreditCardCalculator() {
           <Input
             id="balance"
             type="number"
-            value={data.balance}
+            value={data!.balance}
             onChange={(e) => updateData('balance', Number(e.target.value))}
             placeholder="5000"
           />
@@ -162,15 +173,15 @@ export function CreditCardCalculator() {
             id="apr"
             type="number"
             step="0.01"
-            value={data.apr}
+            value={data!.apr}
             onChange={(e) => updateData('apr', Number(e.target.value))}
             placeholder="18.99"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="payment-type">Payment Method</Label>
-          <Select value={data.paymentType} onValueChange={(value) => updateData('paymentType', value)}>
-            <SelectTrigger id="payment-type">
+          <Select value={data!.paymentType} onValueChange={(value) => updateData('paymentType', value)}>
+            <SelectTrigger id="payment-type" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -179,13 +190,25 @@ export function CreditCardCalculator() {
             </SelectContent>
           </Select>
         </div>
-        {data.paymentType === 'fixed' && (
+        {data!.paymentType === 'minimum' && (
+          <div className="space-y-2">
+            <Label htmlFor="minimum-payment">Minimum Payment ($)</Label>
+            <Input
+              id="minimum-payment"
+              type="number"
+              value={data!.minimumPayment}
+              onChange={(e) => updateData('minimumPayment', Number(e.target.value))}
+              placeholder="25"
+            />
+          </div>
+        )}
+        {data!.paymentType === 'fixed' && (
           <div className="space-y-2">
             <Label htmlFor="fixed-payment">Fixed Payment ($)</Label>
             <Input
               id="fixed-payment"
               type="number"
-              value={data.fixedPayment}
+              value={data!.fixedPayment}
               onChange={(e) => updateData('fixedPayment', Number(e.target.value))}
               placeholder="150"
             />

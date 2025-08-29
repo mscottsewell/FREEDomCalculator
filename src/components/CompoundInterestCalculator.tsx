@@ -296,12 +296,13 @@ export function CompoundInterestCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Albert Einstien called compound interest "the eighth wonder of the world."</strong> 
-              The earlier you start investing, the more time your money has to grow exponentially. 
-              Even small amounts invested regularly can become substantial wealth over time due to compounding. 
-              The key is starting early and being consistent - time in the market is <em>far more powerful</em> than "timing" the market. 
-              A 25-year-old who saves <b>$200</b>/month will have significantly more at retirement than 
-              a 35-year-old who saves <b>$400</b>/month, simply because of those extra 10 years of compound growth.
+              <strong>Albert Einstein called compound interest "the eighth wonder of the world."</strong> 
+              <br /> 
+              The earlier you start investing, the more time your money has to grow exponentially.
+              Even small amounts invested regularly can become substantial wealth over time due to compounding.
+              The key is starting early and being consistent.
+              <br />
+              Time in the market is <em>far more powerful</em> than "timing" the market.
           </p>
         </CardContent>
       </Card>
