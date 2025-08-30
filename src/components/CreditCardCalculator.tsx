@@ -456,7 +456,7 @@ export function CreditCardCalculator() {
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
             <strong>
-              Credit cards can be wealth destroyers if mismanaged.
+              Credit cards can be wealth destroyers.
             </strong>{" "}
             If you only make the minimum payment, most of your money goes toward
             interest instead of reducing the principal balance. This keeps you
