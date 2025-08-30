@@ -501,9 +501,9 @@ export function TimeValueOfMoneyCalculator() {
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
             <strong>Time is your most valuable financial asset.</strong> The time value of money is the foundation of all personal finance decisions. 
-            Whether you're saving for retirement, a house, or any major purchase, understanding that money grows over time helps you make smarter choices. 
-            It explains why paying off high-interest debt quickly is crucial, why starting to save early is so powerful, and why delaying financial goals 
-            becomes increasingly expensive. Master this concept, and you'll understand why wealthy people often say "time is money."
+            Whether saving for retirement, a house, or any major purchase, understanding that money grows over time can motivate you to make smarter choices. 
+            It explains why paying off high-interest debt quickly is crucial and why starting to save early is so powerful. 
+            Master this concept, and you'll understand why wealthy people often say that "time is money."
           </p>
         </CardContent>
       </Card>

@@ -176,10 +176,10 @@ export function AutoLoanCalculator() {
               <p className="text-base leading-relaxed">
                 For your {formatCurrencyNoDecimals(data!.loanAmount)} auto loan at {data!.interestRate}% interest for {data!.loanTerm} years, 
                 you'll pay <strong>{formatCurrency(results.monthlyPayment)}</strong> per month.             
-                <br/>
+                <br/><br/>
                 Over the life of the loan, you'll pay a total of <strong>{formatCurrency(results.totalInterest)}</strong> in interest, 
                 making your total cost <strong>{formatCurrency(results.totalPaid)}</strong>. 
-                <br/>
+                <br/><br/>
                 The interest adds <strong>{((results.totalInterest / data!.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
             </p>
           </CardContent>
@@ -230,9 +230,10 @@ export function AutoLoanCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Cars are depreciating assets that require smart financing.</strong> Unlike a home that may appreciate, a car loses value the moment you drive it off the lot. 
-              This makes the interest rate and loan term crucial factors in your total cost. A longer loan term means lower monthly payments but significantly more interest paid over time. 
-              Consider the total cost of ownership, not just the monthly payment, and remember that reliable transportation is the goal - not impressing others with an expensive car payment.
+              <strong>Cars are depreciating assets.</strong> Unlike a home that may appreciate, a car loses value when you drive it off the lot. 
+              This makes the interest rate and loan term crucial factors if you borrow money to buy a car. 
+              A longer loan term means you will have lower monthly payments but pay significantly more in interest. 
+              Consider the total cost of ownership, not just the monthly payment, and remember that reliable transportation is the goal.
           </p>
         </CardContent>
       </Card>
