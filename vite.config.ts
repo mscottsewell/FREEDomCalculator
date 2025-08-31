@@ -1,22 +1,14 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
-  base; '/FREEDomCalculator/', // MUST match your GitHub repository name
-  resolve; {
+// https://vitejs.dev/config/
+export default defineConfig({
+  base: '/FREEDomCalculator/', // Set to your repo name for GitHub Pages
+  plugins: [react()],
+  resolve: {
     alias: {
-      '@'; resolve(import.meta.dirname, 'src')
-    }
-  }
-  build: {
-    outDir: 'dist',
-    assetsDir; 'assets',
-    sourcemap; false,
-    minify; 'terser'
-  }
-;
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+});

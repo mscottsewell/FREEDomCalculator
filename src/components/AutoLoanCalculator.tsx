@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@/hooks/useKVFallback'
+import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,9 +21,9 @@ interface PaymentSchedule {
 
 export function AutoLoanCalculator() {
   const [data, setData] = useKV<AutoLoanData>('autoloan-calculator', {
-    loanAmount: 25000,
-    interestRate: 5.5,
-    loanTerm: 5
+    loanAmount: 75000,
+    interestRate: 6.5,
+    loanTerm: 7
   })
 
   const [results, setResults] = useState({
@@ -98,6 +98,18 @@ export function AutoLoanCalculator() {
     setData(current => ({ ...current, [field]: value }))
   }
 
+
+  // Estimate depreciation: 20% first year, 15% each subsequent year
+  let estimatedValue = data.loanAmount;
+  if (data.loanTerm > 0) {
+    estimatedValue *= 0.8; // 20% loss first year
+    if (data.loanTerm > 1) {
+      estimatedValue *= Math.pow(0.85, data.loanTerm - 1); // 15% loss each subsequent year
+    }
+  }
+  // Round down to nearest five hundred
+  estimatedValue = Math.floor(estimatedValue / 500) * 500;
+
   return (
     <div className="space-y-6">
       {/* Input Section */}
@@ -135,46 +147,44 @@ export function AutoLoanCalculator() {
         </div>
       </div>
 
-      {/* Results Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Loan Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.monthlyPayment)}
+      {/* Results & Understanding Section Side by Side */}
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="w-full md:w-1/2">
+          <CardHeader>
+            <CardTitle className="text-lg">Loan Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <div className="flex justify-between items-center py-1">
+              <span className="text-muted-foreground text-left">Monthly Payment</span>
+              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Monthly Payment</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-red">
-              {formatCurrency(results.totalInterest)}
+            <div className="flex justify-between items-center py-1">
+              <span className="text-muted-foreground text-left">Total Interest</span>
+              <span className="text-2xl font-bold currency-red text-right">{formatCurrencyNoDecimals(results.totalInterest)}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Total Interest</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.totalPaid)}
+            <div className="flex justify-between items-center py-1">
+              <span className="text-muted-foreground text-left">Total Amount Paid</span>
+              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.totalPaid)}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Total Amount Paid</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Understanding Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Understanding Your Auto Loan</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm leading-relaxed">
-            For your {formatCurrencyNoDecimals(data.loanAmount)} auto loan at {data.interestRate}% interest for {data.loanTerm} years, 
-            you'll pay {formatCurrency(results.monthlyPayment)} per month. Over the life of the loan, you'll pay a total of {formatCurrency(results.totalInterest)} in interest, 
-            making your total cost {formatCurrency(results.totalPaid)}. This means the interest adds {((results.totalInterest / data.loanAmount) * 100).toFixed(1)}% to the cost of your vehicle.
-          </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <Card className="w-full md:w-1/2">
+          <CardHeader>
+            <CardTitle className="text-lg">Understanding Your Auto Loan</CardTitle>
+          </CardHeader>
+          <CardContent>
+              <p className="text-base leading-relaxed">
+                For your {formatCurrencyNoDecimals(data!.loanAmount)} auto loan at {data!.interestRate}% interest for {data!.loanTerm} years, 
+                you'll pay <strong>{formatCurrencyNoDecimals(results.monthlyPayment)}</strong> per month.             
+                <br/><br/>
+                Over the life of the loan, you'll pay a total of <strong>{formatCurrencyNoDecimals(results.totalInterest)}</strong> in interest, 
+                making your total cost <strong>{formatCurrencyNoDecimals(results.totalPaid)}</strong>. 
+                <br/><br/>
+                The interest adds <strong>{((results.totalInterest / data!.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Amortization Schedule */}
       {schedule.length > 0 && (
@@ -220,9 +230,10 @@ export function AutoLoanCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Cars are depreciating assets that require smart financing.</strong> Unlike a home that may appreciate, a car loses value the moment you drive it off the lot. 
-              This makes the interest rate and loan term crucial factors in your total cost. A longer loan term means lower monthly payments but significantly more interest paid over time. 
-              Consider the total cost of ownership, not just the monthly payment, and remember that reliable transportation is the goal - not impressing others with an expensive car payment.
+              <strong>Cars are depreciating assets.</strong> Unlike a home that may appreciate, a car loses value when you drive it off the lot. 
+              This makes the interest rate and loan term crucial factors if you borrow money to buy a car. 
+              A longer loan term means you will have lower monthly payments but pay significantly more in interest. 
+              Consider the total cost of ownership, not just the monthly payment, and remember that reliable transportation is the goal.
           </p>
         </CardContent>
       </Card>

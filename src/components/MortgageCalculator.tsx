@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@/hooks/useKVFallback'
+import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,9 +30,9 @@ interface MonthlyPayment {
 
 export function MortgageCalculator() {
   const [data, setData] = useKV<MortgageData>('mortgage-calculator', {
-    homePrice: 400000,
-    downPaymentPercent: 20,
-    interestRate: 6.5,
+    homePrice: 450000,
+    downPaymentPercent: 10,
+    interestRate: 6.0,
     loanTerm: 30
   })
 
@@ -193,31 +193,31 @@ export function MortgageCalculator() {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold currency-orange">
-              {formatCurrency(results.downPaymentAmount)}
+              {formatCurrencyNoDecimals(results.downPaymentAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Down Payment</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.calculatedLoanAmount)}
+              {formatCurrencyNoDecimals(results.calculatedLoanAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Loan Amount</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.monthlyPayment)}
+              {formatCurrencyNoDecimals(results.monthlyPayment)}
             </div>
             <div className="text-sm text-muted-foreground">Monthly Payment</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-red">
-              {formatCurrency(results.totalInterest)}
+              {formatCurrencyNoDecimals(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">Total Interest</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.totalPaid)}
+              {formatCurrencyNoDecimals(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">Total Paid</div>
           </div>
@@ -318,9 +318,11 @@ export function MortgageCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Your home can be your largest investment or your biggest financial mistake.</strong> A mortgage allows you to leverage borrowed money to potentially build wealth through real estate appreciation. 
-              However, the total interest paid over 30 years often equals or exceeds the original loan amount. Making extra principal payments early in the loan dramatically reduces total interest costs. 
-              Remember that a home isn't just an investment - it provides shelter and stability. Buy what you can afford, not what the bank will lend you.
+              <strong>Your home can be your best investment or your biggest financial mistake.</strong> A mortgage 
+              gives you a place to live, providing shelter and stability. It can also potentially help you build wealth 
+              over time through real estate appreciation. However, the total interest paid over 30 years often equals 
+              or exceeds the original loan amount. Making extra principal payments early in the loan dramatically 
+              reduces total interest costs. Buy what you can afford, not what the bank will lend you.
           </p>
         </CardContent>
       </Card>

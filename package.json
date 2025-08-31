@@ -1,15 +1,32 @@
 {
   "name": "freedomcalculator",
-  "homepage": "https://mscottsewell.github.io/FREEDomCalculator",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://mscottsewell.github.io/FREEDomCalculator/",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b --noCheck && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
+  "dependencies": {
+    "@github/spark": "^0.39.127",
+    "@phosphor-icons/react": "^2.1.10",
+    "@radix-ui/colors": "^3.0.0",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.540.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-error-boundary": "^6.0.0",
+    "recharts": "^3.1.2",
+    "tailwind-merge": "^3.3.1"
+  },
   "devDependencies": {
     "typescript": "^5.9.2",
-    "vite": "^7.1.3"
+    "vite": "^7.1.2"
   }
 }

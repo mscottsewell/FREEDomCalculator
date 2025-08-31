@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@/hooks/useKVFallback'
+import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,20 +23,16 @@ interface ChartDataPoint {
 
 const compoundingOptions = [
   { value: 1, label: 'Annually' },
-  { value: 2, label: 'Semi-annually' },
-  { value: 4, label: 'Quarterly' },
-  { value: 12, label: 'Monthly' },
-  { value: 52, label: 'Weekly' },
-  { value: 365, label: 'Daily' }
+  { value: 12, label: 'Monthly' }
 ]
 
 export function CompoundInterestCalculator() {
   const [data, setData] = useKV<CompoundData>('compound-calculator', {
-    principal: 10000,
-    interestRate: 7,
+    principal: 5000,
+    interestRate: 8,
     years: 20,
     compoundingFrequency: 12,
-    additionalDeposit: 500,
+    additionalDeposit: 300,
     depositFrequency: 'monthly'
   })
 
@@ -230,19 +226,19 @@ export function CompoundInterestCalculator() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Final Amount:</span>
-                <span className="font-semibold currency-blue">
+                <span className="text-2xl font-semibold currency-blue">
                   {formatCurrency(results.finalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Total Interest Earned:</span>
-                <span className="font-semibold currency-green">
+                <span className="text-2xl font-semibold currency-green">
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Total Deposits:</span>
-                <span className="font-semibold currency-orange">
+                <span className="text-2xl font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
                 </span>
               </div>
@@ -300,11 +296,11 @@ export function CompoundInterestCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Albert Einstien called compound interest "the eighth wonder of the world."</strong> 
-              The earlier you start investing, the more time your money has to grow exponentially. 
-              Even small amounts invested regularly can become substantial wealth over time due to compounding. The key is starting early and being consistent - 
-              time in the market is more powerful than timing the market. A 25-year-old who saves $200/month will have significantly more at retirement than 
-              a 35-year-old who saves $400/month, simply because of those extra 10 years of compound growth.
+              <strong>Albert Einstein called compound interest "the eighth wonder of the world."</strong> 
+              The earlier you start investing, the more time your money has to grow exponentially.
+              Even small amounts invested regularly can become substantial wealth over time due to compounding.
+              The key is starting early and being consistent.
+              Time in the market is <em>far more powerful</em> than "timing" the market.
           </p>
         </CardContent>
       </Card>

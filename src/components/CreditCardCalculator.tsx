@@ -1,126 +1,171 @@
-import { useState, useEffect } from 'react'
-import { useKV } from '@/hooks/useKVFallback'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useState, useEffect } from "react";
+import { useKV } from "@github/spark/hooks";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface CreditCardData {
-  balance: number
-  apr: number
-  paymentType: 'minimum' | 'fixed'
-  fixedPayment: number
+  balance: number;
+  apr: number;
+  paymentType: "minimum" | "fixed";
+  fixedPayment: number;
+  minimumPayment: number;
 }
 
 interface PaymentSchedule {
-  month: number
-  payment: number
-  principal: number
-  interest: number
-  balance: number
-  year: number
+  month: number;
+  payment: number;
+  principal: number;
+  interest: number;
+  balance: number;
+  year: number;
 }
 
 interface ChartDataPoint {
-  month: number
-  principal: number
-  interest: number
+  month: number;
+  principal: number;
+  interest: number;
 }
 
 export function CreditCardCalculator() {
-  const [data, setData] = useKV<CreditCardData>('creditcard-calculator', {
+  const [data, setData] = useKV<CreditCardData>("creditcard-calculator", {
     balance: 5000,
-    apr: 18.99,
-    paymentType: 'minimum',
-    fixedPayment: 150
-  })
+    apr: 29.99,
+    paymentType: "minimum",
+    fixedPayment: 150,
+    minimumPayment: 15,
+  });
 
   const [results, setResults] = useState({
     monthsToPayoff: 0,
     totalInterest: 0,
-    totalPaid: 0
-  })
+    totalPaid: 0,
+  });
 
-  const [schedule, setSchedule] = useState<PaymentSchedule[]>([])
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [schedule, setSchedule] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
+
+  const formatCurrencyWholeDollars = (amount: number): string => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(amount));
+  };
 
   const calculate = () => {
-    if (!data.balance || !data.apr) return
+    if (!data!.balance || !data!.apr) return;
 
-    const monthlyRate = data.apr / 100 / 12
-    let balance = data.balance
-    const paymentHistory: PaymentSchedule[] = []
-    const chartPoints: ChartDataPoint[] = []
-    let month = 0
-    let totalInterest = 0
+    const monthlyRate = data!.apr / 100 / 12;
+    let balance = data!.balance;
+    const paymentHistory: PaymentSchedule[] = [];
+    const chartPoints: ChartDataPoint[] = [];
+    let month = 0;
+    let totalInterest = 0;
 
-    while (balance > 0.01 && month < 600) { // Cap at 50 years to prevent infinite loops
-      month++
-      const interestPayment = balance * monthlyRate
-      
-      let payment: number
-      if (data.paymentType === 'minimum') {
+    while (balance > 0.01 && month < 600) {
+      // Cap at 50 years to prevent infinite loops
+      month++;
+      const interestPayment = balance * monthlyRate;
+
+      let payment: number;
+      if (data!.paymentType === "minimum") {
         // Interest + 1% of balance (minimum payment calculation)
-        payment = Math.max(25, interestPayment + balance * 0.01) // Minimum $25 payment
+        payment = Math.max(
+          data!.minimumPayment,
+          interestPayment + balance * 0.01
+        ); // Use user-defined minimum payment
       } else {
-        payment = data.fixedPayment
+        payment = data!.fixedPayment;
       }
 
       // Don't pay more than the remaining balance
-      payment = Math.min(payment, balance + interestPayment)
-      
-      const principalPayment = payment - interestPayment
-      balance = Math.max(0, balance - principalPayment)
-      
-      totalInterest += interestPayment
+      payment = Math.min(payment, balance + interestPayment);
 
-      const year = Math.ceil(month / 12)
+      const principalPayment = payment - interestPayment;
+      balance = Math.max(0, balance - principalPayment);
+
+      totalInterest += interestPayment;
+
+      const year = Math.ceil(month / 12);
       paymentHistory.push({
         month,
         payment,
         principal: principalPayment,
         interest: interestPayment,
         balance,
-        year
-      })
+        year,
+      });
 
       chartPoints.push({
         month,
         principal: principalPayment,
-        interest: interestPayment
-      })
+        interest: interestPayment,
+      });
 
-      if (balance <= 0.01) break
+      if (balance <= 0.01) break;
     }
 
     setResults({
       monthsToPayoff: month,
       totalInterest,
-      totalPaid: data.balance + totalInterest
-    })
+      totalPaid: data!.balance + totalInterest,
+    });
 
-    setSchedule(paymentHistory)
-    setChartData(chartPoints)
-  }
+    setSchedule(paymentHistory);
+    setChartData(chartPoints);
+  };
 
   useEffect(() => {
-    calculate()
-  }, [data])
+    calculate();
+  }, [data]);
 
   const updateData = (field: keyof CreditCardData, value: number | string) => {
-    setData(current => ({ ...current, [field]: value }))
-  }
+    setData((current) => {
+      const safeCurrent = current || {
+        balance: 5000,
+        apr: 22.99,
+        paymentType: "minimum",
+        fixedPayment: 150,
+        minimumPayment: 25,
+      };
+      return { ...safeCurrent, [field]: value };
+    });
+  };
 
   // Group schedule by year for better display
   const yearlySchedule = schedule.reduce((acc, payment) => {
@@ -131,16 +176,16 @@ export function CreditCardCalculator() {
         totalPrincipal: 0,
         totalInterest: 0,
         endBalance: 0,
-        months: []
-      }
+        months: [],
+      };
     }
-    acc[payment.year].totalPayment += payment.payment
-    acc[payment.year].totalPrincipal += payment.principal
-    acc[payment.year].totalInterest += payment.interest
-    acc[payment.year].endBalance = payment.balance
-    acc[payment.year].months.push(payment)
-    return acc
-  }, {} as Record<number, any>)
+    acc[payment.year].totalPayment += payment.payment;
+    acc[payment.year].totalPrincipal += payment.principal;
+    acc[payment.year].totalInterest += payment.interest;
+    acc[payment.year].endBalance = payment.balance;
+    acc[payment.year].months.push(payment);
+    return acc;
+  }, {} as Record<number, any>);
 
   return (
     <div className="space-y-6">
@@ -151,8 +196,8 @@ export function CreditCardCalculator() {
           <Input
             id="balance"
             type="number"
-            value={data.balance}
-            onChange={(e) => updateData('balance', Number(e.target.value))}
+            value={data!.balance}
+            onChange={(e) => updateData("balance", Number(e.target.value))}
             placeholder="5000"
           />
         </div>
@@ -162,15 +207,18 @@ export function CreditCardCalculator() {
             id="apr"
             type="number"
             step="0.01"
-            value={data.apr}
-            onChange={(e) => updateData('apr', Number(e.target.value))}
+            value={data!.apr}
+            onChange={(e) => updateData("apr", Number(e.target.value))}
             placeholder="18.99"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="payment-type">Payment Method</Label>
-          <Select value={data.paymentType} onValueChange={(value) => updateData('paymentType', value)}>
-            <SelectTrigger id="payment-type">
+          <Select
+            value={data!.paymentType}
+            onValueChange={(value) => updateData("paymentType", value)}
+          >
+            <SelectTrigger id="payment-type" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -179,14 +227,30 @@ export function CreditCardCalculator() {
             </SelectContent>
           </Select>
         </div>
-        {data.paymentType === 'fixed' && (
+        {data!.paymentType === "minimum" && (
+          <div className="space-y-2">
+            <Label htmlFor="minimum-payment">Minimum Payment ($)</Label>
+            <Input
+              id="minimum-payment"
+              type="number"
+              value={data!.minimumPayment}
+              onChange={(e) =>
+                updateData("minimumPayment", Number(e.target.value))
+              }
+              placeholder="25"
+            />
+          </div>
+        )}
+        {data!.paymentType === "fixed" && (
           <div className="space-y-2">
             <Label htmlFor="fixed-payment">Fixed Payment ($)</Label>
             <Input
               id="fixed-payment"
               type="number"
-              value={data.fixedPayment}
-              onChange={(e) => updateData('fixedPayment', Number(e.target.value))}
+              value={data!.fixedPayment}
+              onChange={(e) =>
+                updateData("fixedPayment", Number(e.target.value))
+              }
               placeholder="150"
             />
           </div>
@@ -201,21 +265,27 @@ export function CreditCardCalculator() {
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {Math.ceil(results.monthsToPayoff / 12)} years {results.monthsToPayoff % 12} months
+              {results.monthsToPayoff} months
             </div>
-            <div className="text-sm text-muted-foreground">Time to Payoff</div>
-          </div>
+            <div className="text-sm text-muted-foreground">
+              Months to Payoff
+            </div>
+          </div>{" "}
           <div className="text-center">
             <div className="text-2xl font-bold currency-red">
-              {formatCurrency(results.totalInterest)}
+              {formatCurrencyWholeDollars(results.totalInterest)}
             </div>
-            <div className="text-sm text-muted-foreground">Total Interest Paid</div>
+            <div className="text-sm text-muted-foreground">
+              Total Interest Paid
+            </div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {formatCurrency(results.totalPaid)}
+              {formatCurrencyWholeDollars(results.totalPaid)}
             </div>
-            <div className="text-sm text-muted-foreground">Total Amount Paid</div>
+            <div className="text-sm text-muted-foreground">
+              Total Amount Paid
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -228,27 +298,36 @@ export function CreditCardCalculator() {
         <CardContent>
           <div className="h-80 w-full ml-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
+              <AreaChart
+                data={chartData}
+                margin={{ left: 20, right: 5, top: 5, bottom: 5 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" fontSize={12} />
-                <YAxis tickFormatter={(value) => formatCurrency(value)} fontSize={12} />
-                <Tooltip 
-                  formatter={(value: number, name: string) => [formatCurrency(value), name === 'principal' ? 'Principal' : 'Interest']}
+                <YAxis
+                  tickFormatter={(value) => formatCurrency(value)}
+                  fontSize={12}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    formatCurrency(value),
+                    name === "principal" ? "Principal" : "Interest",
+                  ]}
                   labelFormatter={(label) => `Month ${label}`}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="principal" 
+                <Area
+                  type="monotone"
+                  dataKey="principal"
                   stackId="1"
-                  stroke="oklch(0.55 0.15 245)" 
+                  stroke="oklch(0.55 0.15 245)"
                   fill="oklch(0.55 0.15 245)"
                   fillOpacity={0.8}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="interest" 
+                <Area
+                  type="monotone"
+                  dataKey="interest"
                   stackId="1"
-                  stroke="oklch(0.60 0.20 15)" 
+                  stroke="oklch(0.60 0.20 15)"
                   fill="oklch(0.60 0.20 15)"
                   fillOpacity={0.8}
                 />
@@ -269,21 +348,41 @@ export function CreditCardCalculator() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-left table-header-shaded">Year</TableHead>
-                    <TableHead className="text-right table-header-shaded">Total Payment</TableHead>
-                    <TableHead className="text-right table-header-shaded">Total Principal</TableHead>
-                    <TableHead className="text-right table-header-shaded">Total Interest</TableHead>
-                    <TableHead className="text-right table-header-shaded">End Balance</TableHead>
+                    <TableHead className="text-left table-header-shaded">
+                      Year
+                    </TableHead>
+                    <TableHead className="text-right table-header-shaded">
+                      Total Payment
+                    </TableHead>
+                    <TableHead className="text-right table-header-shaded">
+                      Total Principal
+                    </TableHead>
+                    <TableHead className="text-right table-header-shaded">
+                      Total Interest
+                    </TableHead>
+                    <TableHead className="text-right table-header-shaded">
+                      End Balance
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {Object.values(yearlySchedule).map((yearData: any) => (
                     <TableRow key={yearData.year}>
-                      <TableCell className="font-medium">{yearData.year}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(yearData.totalPayment)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(yearData.totalPrincipal)}</TableCell>
-                      <TableCell className="text-right currency-red">{formatCurrency(yearData.totalInterest)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(yearData.endBalance)}</TableCell>
+                      <TableCell className="font-medium">
+                        {yearData.year}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(yearData.totalPayment)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(yearData.totalPrincipal)}
+                      </TableCell>
+                      <TableCell className="text-right currency-red">
+                        {formatCurrency(yearData.totalInterest)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(yearData.endBalance)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -304,16 +403,29 @@ export function CreditCardCalculator() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-left sticky top-0 bg-muted table-header-shaded">Month</TableHead>
-                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">Payment</TableHead>
-                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">Principal</TableHead>
-                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">Interest</TableHead>
-                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">Remaining Balance</TableHead>
+                    <TableHead className="text-left sticky top-0 bg-muted table-header-shaded">
+                      Month
+                    </TableHead>
+                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">
+                      Payment
+                    </TableHead>
+                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">
+                      Principal
+                    </TableHead>
+                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">
+                      Interest
+                    </TableHead>
+                    <TableHead className="text-right sticky top-0 bg-muted table-header-shaded">
+                      Remaining Balance
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {schedule.map((payment, index) => (
-                    <TableRow key={payment.month} className={index % 12 === 0 ? "bg-muted/30" : ""}>
+                    <TableRow
+                      key={payment.month}
+                      className={index % 12 === 0 ? "bg-muted/30" : ""}
+                    >
                       <TableCell className="font-medium">
                         {payment.month}
                         {index % 12 === 0 && (
@@ -322,10 +434,18 @@ export function CreditCardCalculator() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">{formatCurrency(payment.payment)}</TableCell>
-                      <TableCell className="text-right currency-blue">{formatCurrency(payment.principal)}</TableCell>
-                      <TableCell className="text-right currency-red">{formatCurrency(payment.interest)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(payment.balance)}</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(payment.payment)}
+                      </TableCell>
+                      <TableCell className="text-right currency-blue">
+                        {formatCurrency(payment.principal)}
+                      </TableCell>
+                      <TableCell className="text-right currency-red">
+                        {formatCurrency(payment.interest)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(payment.balance)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -344,13 +464,21 @@ export function CreditCardCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Credit cards can be wealth destroyers if mismanaged.</strong> Making only minimum payments keeps you trapped in a cycle of debt, 
-              where most of your payment goes to interest rather than reducing the principal balance. High-interest debt is the opposite of compound interest - 
-              working against you instead of for you. Always pay more than the minimum, and prioritize paying off high-interest debt before investing. 
-              The "guaranteed return" from paying off an 18% credit card is better than most investment returns you'll find.
+            <strong>
+              Credit cards can be wealth destroyers.
+            </strong>{" "}
+            If you only make the minimum payment, most of your money goes toward
+            interest instead of reducing the principal balance. This keeps you
+            trapped in a cycle of debt. High-interest credit card debt is like
+            compound interest working in reverse. Instead of helping you grow
+            your money, it drains it. If you have credit card debt, always pay
+            more than the minimum and prioritize paying off high-interest
+            balances first. The “guaranteed return” from paying off a credit
+            card with a 25% interest rate may be one of the best investments you
+            ever make.
           </p>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@/hooks/useKVFallback'
+import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -124,26 +124,26 @@ export function InflationCalculator() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Future Nominal Value:</span>
-              <span className="font-semibold currency-blue">
+              <span className="text-2xl font-semibold currency-blue">
                 {formatCurrency(results.futureNominal)}
               </span>
             </div>
             <hr className="border-t-2 border-gray-400 my-4" />
             <div className="flex justify-between">
               <span>Real Purchasing Power:</span>
-              <span className="font-semibold currency-green">
+              <span className="text-2xl font-semibold currency-green">
                 {formatCurrency(results.realPurchasingPower)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Purchasing Power Lost:</span>
-              <span className="font-semibold currency-red">
+              <span className="text-2xl font-semibold currency-red">
                 {formatCurrency(results.powerLost)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Percentage Lost:</span>
-              <span className="font-semibold currency-red">
+              <span className="text-2xl font-semibold currency-red">
                 {results.percentageLost.toFixed(1)}%
               </span>
             </div>
@@ -156,11 +156,13 @@ export function InflationCalculator() {
           </CardHeader>
           <CardContent>
             <p className="text-lg leading-relaxed">
-              You would need {formatCurrency(results.futureNominal)} in {data.years} years to buy  
-              what {formatCurrency(data.currentAmount)} can buy today. 
-              <br/> <br/>
-              With inflation at {data.inflationRate}% per year, your {formatCurrency(data.currentAmount)} today 
-              will have the same purchasing power as {formatCurrency(results.realPurchasingPower)} in {data.years} years.
+              With inflation at {data.inflationRate}% per year, in {data.years} years you would 
+              need {formatCurrency(results.futureNominal)} to buy
+              what {formatCurrency(data.currentAmount)} can buy today.
+              <br /> <br />
+              In {data.years} years, {formatCurrency(data.currentAmount)} will have the 
+              same purchasing power as {formatCurrency(results.realPurchasingPower)} has today.
+              <br /> <br />
               This represents a loss of purchasing power of {results.percentageLost.toFixed(1)}%.
             </p>
           </CardContent>

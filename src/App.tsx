@@ -9,7 +9,7 @@ import {
   Car, 
   House 
 } from '@phosphor-icons/react'
-import collegeLogo from '@/assets/images/FHU_COB.jpg'
+import collegeLogo from '@/assets/images/FHU_COB.svg'
 import { InflationCalculator } from '@/components/InflationCalculator'
 import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
 import { TimeValueOfMoneyCalculator } from '@/components/TimeValueOfMoneyCalculator'
@@ -43,11 +43,11 @@ function App() {
               />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">
-                Mrs. Sewell's Financial FREEDom Calculators
+              <h1 className="text-2xl md:text-2xl font-bold">
+                Mrs. Sewell's Financial FREED-om Calculators
               </h1>
               <p className="text-primary-foreground/80 text-sm md:text-base">
-                Personal Finance Made Easy
+                
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-8 py-6">
+      <div className="container mx-auto px-8 py-7">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 gap-2 h-auto p-2">
             {calculators.map((calc) => {
@@ -66,7 +66,7 @@ function App() {
                   value={calc.id}
                   className="flex flex-col items-center gap-2 p-3 h-auto text-xs md:text-sm"
                 >
-                  <Icon size={64} />
+                  <Icon size={24} />
                   <span className="text-center leading-tight font-bold">{calc.name}</span>
                 </TabsTrigger>
               )
