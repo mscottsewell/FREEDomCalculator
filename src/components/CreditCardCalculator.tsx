@@ -78,8 +78,7 @@ export function CreditCardCalculator() {
     }).format(amount);
   };
 
-  // Added: format currency without decimal places (whole dollars) for Payoff Summary
-  const formatCurrencyNoDecimals = (amount: number): string => {
+  const formatCurrencyWholeDollars = (amount: number): string => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -274,7 +273,7 @@ export function CreditCardCalculator() {
           </div>{" "}
           <div className="text-center">
             <div className="text-2xl font-bold currency-red">
-              {formatCurrencyNoDecimals(results.totalInterest)}
+              {formatCurrencyWholeDollars(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">
               Total Interest Paid
@@ -282,7 +281,7 @@ export function CreditCardCalculator() {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold currency-blue">
-              {formatCurrencyNoDecimals(results.totalPaid)}
+              {formatCurrencyWholeDollars(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">
               Total Amount Paid
