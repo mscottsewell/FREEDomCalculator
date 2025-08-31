@@ -156,15 +156,15 @@ export function AutoLoanCalculator() {
           <CardContent className="flex flex-col gap-2">
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Monthly Payment</span>
-              <span className="text-2xl font-bold currency-blue text-right">{formatCurrency(results.monthlyPayment)}</span>
+              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Total Interest</span>
-              <span className="text-2xl font-bold currency-red text-right">{formatCurrency(results.totalInterest)}</span>
+              <span className="text-2xl font-bold currency-red text-right">{formatCurrencyNoDecimals(results.totalInterest)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Total Amount Paid</span>
-              <span className="text-2xl font-bold currency-blue text-right">{formatCurrency(results.totalPaid)}</span>
+              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.totalPaid)}</span>
             </div>
           </CardContent>
         </Card>
@@ -175,10 +175,10 @@ export function AutoLoanCalculator() {
           <CardContent>
               <p className="text-base leading-relaxed">
                 For your {formatCurrencyNoDecimals(data!.loanAmount)} auto loan at {data!.interestRate}% interest for {data!.loanTerm} years, 
-                you'll pay <strong>{formatCurrency(results.monthlyPayment)}</strong> per month.             
+                you'll pay <strong>{formatCurrencyNoDecimals(results.monthlyPayment)}</strong> per month.             
                 <br/><br/>
-                Over the life of the loan, you'll pay a total of <strong>{formatCurrency(results.totalInterest)}</strong> in interest, 
-                making your total cost <strong>{formatCurrency(results.totalPaid)}</strong>. 
+                Over the life of the loan, you'll pay a total of <strong>{formatCurrencyNoDecimals(results.totalInterest)}</strong> in interest, 
+                making your total cost <strong>{formatCurrencyNoDecimals(results.totalPaid)}</strong>. 
                 <br/><br/>
                 The interest adds <strong>{((results.totalInterest / data!.loanAmount) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
             </p>
