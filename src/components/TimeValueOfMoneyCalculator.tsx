@@ -457,13 +457,13 @@ export function TimeValueOfMoneyCalculator() {
               <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p><br />
               <p><strong>Investment Example:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Present Value (PV): The initial investment: Use negative (e.g., -10,000)</li>
-                <li>Payment (PMT): Additional investment per period: Use negative (e.g., -500)</li> 
+                <li>PV: Initial investment: Use negative (e.g., -10,000)</li>
+                <li>PMT: Additional investment per period: Use negative (e.g., -500)</li> 
                 </ul>
               <p><strong>Loan Example:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Present Value (PV): Principal received at loan initiation: Use positive (e.g., 10,000)</li>
-                <li>Payments made (PMT): Total of Payments made per period: Use negative (e.g., -500)</li>
+                <li>PV: Amount of Loan: Use positive (e.g., 10,000)</li>
+                <li>PMT: Total of Payments made per period: Use negative (e.g., -500)</li>
               </ul>
             </div>
           </CardContent>
