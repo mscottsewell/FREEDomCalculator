@@ -28,7 +28,7 @@ export function TimeValueOfMoneyCalculator() {
     interestRate: 8,
     presentValue: -5000,
     payment: -6000,
-    futureValue: 0,
+    futureValue: 1000000,
     solveFor: 'futureValue'
   })
 
@@ -44,6 +44,17 @@ export function TimeValueOfMoneyCalculator() {
       maximumFractionDigits: 0,
     }).format(Math.abs(amount))
   }
+
+  const formatNumberWithCommas = (value: number | ''): string => {
+    if (value === '') return '';
+    return new Intl.NumberFormat('en-US').format(Number(value));
+  };
+
+  const parseFormattedNumber = (value: string): number | '' => {
+    if (value === '') return '';
+    const numericValue = value.replace(/,/g, '');
+    return numericValue === '' ? '' : Number(numericValue);
+  };
 
   // Newton-Raphson method for solving interest rate
   const solveForRate = (n: number, pv: number, pmt: number, fv: number): number => {
@@ -272,6 +283,13 @@ export function TimeValueOfMoneyCalculator() {
       };
       return { ...safeCurrent, [field]: value };
     });
+    
+    // Clear results when 'solve for' selector changes
+    if (field === 'solveFor') {
+      setResult(null);
+      setError('');
+      setChartData([]);
+    }
   }
 
   const formatResult = () => {
@@ -345,9 +363,9 @@ export function TimeValueOfMoneyCalculator() {
           <Label htmlFor="present-value">Present Value (PV) - Cash Outflow Negative</Label>
           <Input
             id="present-value"
-            type="number"
-            value={getInputValue('presentValue')}
-            onChange={(e) => updateData('presentValue', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(getInputValue('presentValue'))}
+            onChange={(e) => updateData('presentValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('presentValue')}
             className={isFieldDisabled('presentValue') ? 'bg-muted' : ''}
           />
@@ -357,9 +375,9 @@ export function TimeValueOfMoneyCalculator() {
           <Label htmlFor="payment">Payment (PMT) - Cash Outflow Negative</Label>
           <Input
             id="payment"
-            type="number"
-            value={getInputValue('payment')}
-            onChange={(e) => updateData('payment', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(getInputValue('payment'))}
+            onChange={(e) => updateData('payment', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('payment')}
             className={isFieldDisabled('payment') ? 'bg-muted' : ''}
           />
@@ -369,9 +387,9 @@ export function TimeValueOfMoneyCalculator() {
           <Label htmlFor="future-value">Future Value (FV)</Label>
           <Input
             id="future-value"
-            type="number"
-            value={getInputValue('futureValue')}
-            onChange={(e) => updateData('futureValue', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(getInputValue('futureValue'))}
+            onChange={(e) => updateData('futureValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('futureValue')}
             className={isFieldDisabled('futureValue') ? 'bg-muted' : ''}
           />
@@ -409,18 +427,18 @@ export function TimeValueOfMoneyCalculator() {
           </CardContent>
         </Card>
         <Card className="w-full md:w-2/3">
-          <CardHeader>
-            <CardTitle className="text-xl">Instructions</CardTitle>
-          </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p>
-              <p><strong>Examples:</strong></p>
+              <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p><br />
+              <p><strong>Investment Example:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Initial investment: Use negative PV (e.g., -10000)</li>
-                <li>Monthly deposits: Use negative PMT (e.g., -500)</li>
-                <li>Loan principal received: Use positive PV</li>
-                <li>Loan payments made: Use negative PMT</li>
+                <li>Present Value (PV): The initial investment: Use negative (e.g., -10,000)</li>
+                <li>Payment (PMT): Additional investment per period: Use negative (e.g., -500)</li> 
+                </ul>
+              <p><strong>Loan Example:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Present Value (PV): (Principal received): Use positive (e.g., 10,000)</li>
+                <li>Payments made (PMT): Payments made per period: Use negative (e.g., -500)</li>
               </ul>
             </div>
           </CardContent>

@@ -67,6 +67,23 @@ export function CompoundInterestCalculator() {
     }).format(amount)
   }
 
+  // Format number with commas for display
+  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
+    if (value === '' || value === null || value === undefined) return ''
+    const num = typeof value === 'number' ? value : parseFloat(value.toString())
+    if (isNaN(num)) return ''
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Parse comma-formatted string back to number
+  const parseFormattedNumber = (value: string): NumericOrEmpty => {
+    if (value === '') return ''
+    // Remove commas and parse
+    const cleanValue = value.replace(/,/g, '')
+    const num = parseFloat(cleanValue)
+    return isNaN(num) ? '' : num
+  }
+
   const calculate = () => {
     if (!validateInputs().isValid) return
 
@@ -165,9 +182,12 @@ export function CompoundInterestCalculator() {
           <Label htmlFor="principal">Principal Amount ($)</Label>
           <Input
             id="principal"
-            type="number"
-            value={data.principal}
-            onChange={(e) => updateData('principal', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data.principal)}
+            onChange={(e) => {
+              const parsedValue = parseFormattedNumber(e.target.value)
+              updateData('principal', parsedValue)
+            }}
           />
         </div>
         <div className="space-y-2">
@@ -208,9 +228,12 @@ export function CompoundInterestCalculator() {
           <Label htmlFor="additional-deposit">Additional Deposit ($)</Label>
           <Input
             id="additional-deposit"
-            type="number"
-            value={data.additionalDeposit}
-            onChange={(e) => updateData('additionalDeposit', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data.additionalDeposit)}
+            onChange={(e) => {
+              const parsedValue = parseFormattedNumber(e.target.value)
+              updateData('additionalDeposit', parsedValue)
+            }}
           />
         </div>
         <div className="space-y-2">

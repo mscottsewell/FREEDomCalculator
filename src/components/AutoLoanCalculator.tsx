@@ -54,6 +54,23 @@ export function AutoLoanCalculator() {
     }).format(amount)
   }
 
+  // Format number with commas for display
+  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
+    if (value === '' || value === null || value === undefined) return ''
+    const num = typeof value === 'number' ? value : parseFloat(value.toString())
+    if (isNaN(num)) return ''
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Parse comma-formatted string back to number
+  const parseFormattedNumber = (value: string): NumericOrEmpty => {
+    if (value === '') return ''
+    // Remove commas and parse
+    const cleanValue = value.replace(/,/g, '')
+    const num = parseFloat(cleanValue)
+    return isNaN(num) ? '' : num
+  }
+
   const validateInputs = (): string | null => {
     if (!isValidNumber(data?.loanAmount)) return "Please enter a valid loan amount"
     if (!isValidNumber(data?.interestRate)) return "Please enter a valid interest rate"
@@ -137,9 +154,12 @@ export function AutoLoanCalculator() {
           <Label htmlFor="loan-amount">Loan Amount ($)</Label>
           <Input
             id="loan-amount"
-            type="number"
-            value={data?.loanAmount ?? ''}
-            onChange={(e) => updateData('loanAmount', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data?.loanAmount ?? '')}
+            onChange={(e) => {
+              const parsedValue = parseFormattedNumber(e.target.value)
+              updateData('loanAmount', parsedValue)
+            }}
           />
         </div>
         <div className="space-y-2">

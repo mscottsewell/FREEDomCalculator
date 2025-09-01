@@ -89,6 +89,17 @@ export function CreditCardCalculator() {
     }).format(Math.round(amount));
   };
 
+  const formatNumberWithCommas = (value: number | ''): string => {
+    if (value === '') return '';
+    return new Intl.NumberFormat('en-US').format(Number(value));
+  };
+
+  const parseFormattedNumber = (value: string): number | '' => {
+    if (value === '') return '';
+    const numericValue = value.replace(/,/g, '');
+    return numericValue === '' ? '' : Number(numericValue);
+  };
+
   const calculate = () => {
     const validationError = validateInputs()
     if (validationError) return
@@ -222,9 +233,9 @@ export function CreditCardCalculator() {
           <Label htmlFor="balance">Current Balance ($)</Label>
           <Input
             id="balance"
-            type="number"
-            value={data!.balance}
-            onChange={(e) => updateData("balance", e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data!.balance)}
+            onChange={(e) => updateData("balance", parseFormattedNumber(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -257,10 +268,10 @@ export function CreditCardCalculator() {
             <Label htmlFor="minimum-payment">Minimum Payment ($)</Label>
             <Input
               id="minimum-payment"
-              type="number"
-              value={data!.minimumPayment}
+              type="text"
+              value={formatNumberWithCommas(data!.minimumPayment)}
               onChange={(e) =>
-                updateData("minimumPayment", e.target.value === '' ? '' : Number(e.target.value))
+                updateData("minimumPayment", parseFormattedNumber(e.target.value))
               }
             />
           </div>
@@ -270,10 +281,10 @@ export function CreditCardCalculator() {
             <Label htmlFor="fixed-payment">Fixed Payment ($)</Label>
             <Input
               id="fixed-payment"
-              type="number"
-              value={data!.fixedPayment}
+              type="text"
+              value={formatNumberWithCommas(data!.fixedPayment)}
               onChange={(e) =>
-                updateData("fixedPayment", e.target.value === '' ? '' : Number(e.target.value))
+                updateData("fixedPayment", parseFormattedNumber(e.target.value))
               }
             />
           </div>

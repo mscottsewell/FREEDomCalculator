@@ -67,6 +67,23 @@ export function MortgageCalculator() {
     }).format(amount)
   }
 
+  // Format number with commas for display
+  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
+    if (value === '' || value === null || value === undefined) return ''
+    const num = typeof value === 'number' ? value : parseFloat(value.toString())
+    if (isNaN(num)) return ''
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Parse comma-formatted string back to number
+  const parseFormattedNumber = (value: string): NumericOrEmpty => {
+    if (value === '') return ''
+    // Remove commas and parse
+    const cleanValue = value.replace(/,/g, '')
+    const num = parseFloat(cleanValue)
+    return isNaN(num) ? '' : num
+  }
+
   const validateInputs = (): string | null => {
     if (!isValidNumber(data?.homePrice)) return "Please enter a valid home price"
     if (!isValidNumber(data?.downPaymentPercent)) return "Please enter a valid down payment percentage"
@@ -169,9 +186,12 @@ export function MortgageCalculator() {
           <Label htmlFor="home-price">Home Price ($)</Label>
           <Input
             id="home-price"
-            type="number"
-            value={data?.homePrice ?? ''}
-            onChange={(e) => updateData('homePrice', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data?.homePrice ?? '')}
+            onChange={(e) => {
+              const parsedValue = parseFormattedNumber(e.target.value)
+              updateData('homePrice', parsedValue)
+            }}
           />
         </div>
         <div className="space-y-2">

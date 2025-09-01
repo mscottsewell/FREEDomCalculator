@@ -52,6 +52,23 @@ export function InflationCalculator() {
     }).format(amount)
   }
 
+  // Format number with commas for display
+  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
+    if (value === '' || value === null || value === undefined) return ''
+    const num = typeof value === 'number' ? value : parseFloat(value.toString())
+    if (isNaN(num)) return ''
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Parse comma-formatted string back to number
+  const parseFormattedNumber = (value: string): NumericOrEmpty => {
+    if (value === '') return ''
+    // Remove commas and parse
+    const cleanValue = value.replace(/,/g, '')
+    const num = parseFloat(cleanValue)
+    return isNaN(num) ? '' : num
+  }
+
   const calculate = () => {
     if (!validateInputs().isValid) return
 
@@ -97,9 +114,12 @@ export function InflationCalculator() {
           <Label htmlFor="current-amount">Current Amount ($)</Label>
           <Input
             id="current-amount"
-            type="number"
-            value={data.currentAmount}
-            onChange={(e) => updateData('currentAmount', e.target.value === '' ? '' : Number(e.target.value))}
+            type="text"
+            value={formatNumberWithCommas(data.currentAmount)}
+            onChange={(e) => {
+              const parsedValue = parseFormattedNumber(e.target.value)
+              updateData('currentAmount', parsedValue)
+            }}
           />
         </div>
         <div className="space-y-2">
