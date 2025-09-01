@@ -45,15 +45,31 @@ export function TimeValueOfMoneyCalculator() {
     }).format(Math.abs(amount))
   }
 
-  const formatNumberWithCommas = (value: number | ''): string => {
-    if (value === '') return '';
-    return new Intl.NumberFormat('en-US').format(Number(value));
+  const formatNumberWithCommas = (value: number | string | ''): string => {
+    if (value === '' || value === null || value === undefined) return '';
+    
+    // Handle intermediate input states for negative numbers
+    if (value === '-' || value === '-.') {
+      return value as string;
+    }
+    
+    const num = Number(value);
+    if (isNaN(num)) return '';
+    return new Intl.NumberFormat('en-US').format(num);
   };
 
   const parseFormattedNumber = (value: string): number | '' => {
-    if (value === '') return '';
-    const numericValue = value.replace(/,/g, '');
-    return numericValue === '' ? '' : Number(numericValue);
+    if (value === '' || value === null || value === undefined) return '';
+    const numericValue = value.replace(/,/g, '').trim();
+    if (numericValue === '') return '';
+    
+    // Allow intermediate input states for negative numbers
+    if (numericValue === '-' || numericValue === '-.') {
+      return numericValue as any; // Allow these intermediate states
+    }
+    
+    const num = Number(numericValue);
+    return isNaN(num) ? '' : num;
   };
 
   // Format percentage with % sign for display
