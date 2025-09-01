@@ -342,7 +342,8 @@ export function TimeValueOfMoneyCalculator() {
             value={getInputValue('periods')}
             onChange={(e) => updateData('periods', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('periods')}
-            className={isFieldDisabled('periods') ? 'bg-muted' : ''}
+            placeholder={isFieldDisabled('periods') ? 'Solving for Number of Periods (N)' : ''}
+            className={isFieldDisabled('periods') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
           />
         </div>
 
@@ -355,7 +356,8 @@ export function TimeValueOfMoneyCalculator() {
             value={getInputValue('interestRate')}
             onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('interestRate')}
-            className={isFieldDisabled('interestRate') ? 'bg-muted' : ''}
+            placeholder={isFieldDisabled('interestRate') ? 'Solving For Interest Rate (%)' : ''}
+            className={isFieldDisabled('interestRate') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
           />
         </div>
 
@@ -367,7 +369,8 @@ export function TimeValueOfMoneyCalculator() {
             value={formatNumberWithCommas(getInputValue('presentValue'))}
             onChange={(e) => updateData('presentValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('presentValue')}
-            className={isFieldDisabled('presentValue') ? 'bg-muted' : ''}
+            placeholder={isFieldDisabled('presentValue') ? 'Solving For Present Value (PV)' : ''}
+            className={isFieldDisabled('presentValue') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
           />
         </div>
 
@@ -379,7 +382,8 @@ export function TimeValueOfMoneyCalculator() {
             value={formatNumberWithCommas(getInputValue('payment'))}
             onChange={(e) => updateData('payment', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('payment')}
-            className={isFieldDisabled('payment') ? 'bg-muted' : ''}
+            placeholder={isFieldDisabled('payment') ? 'Solving For Payment (PMT)' : ''}
+            className={isFieldDisabled('payment') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
           />
         </div>
 
@@ -391,7 +395,8 @@ export function TimeValueOfMoneyCalculator() {
             value={formatNumberWithCommas(getInputValue('futureValue'))}
             onChange={(e) => updateData('futureValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('futureValue')}
-            className={isFieldDisabled('futureValue') ? 'bg-muted' : ''}
+            placeholder={isFieldDisabled('futureValue') ? 'Solving For Future Value (FV)' : ''}
+            className={isFieldDisabled('futureValue') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
           />
         </div>
       </div>
