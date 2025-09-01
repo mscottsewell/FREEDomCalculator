@@ -84,6 +84,23 @@ export function CompoundInterestCalculator() {
     return isNaN(num) ? '' : num
   }
 
+  // Format percentage with % sign for display  
+  const formatPercentage = (value: NumericOrEmpty): string => {
+    if (value === '' || value === null || value === undefined) return ''
+    const num = typeof value === 'number' ? value : parseFloat(value.toString())
+    if (isNaN(num)) return ''
+    return num.toString()
+  }
+
+  // Parse percentage string back to number
+  const parsePercentage = (value: string): NumericOrEmpty => {
+    if (value === '') return ''
+    // Remove % sign and parse
+    const cleanValue = value.replace(/%/g, '').trim()
+    const num = parseFloat(cleanValue)
+    return isNaN(num) ? '' : num
+  }
+
   const calculate = () => {
     if (!validateInputs().isValid) return
 
@@ -192,13 +209,19 @@ export function CompoundInterestCalculator() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="interest-rate">Interest Rate (%)</Label>
-          <Input
-            id="interest-rate"
-            type="number"
-            step="0.1"
-            value={data.interestRate}
-            onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
-          />
+          <div className="relative">
+            <Input
+              id="interest-rate"
+              type="number"
+              step="0.1"
+              value={data.interestRate}
+              onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
+              className="pr-8"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm text-muted-foreground">
+              %
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="years">Years</Label>

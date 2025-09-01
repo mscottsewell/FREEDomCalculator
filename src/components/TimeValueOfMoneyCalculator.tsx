@@ -56,6 +56,21 @@ export function TimeValueOfMoneyCalculator() {
     return numericValue === '' ? '' : Number(numericValue);
   };
 
+  // Format percentage with % sign for display
+  const formatPercentage = (value: number | ''): string => {
+    if (value === '') return '';
+    return `${Number(value)}%`;
+  };
+
+  // Parse percentage string back to number
+  const parsePercentage = (value: string): number | '' => {
+    if (value === '') return '';
+    // Remove % sign and parse
+    const cleanValue = value.replace(/%/g, '').trim();
+    const num = parseFloat(cleanValue);
+    return isNaN(num) ? '' : num;
+  };
+
   // Newton-Raphson method for solving interest rate
   const solveForRate = (n: number, pv: number, pmt: number, fv: number): number => {
     let rate = 0.1 // Initial guess
@@ -349,16 +364,21 @@ export function TimeValueOfMoneyCalculator() {
 
         <div className="space-y-2">
           <Label htmlFor="interest-rate">Interest Rate (% per period)</Label>
-          <Input
-            id="interest-rate"
-            type="number"
-            step="0.1"
-            value={getInputValue('interestRate')}
-            onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={isFieldDisabled('interestRate')}
-            placeholder={isFieldDisabled('interestRate') ? 'Solving For Interest Rate (%)' : ''}
-            className={isFieldDisabled('interestRate') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
-          />
+          <div className="relative">
+            <Input
+              id="interest-rate"
+              type="number"
+              step="0.1"
+              value={getInputValue('interestRate')}
+              onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
+              disabled={isFieldDisabled('interestRate')}
+              placeholder={isFieldDisabled('interestRate') ? 'Solving For Interest Rate' : ''}
+              className={`${isFieldDisabled('interestRate') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''} pr-8`}
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm text-muted-foreground">
+              %
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">

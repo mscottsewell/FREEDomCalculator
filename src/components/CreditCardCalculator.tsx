@@ -100,6 +100,21 @@ export function CreditCardCalculator() {
     return numericValue === '' ? '' : Number(numericValue);
   };
 
+  // Format percentage with % sign for display
+  const formatPercentage = (value: number | ''): string => {
+    if (value === '') return '';
+    return `${Number(value)}%`;
+  };
+
+  // Parse percentage string back to number
+  const parsePercentage = (value: string): number | '' => {
+    if (value === '') return '';
+    // Remove % sign and parse
+    const cleanValue = value.replace(/%/g, '').trim();
+    const num = parseFloat(cleanValue);
+    return isNaN(num) ? '' : num;
+  };
+
   const calculate = () => {
     const validationError = validateInputs()
     if (validationError) return
@@ -240,13 +255,19 @@ export function CreditCardCalculator() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="apr">Annual Percentage Rate (%)</Label>
-          <Input
-            id="apr"
-            type="number"
-            step="0.01"
-            value={data!.apr}
-            onChange={(e) => updateData("apr", e.target.value === '' ? '' : Number(e.target.value))}
-          />
+          <div className="relative">
+            <Input
+              id="apr"
+              type="number"
+              step="0.01"
+              value={data!.apr}
+              onChange={(e) => updateData("apr", e.target.value === '' ? '' : Number(e.target.value))}
+              className="pr-8"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm text-muted-foreground">
+              %
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="payment-type">Payment Method</Label>
