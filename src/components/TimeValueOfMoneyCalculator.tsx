@@ -462,8 +462,8 @@ export function TimeValueOfMoneyCalculator() {
                 </ul>
               <p><strong>Loan Example:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Present Value (PV): (Principal received): Use positive (e.g., 10,000)</li>
-                <li>Payments made (PMT): Payments made per period: Use negative (e.g., -500)</li>
+                <li>Present Value (PV): Principal received at loan initiation: Use positive (e.g., 10,000)</li>
+                <li>Payments made (PMT): Total of Payments made per period: Use negative (e.g., -500)</li>
               </ul>
             </div>
           </CardContent>
