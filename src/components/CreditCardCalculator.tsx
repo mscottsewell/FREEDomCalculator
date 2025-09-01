@@ -530,8 +530,7 @@ export function CreditCardCalculator() {
             trapped in a cycle of debt. High-interest credit card debt is like
             compound interest working in reverse. Instead of helping you grow
             your money, it drains it. If you have credit card debt, always pay
-            more than the minimum and prioritize paying off high-interest
-            balances first. The “guaranteed return” from paying off a credit
+            more than the minimum. The “guaranteed return” from paying off a credit
             card with a 25% interest rate may be one of the best investments you
             ever make.
           </p>
