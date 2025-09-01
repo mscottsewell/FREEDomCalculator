@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useKV } from "@github/spark/hooks";
+import { useState } from "react";
+import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,13 +27,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { CalculateButton } from "@/components/ui/calculate-button";
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from "@/lib/calculator-validation";
 
 interface CreditCardData {
-  balance: number;
-  apr: number;
+  balance: NumericOrEmpty;
+  apr: NumericOrEmpty;
   paymentType: "minimum" | "fixed";
-  fixedPayment: number;
-  minimumPayment: number;
+  fixedPayment: NumericOrEmpty;
+  minimumPayment: NumericOrEmpty;
 }
 
 interface PaymentSchedule {
@@ -88,36 +90,42 @@ export function CreditCardCalculator() {
   };
 
   const calculate = () => {
-    if (!data!.balance || !data!.apr) return;
+    const validationError = validateInputs()
+    if (validationError) return
 
-    const monthlyRate = data!.apr / 100 / 12;
-    let balance = data!.balance;
+    const balance = toNumber(data!.balance)
+    const apr = toNumber(data!.apr)
+    const fixedPayment = toNumber(data!.fixedPayment)
+    const minimumPayment = toNumber(data!.minimumPayment)
+
+    const monthlyRate = apr / 100 / 12;
+    let currentBalance = balance;
     const paymentHistory: PaymentSchedule[] = [];
     const chartPoints: ChartDataPoint[] = [];
     let month = 0;
     let totalInterest = 0;
 
-    while (balance > 0.01 && month < 600) {
+    while (currentBalance > 0.01 && month < 600) {
       // Cap at 50 years to prevent infinite loops
       month++;
-      const interestPayment = balance * monthlyRate;
+      const interestPayment = currentBalance * monthlyRate;
 
       let payment: number;
       if (data!.paymentType === "minimum") {
         // Interest + 1% of balance (minimum payment calculation)
         payment = Math.max(
-          data!.minimumPayment,
-          interestPayment + balance * 0.01
+          minimumPayment,
+          interestPayment + currentBalance * 0.01
         ); // Use user-defined minimum payment
       } else {
-        payment = data!.fixedPayment;
+        payment = fixedPayment;
       }
 
       // Don't pay more than the remaining balance
-      payment = Math.min(payment, balance + interestPayment);
+      payment = Math.min(payment, currentBalance + interestPayment);
 
       const principalPayment = payment - interestPayment;
-      balance = Math.max(0, balance - principalPayment);
+      currentBalance = Math.max(0, currentBalance - principalPayment);
 
       totalInterest += interestPayment;
 
@@ -127,7 +135,7 @@ export function CreditCardCalculator() {
         payment,
         principal: principalPayment,
         interest: interestPayment,
-        balance,
+        balance: currentBalance,
         year,
       });
 
@@ -137,24 +145,43 @@ export function CreditCardCalculator() {
         interest: interestPayment,
       });
 
-      if (balance <= 0.01) break;
+      if (currentBalance <= 0.01) break;
     }
 
     setResults({
       monthsToPayoff: month,
       totalInterest,
-      totalPaid: data!.balance + totalInterest,
+      totalPaid: balance + totalInterest,
     });
 
     setSchedule(paymentHistory);
     setChartData(chartPoints);
   };
 
-  useEffect(() => {
-    calculate();
-  }, [data]);
+  const validateInputs = (): string | null => {
+    if (!isValidNumber(data?.balance)) return "Please enter a valid balance"
+    if (!isValidNumber(data?.apr)) return "Please enter a valid APR"
+    
+    const balance = toNumber(data!.balance)
+    const apr = toNumber(data!.apr)
+    
+    if (balance <= 0) return "Balance must be greater than 0"
+    if (apr < 0) return "APR cannot be negative"
+    
+    if (data?.paymentType === "fixed") {
+      if (!isValidNumber(data?.fixedPayment)) return "Please enter a valid fixed payment amount"
+      const fixedPayment = toNumber(data!.fixedPayment)
+      if (fixedPayment <= 0) return "Fixed payment must be greater than 0"
+    } else {
+      if (!isValidNumber(data?.minimumPayment)) return "Please enter a valid minimum payment percentage"
+      const minimumPayment = toNumber(data!.minimumPayment)
+      if (minimumPayment <= 0) return "Minimum payment percentage must be greater than 0"
+    }
 
-  const updateData = (field: keyof CreditCardData, value: number | string) => {
+    return null
+  }
+
+  const updateData = (field: keyof CreditCardData, value: NumericOrEmpty | string) => {
     setData((current) => {
       const safeCurrent = current || {
         balance: 5000,
@@ -197,8 +224,7 @@ export function CreditCardCalculator() {
             id="balance"
             type="number"
             value={data!.balance}
-            onChange={(e) => updateData("balance", Number(e.target.value))}
-            placeholder="5000"
+            onChange={(e) => updateData("balance", e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -208,8 +234,7 @@ export function CreditCardCalculator() {
             type="number"
             step="0.01"
             value={data!.apr}
-            onChange={(e) => updateData("apr", Number(e.target.value))}
-            placeholder="18.99"
+            onChange={(e) => updateData("apr", e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -235,9 +260,8 @@ export function CreditCardCalculator() {
               type="number"
               value={data!.minimumPayment}
               onChange={(e) =>
-                updateData("minimumPayment", Number(e.target.value))
+                updateData("minimumPayment", e.target.value === '' ? '' : Number(e.target.value))
               }
-              placeholder="25"
             />
           </div>
         )}
@@ -249,13 +273,15 @@ export function CreditCardCalculator() {
               type="number"
               value={data!.fixedPayment}
               onChange={(e) =>
-                updateData("fixedPayment", Number(e.target.value))
+                updateData("fixedPayment", e.target.value === '' ? '' : Number(e.target.value))
               }
-              placeholder="150"
             />
           </div>
         )}
       </div>
+
+      {/* Calculate Button */}
+      <CalculateButton onCalculate={calculate} />
 
       {/* Results Section */}
       <Card>

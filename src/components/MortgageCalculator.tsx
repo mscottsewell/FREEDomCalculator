@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { CalculateButton } from '@/components/ui/calculate-button'
+import { NumericOrEmpty, isValidNumber, toNumber } from '@/lib/calculator-validation'
 
 interface MortgageData {
-  homePrice: number
-  downPaymentPercent: number
-  interestRate: number
-  loanTerm: number
+  homePrice: NumericOrEmpty
+  downPaymentPercent: NumericOrEmpty
+  interestRate: NumericOrEmpty
+  loanTerm: NumericOrEmpty
 }
 
 interface YearlySchedule {
@@ -30,9 +32,9 @@ interface MonthlyPayment {
 
 export function MortgageCalculator() {
   const [data, setData] = useKV<MortgageData>('mortgage-calculator', {
-    homePrice: 450000,
+    homePrice: 300000,
     downPaymentPercent: 10,
-    interestRate: 6.0,
+    interestRate: 7.0,
     loanTerm: 30
   })
 
@@ -65,15 +67,41 @@ export function MortgageCalculator() {
     }).format(amount)
   }
 
+  const validateInputs = (): string | null => {
+    if (!isValidNumber(data?.homePrice)) return "Please enter a valid home price"
+    if (!isValidNumber(data?.downPaymentPercent)) return "Please enter a valid down payment percentage"
+    if (!isValidNumber(data?.interestRate)) return "Please enter a valid interest rate"
+    if (!isValidNumber(data?.loanTerm)) return "Please enter a valid loan term"
+
+    const homePrice = toNumber(data!.homePrice)
+    const downPaymentPercent = toNumber(data!.downPaymentPercent)
+    const interestRate = toNumber(data!.interestRate)
+    const loanTerm = toNumber(data!.loanTerm)
+
+    if (homePrice <= 0) return "Home price must be greater than 0"
+    if (downPaymentPercent < 0) return "Down payment percentage cannot be negative"
+    if (downPaymentPercent >= 100) return "Down payment percentage must be less than 100%"
+    if (interestRate < 0) return "Interest rate cannot be negative"
+    if (loanTerm <= 0) return "Loan term must be greater than 0"
+
+    return null
+  }
+
   const calculate = () => {
-    if (!data.homePrice || !data.downPaymentPercent || !data.interestRate || !data.loanTerm) return
+    const validationError = validateInputs()
+    if (validationError) return
+
+    const homePrice = toNumber(data!.homePrice)
+    const downPaymentPercent = toNumber(data!.downPaymentPercent)
+    const interestRate = toNumber(data!.interestRate)
+    const loanTerm = toNumber(data!.loanTerm)
 
     // Calculate down payment amount and loan amount
-    const downPaymentAmount = data.homePrice * (data.downPaymentPercent / 100)
-    const calculatedLoanAmount = data.homePrice - downPaymentAmount
+    const downPaymentAmount = homePrice * (downPaymentPercent / 100)
+    const calculatedLoanAmount = homePrice - downPaymentAmount
 
-    const monthlyRate = data.interestRate / 100 / 12
-    const numberOfPayments = data.loanTerm * 12
+    const monthlyRate = interestRate / 100 / 12
+    const numberOfPayments = loanTerm * 12
 
     // Calculate monthly payment using mortgage formula
     const monthlyPayment = (calculatedLoanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
@@ -129,12 +157,8 @@ export function MortgageCalculator() {
     setMonthlySchedule(monthlyPayments)
   }
 
-  useEffect(() => {
-    calculate()
-  }, [data])
-
-  const updateData = (field: keyof MortgageData, value: number) => {
-    setData(current => ({ ...current, [field]: value }))
+  const updateData = (field: keyof MortgageData, value: NumericOrEmpty) => {
+    setData(current => ({ ...current!, [field]: value }))
   }
 
   return (
@@ -146,9 +170,8 @@ export function MortgageCalculator() {
           <Input
             id="home-price"
             type="number"
-            value={data.homePrice}
-            onChange={(e) => updateData('homePrice', Number(e.target.value))}
-            placeholder="400000"
+            value={data?.homePrice ?? ''}
+            onChange={(e) => updateData('homePrice', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -157,9 +180,8 @@ export function MortgageCalculator() {
             id="down-payment-percent"
             type="number"
             step="0.1"
-            value={data.downPaymentPercent}
-            onChange={(e) => updateData('downPaymentPercent', Number(e.target.value))}
-            placeholder="20"
+            value={data?.downPaymentPercent ?? ''}
+            onChange={(e) => updateData('downPaymentPercent', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -168,9 +190,8 @@ export function MortgageCalculator() {
             id="interest-rate"
             type="number"
             step="0.01"
-            value={data.interestRate}
-            onChange={(e) => updateData('interestRate', Number(e.target.value))}
-            placeholder="6.5"
+            value={data?.interestRate ?? ''}
+            onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -178,12 +199,14 @@ export function MortgageCalculator() {
           <Input
             id="loan-term"
             type="number"
-            value={data.loanTerm}
-            onChange={(e) => updateData('loanTerm', Number(e.target.value))}
-            placeholder="30"
+            value={data?.loanTerm ?? ''}
+            onChange={(e) => updateData('loanTerm', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
       </div>
+
+      {/* Calculate Button */}
+      <CalculateButton onCalculate={calculate} />
 
       {/* Results Section */}
       <Card>
@@ -231,8 +254,8 @@ export function MortgageCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-relaxed">
-            For your {formatCurrencyNoDecimals(data.homePrice)} home with a {data.downPaymentPercent}% down payment ({formatCurrency(results.downPaymentAmount)}), 
-            you'll need to finance {formatCurrencyNoDecimals(results.calculatedLoanAmount)} at {data.interestRate}% interest for {data.loanTerm} years. 
+            For your {formatCurrencyNoDecimals(toNumber(data?.homePrice || 0))} home with a {toNumber(data?.downPaymentPercent || 0)}% down payment ({formatCurrency(results.downPaymentAmount)}),
+            you'll need to finance {formatCurrencyNoDecimals(results.calculatedLoanAmount)} at {toNumber(data?.interestRate || 0)}% interest for {toNumber(data?.loanTerm || 0)} years.
             Your monthly payment will be {formatCurrency(results.monthlyPayment)}. Over the life of the loan, you'll pay {formatCurrency(results.totalInterest)} in interest, 
             making your total payments {formatCurrency(results.totalPaid)}. The interest represents {((results.totalInterest / results.calculatedLoanAmount) * 100).toFixed(1)}% of your loan amount.
           </p>

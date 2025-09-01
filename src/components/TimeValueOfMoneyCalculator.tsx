@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { CalculateButton } from '@/components/ui/calculate-button'
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 
 interface TVMData {
-  periods: number
-  interestRate: number
-  presentValue: number
-  payment: number
-  futureValue: number
+  periods: NumericOrEmpty
+  interestRate: NumericOrEmpty
+  presentValue: NumericOrEmpty
+  payment: NumericOrEmpty
+  futureValue: NumericOrEmpty
   solveFor: 'periods' | 'interestRate' | 'presentValue' | 'payment' | 'futureValue'
 }
 
@@ -22,11 +23,11 @@ interface ChartDataPoint {
 }
 
 export function TimeValueOfMoneyCalculator() {
-  const [data, setData] = useKV<TVMData>('tvm-calculator', {
+  const [data, setData] = useState<TVMData>({
     periods: 20,
-    interestRate: 7.5,
-    presentValue: -10000,
-    payment: -500,
+    interestRate: 8,
+    presentValue: -5000,
+    payment: -6000,
     futureValue: 0,
     solveFor: 'futureValue'
   })
@@ -110,18 +111,29 @@ export function TimeValueOfMoneyCalculator() {
     setError('')
     setResult(null)
 
+    const validationError = validateInputs()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
     try {
-      const { periods: n, interestRate, presentValue: pv, payment: pmt, futureValue: fv, solveFor } = data!
+      const periods = toNumber(data?.periods ?? 0)
+      const interestRate = toNumber(data?.interestRate ?? 0)
+      const presentValue = toNumber(data?.presentValue ?? 0)
+      const payment = toNumber(data?.payment ?? 0)
+      const futureValue = toNumber(data?.futureValue ?? 0)
+      const { solveFor } = data!
       const rate = interestRate / 100
 
       switch (solveFor) {
         case 'futureValue': {
           let result: number
           if (rate === 0) {
-            result = -(pv + pmt * n)
+            result = -(presentValue + payment * periods)
           } else {
-            const factor = Math.pow(1 + rate, n)
-            result = -(pv * factor + pmt * ((factor - 1) / rate))
+            const factor = Math.pow(1 + rate, periods)
+            result = -(presentValue * factor + payment * ((factor - 1) / rate))
           }
           setResult(result)
           break
@@ -130,10 +142,10 @@ export function TimeValueOfMoneyCalculator() {
         case 'presentValue': {
           let result: number
           if (rate === 0) {
-            result = -(fv + pmt * n)
+            result = -(futureValue + payment * periods)
           } else {
-            const factor = Math.pow(1 + rate, n)
-            result = -(fv + pmt * ((factor - 1) / rate)) / factor
+            const factor = Math.pow(1 + rate, periods)
+            result = -(futureValue + payment * ((factor - 1) / rate)) / factor
           }
           setResult(result)
           break
@@ -142,17 +154,17 @@ export function TimeValueOfMoneyCalculator() {
         case 'payment': {
           let result: number
           if (rate === 0) {
-            result = -(pv + fv) / n
+            result = -(presentValue + futureValue) / periods
           } else {
-            const factor = Math.pow(1 + rate, n)
-            result = -(pv * factor + fv) / ((factor - 1) / rate)
+            const factor = Math.pow(1 + rate, periods)
+            result = -(presentValue * factor + futureValue) / ((factor - 1) / rate)
           }
           setResult(result)
           break
         }
 
         case 'interestRate': {
-          const result = solveForRate(n, pv, pmt, fv)
+          const result = solveForRate(periods, presentValue, payment, futureValue)
           if (isNaN(result)) {
             setError('Unable to solve for interest rate with given values')
           } else {
@@ -162,7 +174,7 @@ export function TimeValueOfMoneyCalculator() {
         }
 
         case 'periods': {
-          const result = solveForPeriods(interestRate, pv, pmt, fv)
+          const result = solveForPeriods(interestRate, presentValue, payment, futureValue)
           if (isNaN(result) || result < 0) {
             setError('Unable to solve for periods with given values')
           } else {
@@ -171,6 +183,9 @@ export function TimeValueOfMoneyCalculator() {
           break
         }
       }
+
+      // Generate chart data after successful calculation
+      generateChartData()
     } catch (err) {
       setError('Calculation error. Please check your inputs.')
     }
@@ -178,9 +193,13 @@ export function TimeValueOfMoneyCalculator() {
 
   const generateChartData = () => {
     try {
-      const { periods: n, interestRate, presentValue: pv, payment: pmt } = data!
+      const periods = toNumber(data?.periods ?? 0)
+      const interestRate = toNumber(data?.interestRate ?? 0)
+      const presentValue = toNumber(data?.presentValue ?? 0)
+      const payment = toNumber(data?.payment ?? 0)
+      
       const rate = interestRate / 100 // Use the rate as entered
-      const totalPeriods = Math.floor(n) // Use periods as entered
+      const totalPeriods = Math.floor(periods) // Use periods as entered
       
       if (totalPeriods <= 0 || rate < 0) {
         setChartData([])
@@ -188,7 +207,7 @@ export function TimeValueOfMoneyCalculator() {
       }
 
       const chartDataPoints: ChartDataPoint[] = []
-      let currentPrincipal = Math.abs(pv)
+      let currentPrincipal = Math.abs(presentValue)
       let totalInterest = 0
 
       for (let period = 0; period <= Math.min(totalPeriods, 100); period++) { // Cap at 100 periods for performance
@@ -200,7 +219,7 @@ export function TimeValueOfMoneyCalculator() {
           })
         } else if (rate === 0) {
           // Simple growth without compounding
-          const monthlyPayment = Math.abs(pmt)
+          const monthlyPayment = Math.abs(payment)
           currentPrincipal += monthlyPayment
           chartDataPoints.push({
             period,
@@ -211,7 +230,7 @@ export function TimeValueOfMoneyCalculator() {
           // Compound growth
           const interestEarned = currentPrincipal * rate
           totalInterest += interestEarned
-          currentPrincipal = currentPrincipal * (1 + rate) + Math.abs(pmt)
+          currentPrincipal = currentPrincipal * (1 + rate) + Math.abs(payment)
           
           chartDataPoints.push({
             period,
@@ -227,19 +246,28 @@ export function TimeValueOfMoneyCalculator() {
     }
   }
 
-  useEffect(() => {
-    calculate()
-    generateChartData()
-  }, [data])
+  const validateInputs = (): string | null => {
+    const requiredFields = ['periods', 'interestRate', 'presentValue', 'payment', 'futureValue'] as const
+    const fieldsToValidate = requiredFields.filter(field => field !== data?.solveFor)
 
-  const updateData = (field: keyof TVMData, value: number | string) => {
+    for (const field of fieldsToValidate) {
+      const value = data?.[field]
+      if (!isValidNumber(value)) {
+        return `Please enter a valid ${formatFieldName(field)}`
+      }
+    }
+
+    return null
+  }
+
+  const updateData = (field: keyof TVMData, value: NumericOrEmpty | string) => {
     setData(current => {
       const safeCurrent: TVMData = {
-        periods: current?.periods ?? 0,
-        interestRate: current?.interestRate ?? 0,
-        presentValue: current?.presentValue ?? 0,
-        payment: current?.payment ?? 0,
-        futureValue: current?.futureValue ?? 0,
+        periods: current?.periods ?? '',
+        interestRate: current?.interestRate ?? '',
+        presentValue: current?.presentValue ?? '',
+        payment: current?.payment ?? '',
+        futureValue: current?.futureValue ?? '',
         solveFor: current?.solveFor ?? 'futureValue',
       };
       return { ...safeCurrent, [field]: value };
@@ -262,11 +290,6 @@ export function TimeValueOfMoneyCalculator() {
   const getInputValue = (field: keyof TVMData) => {
     if (data!.solveFor === field) return ''
     return data![field]
-  }
-
-  const getInputPlaceholder = (field: keyof TVMData, defaultPlaceholder: string) => {
-    if (data!.solveFor === field) return ''
-    return defaultPlaceholder
   }
 
   const isFieldDisabled = (field: keyof TVMData) => {
@@ -299,8 +322,7 @@ export function TimeValueOfMoneyCalculator() {
             id="periods"
             type="number"
             value={getInputValue('periods')}
-            onChange={(e) => updateData('periods', Number(e.target.value))}
-            placeholder={getInputPlaceholder('periods', '20')}
+            onChange={(e) => updateData('periods', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('periods')}
             className={isFieldDisabled('periods') ? 'bg-muted' : ''}
           />
@@ -313,8 +335,7 @@ export function TimeValueOfMoneyCalculator() {
             type="number"
             step="0.1"
             value={getInputValue('interestRate')}
-            onChange={(e) => updateData('interestRate', Number(e.target.value))}
-            placeholder={getInputPlaceholder('interestRate', '7')}
+            onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('interestRate')}
             className={isFieldDisabled('interestRate') ? 'bg-muted' : ''}
           />
@@ -326,8 +347,7 @@ export function TimeValueOfMoneyCalculator() {
             id="present-value"
             type="number"
             value={getInputValue('presentValue')}
-            onChange={(e) => updateData('presentValue', Number(e.target.value))}
-            placeholder={getInputPlaceholder('presentValue', '-10000')}
+            onChange={(e) => updateData('presentValue', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('presentValue')}
             className={isFieldDisabled('presentValue') ? 'bg-muted' : ''}
           />
@@ -339,8 +359,7 @@ export function TimeValueOfMoneyCalculator() {
             id="payment"
             type="number"
             value={getInputValue('payment')}
-            onChange={(e) => updateData('payment', Number(e.target.value))}
-            placeholder={getInputPlaceholder('payment', '-500')}
+            onChange={(e) => updateData('payment', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('payment')}
             className={isFieldDisabled('payment') ? 'bg-muted' : ''}
           />
@@ -352,13 +371,15 @@ export function TimeValueOfMoneyCalculator() {
             id="future-value"
             type="number"
             value={getInputValue('futureValue')}
-            onChange={(e) => updateData('futureValue', Number(e.target.value))}
-            placeholder={getInputPlaceholder('futureValue', '0')}
+            onChange={(e) => updateData('futureValue', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('futureValue')}
             className={isFieldDisabled('futureValue') ? 'bg-muted' : ''}
           />
         </div>
       </div>
+
+      {/* Calculate Button */}
+      <CalculateButton onCalculate={calculate} />
 
       {/* Results and Instructions Section Side by Side */}
       <div className="flex flex-col md:flex-row gap-6">

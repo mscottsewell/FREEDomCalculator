@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { CalculateButton } from '@/components/ui/calculate-button'
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 
 interface InflationData {
-  currentAmount: number
-  inflationRate: number
-  years: number
+  currentAmount: NumericOrEmpty
+  inflationRate: NumericOrEmpty
+  years: NumericOrEmpty
 }
 
 interface ChartDataPoint {
@@ -17,9 +18,9 @@ interface ChartDataPoint {
 }
 
 export function InflationCalculator() {
-  const [data, setData] = useKV<InflationData>('inflation-calculator', {
+  const [data, setData] = useState<InflationData>({
     currentAmount: 10000,
-    inflationRate: 3.5,
+    inflationRate: 3,
     years: 20
   })
 
@@ -30,7 +31,17 @@ export function InflationCalculator() {
     percentageLost: 0
   })
 
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [chartData, setChartData] = useState([])
+
+  // Validation using shared utilities
+  const validateInputs = () => {
+    const requiredFields = ['currentAmount', 'inflationRate', 'years'];
+    const missingFields = requiredFields.filter(field => !isValidNumber(data[field as keyof InflationData]));
+    return {
+      isValid: missingFields.length === 0,
+      missingFields: missingFields.map(formatFieldName)
+    };
+  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -42,13 +53,17 @@ export function InflationCalculator() {
   }
 
   const calculate = () => {
-    if (!data.currentAmount || !data.inflationRate || !data.years) return
+    if (!validateInputs().isValid) return
 
-    const inflationFactor = Math.pow(1 + data.inflationRate / 100, data.years)
-    const futureNominal = data.currentAmount * inflationFactor
-    const realPurchasingPower = data.currentAmount / inflationFactor
-    const powerLost = data.currentAmount - realPurchasingPower
-    const percentageLost = ((powerLost / data.currentAmount) * 100)
+    const currentAmount = toNumber(data.currentAmount)
+    const inflationRate = toNumber(data.inflationRate)
+    const years = toNumber(data.years)
+
+    const inflationFactor = Math.pow(1 + inflationRate / 100, years)
+    const futureNominal = currentAmount * inflationFactor
+    const realPurchasingPower = currentAmount / inflationFactor
+    const powerLost = currentAmount - realPurchasingPower
+    const percentageLost = ((powerLost / currentAmount) * 100)
 
     setResults({
       futureNominal,
@@ -58,10 +73,10 @@ export function InflationCalculator() {
     })
 
     // Generate chart data
-    const chartPoints: ChartDataPoint[] = []
-    for (let year = 0; year <= data.years; year++) {
-      const yearlyInflationFactor = Math.pow(1 + data.inflationRate / 100, year)
-      const purchasing_power = data.currentAmount / yearlyInflationFactor
+    const chartPoints = []
+    for (let year = 0; year <= years; year++) {
+      const yearlyInflationFactor = Math.pow(1 + inflationRate / 100, year)
+      const purchasing_power = currentAmount / yearlyInflationFactor
       chartPoints.push({
         year,
         purchasing_power
@@ -70,11 +85,7 @@ export function InflationCalculator() {
     setChartData(chartPoints)
   }
 
-  useEffect(() => {
-    calculate()
-  }, [data])
-
-  const updateData = (field: keyof InflationData, value: number) => {
+  const updateData = (field: keyof InflationData, value: NumericOrEmpty) => {
     setData(current => ({ ...current, [field]: value }))
   }
 
@@ -88,8 +99,7 @@ export function InflationCalculator() {
             id="current-amount"
             type="number"
             value={data.currentAmount}
-            onChange={(e) => updateData('currentAmount', Number(e.target.value))}
-            placeholder="10000"
+            onChange={(e) => updateData('currentAmount', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -99,8 +109,7 @@ export function InflationCalculator() {
             type="number"
             step="0.1"
             value={data.inflationRate}
-            onChange={(e) => updateData('inflationRate', Number(e.target.value))}
-            placeholder="3.5"
+            onChange={(e) => updateData('inflationRate', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -109,10 +118,14 @@ export function InflationCalculator() {
             id="years"
             type="number"
             value={data.years}
-            onChange={(e) => updateData('years', Number(e.target.value))}
-            placeholder="20"
+            onChange={(e) => updateData('years', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
+      </div>
+
+      {/* Calculate Button */}
+      <div className="flex justify-center">
+        <CalculateButton onCalculate={calculate} />
       </div>
 
       {/* Results Section */}

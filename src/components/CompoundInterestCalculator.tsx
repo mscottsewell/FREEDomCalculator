@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { CalculateButton } from '@/components/ui/calculate-button'
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 
 interface CompoundData {
-  principal: number
-  interestRate: number
-  years: number
+  principal: NumericOrEmpty
+  interestRate: NumericOrEmpty
+  years: NumericOrEmpty
   compoundingFrequency: number
-  additionalDeposit: number
+  additionalDeposit: NumericOrEmpty
   depositFrequency: 'monthly' | 'annually'
 }
 
@@ -27,12 +28,12 @@ const compoundingOptions = [
 ]
 
 export function CompoundInterestCalculator() {
-  const [data, setData] = useKV<CompoundData>('compound-calculator', {
+  const [data, setData] = useState<CompoundData>({
     principal: 5000,
     interestRate: 8,
     years: 20,
-    compoundingFrequency: 12,
-    additionalDeposit: 300,
+    compoundingFrequency: 1,
+    additionalDeposit: 500,
     depositFrequency: 'monthly'
   })
 
@@ -42,7 +43,20 @@ export function CompoundInterestCalculator() {
     totalDeposits: 0
   })
 
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [chartData, setChartData] = useState([])
+
+  // Validation using shared utilities
+  const validateInputs = () => {
+    const requiredFields = ['principal', 'interestRate', 'years'];
+    const missingFields = requiredFields.filter(field => {
+      const value = data[field as keyof CompoundData];
+      return !isValidNumber(value as NumericOrEmpty);
+    });
+    return {
+      isValid: missingFields.length === 0,
+      missingFields: missingFields.map(formatFieldName)
+    };
+  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -54,18 +68,23 @@ export function CompoundInterestCalculator() {
   }
 
   const calculate = () => {
-    if (!data.principal || !data.interestRate || !data.years) return
+    if (!validateInputs().isValid) return
 
-    const r = data.interestRate / 100
+    const principal = toNumber(data.principal)
+    const interestRate = toNumber(data.interestRate)
+    const years = toNumber(data.years)
+    const additionalDeposit = toNumber(data.additionalDeposit)
+
+    const r = interestRate / 100
     const n = data.compoundingFrequency
-    const t = data.years
+    const t = years
     
     // Calculate compound interest on principal
-    const principalGrowth = data.principal * Math.pow(1 + r / n, n * t)
+    const principalGrowth = principal * Math.pow(1 + r / n, n * t)
     
     // Calculate additional deposits
     let depositContribution = 0
-    if (data.additionalDeposit > 0) {
+    if (additionalDeposit > 0) {
       if (data.depositFrequency === 'monthly') {
         // Monthly deposits compounded
         const monthlyRate = r / 12
@@ -134,11 +153,7 @@ export function CompoundInterestCalculator() {
     setChartData(chartPoints)
   }
 
-  useEffect(() => {
-    calculate()
-  }, [data])
-
-  const updateData = (field: keyof CompoundData, value: number | string) => {
+  const updateData = (field: keyof CompoundData, value: NumericOrEmpty | number | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
 
@@ -152,8 +167,7 @@ export function CompoundInterestCalculator() {
             id="principal"
             type="number"
             value={data.principal}
-            onChange={(e) => updateData('principal', Number(e.target.value))}
-            placeholder="10000"
+            onChange={(e) => updateData('principal', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -163,8 +177,7 @@ export function CompoundInterestCalculator() {
             type="number"
             step="0.1"
             value={data.interestRate}
-            onChange={(e) => updateData('interestRate', Number(e.target.value))}
-            placeholder="7"
+            onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -173,8 +186,7 @@ export function CompoundInterestCalculator() {
             id="years"
             type="number"
             value={data.years}
-            onChange={(e) => updateData('years', Number(e.target.value))}
-            placeholder="20"
+            onChange={(e) => updateData('years', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -198,8 +210,7 @@ export function CompoundInterestCalculator() {
             id="additional-deposit"
             type="number"
             value={data.additionalDeposit}
-            onChange={(e) => updateData('additionalDeposit', Number(e.target.value))}
-            placeholder="500"
+            onChange={(e) => updateData('additionalDeposit', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
         <div className="space-y-2">
@@ -214,6 +225,11 @@ export function CompoundInterestCalculator() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Calculate Button */}
+      <div className="flex justify-center">
+        <CalculateButton onCalculate={calculate} />
       </div>
 
       {/* Results and Chart Section */}
@@ -296,8 +312,8 @@ export function CompoundInterestCalculator() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed font-medium">
-              <strong>Albert Einstein called compound interest "the eighth wonder of the world."</strong> 
-              The earlier you start investing, the more time your money has to grow exponentially.
+              <strong>Albert Einstein called compound interest "the eighth wonder of the world."</strong> The 
+              earlier you start investing, the more time your money has to grow exponentially.
               Even small amounts invested regularly can become substantial wealth over time due to compounding.
               The key is starting early and being consistent.
               Time in the market is <em>far more powerful</em> than "timing" the market.
