@@ -302,11 +302,14 @@ export function MortgageCalculator() {
           <CardTitle className="text-lg">Understanding Your Mortgage</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed">
+          <p className="leading-relaxed">
             For your {formatCurrencyNoDecimals(toNumber(data?.homePrice || 0))} home with a {toNumber(data?.downPaymentPercent || 0)}% down payment ({formatCurrency(results.downPaymentAmount)}),
-            you'll need to finance {formatCurrencyNoDecimals(results.calculatedLoanAmount)} at {toNumber(data?.interestRate || 0)}% interest for {toNumber(data?.loanTerm || 0)} years.
-            Your monthly payment will be {formatCurrency(results.monthlyPayment)}. Over the life of the loan, you'll pay {formatCurrency(results.totalInterest)} in interest, 
-            making your total payments {formatCurrency(results.totalPaid)}. The interest represents {((results.totalInterest / results.calculatedLoanAmount) * 100).toFixed(1)}% of your loan amount.
+            you'll need to finance {formatCurrencyNoDecimals(results.calculatedLoanAmount)} at {toNumber(data?.interestRate || 0)}% interest for {toNumber(data?.loanTerm || 0)} years. 
+            Your monthly payment will be {formatCurrency(results.monthlyPayment)}. 
+            <br /> 
+            Over the life of the loan, you'll pay {formatCurrency(results.totalInterest)} in interest, making your total payments {formatCurrency(results.totalPaid)}. 
+            <br />
+            The interest represents {((results.totalInterest / results.totalPaid) * 100).toFixed(1)}% of your Total Purchase.
           </p>
         </CardContent>
       </Card>
