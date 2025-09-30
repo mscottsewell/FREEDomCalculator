@@ -1,14 +1,17 @@
-# FREEDom Calculator
+# FREEDom Calculator: "AmyCalc.com"
 
 A comprehensive suite of financial calculators designed for educational purposes to help students and individuals understand important financial concepts and make informed financial decisions.
 
+<img width="1375" height="1621" alt="image" src="https://github.com/user-attachments/assets/f8c67c87-1d51-4ac9-b97e-6f559c987c48" />
+
+
 ## Purpose
 
-This project provides interactive, user-friendly calculators for various financial planning scenarios. Created by Mrs. Sewell from the FHU College of Business, these tools are designed to promote financial literacy and responsible financial decision-making (Financial Responsibility, Education, Empowerment, and Decision-making - FREED-om).
+This project provides interactive, user-friendly calculators for various financial planning scenarios. Created for Mrs. Amy Sewell, Instructor in the FHU College of Business, these tools are designed to promote financial literacy and responsible financial decision-making (Financial Responsibility, Education, Empowerment, and Decision-making Freedom).
 
 ## Live Demo
 
-Visit the live application: [https://mscottsewell.github.io/FREEDomCalculator/](https://mscottsewell.github.io/FREEDomCalculator/)
+Visit the live application: [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/)
 
 ## Calculators
 
@@ -165,29 +168,15 @@ These calculators are designed for educational purposes to help students and ind
 - Make informed borrowing and investing decisions
 - Develop better financial literacy
 
-## Contributing
-
-Contributions are welcome! If you'd like to improve the calculators or add new features:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
 This project is intended for educational purposes.
 
 ## Acknowledgments
 
-- Created by Mrs. Sewell for the FHU College of Business
-- Built with modern web technologies to provide an accessible financial education tool
+- Created by Scott Sewell for his lovely wife.
+- Built with GitHub Spark and modern web tools to provide an accessible financial education tool
 - Inspired by the need for practical financial literacy resources
-
-## Contact
-
-For questions or feedback about this project, please open an issue on GitHub.
 
 ---
 
