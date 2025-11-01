@@ -5,7 +5,7 @@ import { writeFileSync } from 'fs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? '/' : '/FREEDomCalculator/', // Root for Actions, subdir for gh-pages
+  base: '/FREEDomCalculator/', // Set to your repo name for GitHub Pages
   plugins: [
     react(),
     {
