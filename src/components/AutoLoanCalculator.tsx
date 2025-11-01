@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,7 +22,7 @@ interface PaymentSchedule {
 }
 
 export function AutoLoanCalculator() {
-  const [data, setData] = useKV<AutoLoanData>('autoloan-calculator', {
+  const [data, setData] = useLocalStorage<AutoLoanData>('autoloan-calculator', {
     loanAmount: 40000,
     interestRate: 8,
     loanTerm: 7

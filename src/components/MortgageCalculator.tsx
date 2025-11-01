@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,7 +31,7 @@ interface MonthlyPayment {
 }
 
 export function MortgageCalculator() {
-  const [data, setData] = useKV<MortgageData>('mortgage-calculator', {
+  const [data, setData] = useLocalStorage<MortgageData>('mortgage-calculator', {
     homePrice: 300000,
     downPaymentPercent: 10,
     interestRate: 7.0,

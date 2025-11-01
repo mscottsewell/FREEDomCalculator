@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useKV } from '@github/spark/hooks'
+import { useState } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,7 +54,7 @@ interface ChartDataPoint {
 }
 
 export function CreditCardCalculator() {
-  const [data, setData] = useKV<CreditCardData>("creditcard-calculator", {
+  const [data, setData] = useLocalStorage<CreditCardData>("creditcard-calculator", {
     balance: 5000,
     apr: 29.99,
     paymentType: "minimum",
