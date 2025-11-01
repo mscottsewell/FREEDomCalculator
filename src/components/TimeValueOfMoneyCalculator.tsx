@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
+import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 
 interface TVMData {
   periods: NumericOrEmpty
@@ -36,56 +37,15 @@ export function TimeValueOfMoneyCalculator() {
   const [error, setError] = useState('')
   const [chartData, setChartData] = useState([])
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.abs(amount))
+  const formatCurrencyLocal = (amount: number): string => {
+    return formatCurrency(Math.abs(amount), 0, 0)
   }
 
-  const formatNumberWithCommas = (value: number | string | ''): string => {
-    if (value === '' || value === null || value === undefined) return '';
-    
-    // Handle intermediate input states for negative numbers
-    if (value === '-' || value === '-.') {
-      return value as string;
-    }
-    
-    const num = Number(value);
-    if (isNaN(num)) return '';
-    return new Intl.NumberFormat('en-US').format(num);
-  };
 
-  const parseFormattedNumber = (value: string): number | '' => {
-    if (value === '' || value === null || value === undefined) return '';
-    const numericValue = value.replace(/,/g, '').trim();
-    if (numericValue === '') return '';
-    
-    // Allow intermediate input states for negative numbers
-    if (numericValue === '-' || numericValue === '-.') {
-      return numericValue as any; // Allow these intermediate states
-    }
-    
-    const num = Number(numericValue);
-    return isNaN(num) ? '' : num;
-  };
 
-  // Format percentage with % sign for display
-  const formatPercentage = (value: number | ''): string => {
-    if (value === '') return '';
-    return `${Number(value)}%`;
-  };
 
-  // Parse percentage string back to number
-  const parsePercentage = (value: string): number | '' => {
-    if (value === '') return '';
-    // Remove % sign and parse
-    const cleanValue = value.replace(/%/g, '').trim();
-    const num = parseFloat(cleanValue);
-    return isNaN(num) ? '' : num;
-  };
+
+
 
   // Newton-Raphson method for solving interest rate
   const solveForRate = (n: number, pv: number, pmt: number, fv: number): number => {
@@ -332,7 +292,7 @@ export function TimeValueOfMoneyCalculator() {
       case 'periods':
         return `${result.toFixed(1)} periods`
       default:
-        return formatCurrency(result)
+        return formatCurrencyLocal(result)
     }
   }
 

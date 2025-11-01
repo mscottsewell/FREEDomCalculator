@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
@@ -10,12 +10,14 @@ import {
   House 
 } from '@phosphor-icons/react'
 import collegeLogo from '@/assets/images/FHU_COB.svg'
-import { InflationCalculator } from '@/components/InflationCalculator'
-import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
-import { TimeValueOfMoneyCalculator } from '@/components/TimeValueOfMoneyCalculator'
-import { CreditCardCalculator } from '@/components/CreditCardCalculator'
-import { AutoLoanCalculator } from '@/components/AutoLoanCalculator'
-import { MortgageCalculator } from '@/components/MortgageCalculator'
+
+// Lazy load calculator components for better performance
+const InflationCalculator = lazy(() => import('@/components/InflationCalculator').then(m => ({ default: m.InflationCalculator })))
+const CompoundInterestCalculator = lazy(() => import('@/components/CompoundInterestCalculator').then(m => ({ default: m.CompoundInterestCalculator })))
+const TimeValueOfMoneyCalculator = lazy(() => import('@/components/TimeValueOfMoneyCalculator').then(m => ({ default: m.TimeValueOfMoneyCalculator })))
+const CreditCardCalculator = lazy(() => import('@/components/CreditCardCalculator').then(m => ({ default: m.CreditCardCalculator })))
+const AutoLoanCalculator = lazy(() => import('@/components/AutoLoanCalculator').then(m => ({ default: m.AutoLoanCalculator })))
+const MortgageCalculator = lazy(() => import('@/components/MortgageCalculator').then(m => ({ default: m.MortgageCalculator })))
 
 const calculators = [
   { id: 'inflation', name: 'Inflation', icon: TrendUp, component: InflationCalculator },
@@ -85,7 +87,9 @@ function App() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Component />
+                    <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
+                      <Component />
+                    </Suspense>
                   </CardContent>
                 </Card>
               </TabsContent>

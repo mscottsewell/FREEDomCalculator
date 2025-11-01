@@ -29,6 +29,7 @@ import {
 } from "recharts";
 import { CalculateButton } from "@/components/ui/calculate-button";
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from "@/lib/calculator-validation";
+import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters';
 
 interface CreditCardData {
   balance: NumericOrEmpty;
@@ -71,49 +72,15 @@ export function CreditCardCalculator() {
   const [schedule, setSchedule] = useState([]);
   const [chartData, setChartData] = useState([]);
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
-
   const formatCurrencyWholeDollars = (amount: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.round(amount));
+    return formatCurrency(Math.round(amount), 0, 0);
   };
 
-  const formatNumberWithCommas = (value: number | ''): string => {
-    if (value === '') return '';
-    return new Intl.NumberFormat('en-US').format(Number(value));
-  };
 
-  const parseFormattedNumber = (value: string): number | '' => {
-    if (value === '') return '';
-    const numericValue = value.replace(/,/g, '');
-    return numericValue === '' ? '' : Number(numericValue);
-  };
 
-  // Format percentage with % sign for display
-  const formatPercentage = (value: number | ''): string => {
-    if (value === '') return '';
-    return `${Number(value)}%`;
-  };
 
-  // Parse percentage string back to number
-  const parsePercentage = (value: string): number | '' => {
-    if (value === '') return '';
-    // Remove % sign and parse
-    const cleanValue = value.replace(/%/g, '').trim();
-    const num = parseFloat(cleanValue);
-    return isNaN(num) ? '' : num;
-  };
+
+
 
   const calculate = () => {
     const validationError = validateInputs()

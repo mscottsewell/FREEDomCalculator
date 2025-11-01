@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
+import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 
 interface CompoundData {
   principal: NumericOrEmpty
@@ -57,49 +58,6 @@ export function CompoundInterestCalculator() {
       missingFields: missingFields.map(formatFieldName)
     };
   };
-
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
-  // Format number with commas for display
-  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
-    if (value === '' || value === null || value === undefined) return ''
-    const num = typeof value === 'number' ? value : parseFloat(value.toString())
-    if (isNaN(num)) return ''
-    return new Intl.NumberFormat('en-US').format(num)
-  }
-
-  // Parse comma-formatted string back to number
-  const parseFormattedNumber = (value: string): NumericOrEmpty => {
-    if (value === '') return ''
-    // Remove commas and parse
-    const cleanValue = value.replace(/,/g, '')
-    const num = parseFloat(cleanValue)
-    return isNaN(num) ? '' : num
-  }
-
-  // Format percentage with % sign for display  
-  const formatPercentage = (value: NumericOrEmpty): string => {
-    if (value === '' || value === null || value === undefined) return ''
-    const num = typeof value === 'number' ? value : parseFloat(value.toString())
-    if (isNaN(num)) return ''
-    return num.toString()
-  }
-
-  // Parse percentage string back to number
-  const parsePercentage = (value: string): NumericOrEmpty => {
-    if (value === '') return ''
-    // Remove % sign and parse
-    const cleanValue = value.replace(/%/g, '').trim()
-    const num = parseFloat(cleanValue)
-    return isNaN(num) ? '' : num
-  }
 
   const calculate = () => {
     if (!validateInputs().isValid) return

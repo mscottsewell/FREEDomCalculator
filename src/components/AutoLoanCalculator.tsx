@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CalculateButton } from '@/components/ui/calculate-button'
-import { NumericOrEmpty, isValidNumber, toNumber } from '@/lib/calculator-validation'
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
+import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 
 interface AutoLoanData {
   loanAmount: NumericOrEmpty
@@ -36,57 +37,10 @@ export function AutoLoanCalculator() {
 
   const [schedule, setSchedule] = useState<PaymentSchedule[]>([])
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  }
-
-  const formatCurrencyNoDecimals = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
-  // Format number with commas for display
-  const formatNumberWithCommas = (value: NumericOrEmpty): string => {
-    if (value === '' || value === null || value === undefined) return ''
-    const num = typeof value === 'number' ? value : parseFloat(value.toString())
-    if (isNaN(num)) return ''
-    return new Intl.NumberFormat('en-US').format(num)
-  }
-
-  // Parse comma-formatted string back to number
-  const parseFormattedNumber = (value: string): NumericOrEmpty => {
-    if (value === '') return ''
-    // Remove commas and parse
-    const cleanValue = value.replace(/,/g, '')
-    const num = parseFloat(cleanValue)
-    return isNaN(num) ? '' : num
-  }
-
-  // Format percentage with % sign for display
-  const formatPercentage = (value: NumericOrEmpty): string => {
-    if (value === '' || value === null || value === undefined) return ''
-    const num = typeof value === 'number' ? value : parseFloat(value.toString())
-    if (isNaN(num)) return ''
-    return `${num}%`
-  }
-
-  // Parse percentage string back to number
-  const parsePercentage = (value: string): NumericOrEmpty => {
-    if (value === '') return ''
-    // Remove % sign and parse
-    const cleanValue = value.replace(/%/g, '').trim()
-    const num = parseFloat(cleanValue)
-    return isNaN(num) ? '' : num
-  }
+  // Helper for currency without decimals
+  const formatCurrencyNoDecimals = (amount: number) => formatCurrency(amount, false)
+  // Helper for currency with decimals  
+  const formatCurrencyWithDecimals = (amount: number) => formatCurrency(amount, true)
 
   const validateInputs = (): string | null => {
     if (!isValidNumber(data?.loanAmount)) return "Please enter a valid loan amount"
@@ -270,10 +224,10 @@ export function AutoLoanCalculator() {
                   {schedule.map((payment) => (
                     <TableRow key={payment.month}>
                       <TableCell className="font-medium">{payment.month}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(payment.payment)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(payment.principal)}</TableCell>
-                      <TableCell className="text-right currency-red">{formatCurrency(payment.interest)}</TableCell>
-                      <TableCell className="text-right pr-4">{formatCurrency(payment.balance)}</TableCell>
+                      <TableCell className="text-right">{formatCurrencyWithDecimals(payment.payment)}</TableCell>
+                      <TableCell className="text-right">{formatCurrencyWithDecimals(payment.principal)}</TableCell>
+                      <TableCell className="text-right currency-red">{formatCurrencyWithDecimals(payment.interest)}</TableCell>
+                      <TableCell className="text-right pr-4">{formatCurrencyWithDecimals(payment.balance)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
