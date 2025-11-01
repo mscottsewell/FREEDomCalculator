@@ -1,11 +1,20 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { copyFileSync } from 'fs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/FREEDomCalculator/', // Set to your repo name for GitHub Pages
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'copy-nojekyll',
+      closeBundle() {
+        copyFileSync('.nojekyll', 'dist/.nojekyll');
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
