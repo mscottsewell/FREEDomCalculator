@@ -13,6 +13,62 @@ This project provides interactive, user-friendly calculators for various financi
 
 Visit the live application: [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/)
 
+## Install as an App
+
+This calculator suite can be installed as a Progressive Web App (PWA) on your device for a native app-like experience!
+
+### Installation on iPad/iPhone
+
+1. Open [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/) in Safari
+2. Tap the **Share** button (square with arrow pointing up)
+3. Scroll down and tap **"Add to Home Screen"**
+4. Customize the name if desired (default: "AmyCalc")
+5. Tap **"Add"** in the top right corner
+6. The app icon will appear on your home screen - tap it to launch!
+
+### Installation on Windows PC
+
+**Microsoft Edge:**
+1. Open [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/) in Edge
+2. Click the **⊕** icon in the address bar or click the **...** menu
+3. Select **"Apps" > "Install this site as an app"**
+4. Click **"Install"**
+5. The app will open in its own window and appear in your Start Menu
+
+**Google Chrome:**
+1. Open [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/) in Chrome
+2. Click the **⊕** icon in the address bar or the three-dot menu
+3. Select **"Install FREEDom Calculator"** or **"Install app"**
+4. Click **"Install"**
+5. The app will appear in your Start Menu and taskbar
+
+### Installation on Mac
+
+**Safari:**
+1. Open [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/) in Safari
+2. Click **File** > **"Add to Dock"** (macOS Sonoma or later)
+3. The app will appear in your Dock for easy access
+
+**Chrome:**
+1. Follow the same steps as Windows Chrome above
+2. The app will appear in your Applications folder and Launchpad
+
+### Installation on Android
+
+1. Open [AmyCalc.com](https://mscottsewell.github.io/FREEDomCalculator/) in Chrome
+2. Tap the three-dot menu (⋮)
+3. Tap **"Add to Home screen"** or **"Install app"**
+4. Confirm by tapping **"Add"** or **"Install"**
+5. The app icon will appear on your home screen
+
+### Benefits of Installing
+
+- **Offline Access:** Use calculators even without internet connection
+- **Faster Loading:** Cached resources load instantly
+- **Native Feel:** Runs in its own window without browser UI
+- **Home Screen Access:** Quick launch from your device
+- **Push Notifications:** (Future feature) Get updates about new calculators
+
 ## Calculators
 
 The application includes six comprehensive financial calculators:
@@ -119,6 +175,17 @@ npm run build
 
 The built files will be in the `dist` directory.
 
+### Testing PWA Locally
+
+To test the PWA functionality locally:
+
+```bash
+npm run pwa:build
+npm run pwa:preview
+```
+
+Then open your browser to the preview URL and test the install functionality.
+
 ### Deployment
 
 To deploy to GitHub Pages:
@@ -153,6 +220,8 @@ FREEDomCalculator/
 
 ## Features
 
+- **Progressive Web App:** Install on any device (iPad, iPhone, PC, Mac, Android) for app-like experience
+- **Offline Support:** Service worker caches assets for offline functionality
 - **Responsive Design:** Works seamlessly on desktop, tablet, and mobile devices
 - **Interactive Visualizations:** Charts and graphs help visualize financial data
 - **State Persistence:** Your inputs are saved automatically
