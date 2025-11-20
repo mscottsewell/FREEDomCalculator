@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
@@ -32,7 +33,8 @@ export function InflationCalculator() {
     percentageLost: 0
   })
 
-  const [chartData, setChartData] = useState([])
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [error, setError] = useState('')
 
   // Validation using shared utilities
   const validateInputs = () => {
@@ -45,7 +47,13 @@ export function InflationCalculator() {
   };
 
   const calculate = () => {
-    if (!validateInputs().isValid) return
+    const validation = validateInputs()
+    if (!validation.isValid) {
+      setError(`Please enter a valid value for: ${validation.missingFields.join(', ')}`)
+      return
+    }
+
+    setError('')
 
     const currentAmount = toNumber(data.currentAmount)
     const inflationRate = toNumber(data.inflationRate)
@@ -125,8 +133,13 @@ export function InflationCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-3">
         <CalculateButton onCalculate={calculate} />
+        {error && (
+          <Alert variant="destructive" className="w-full">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Results Section */}
@@ -172,9 +185,9 @@ export function InflationCalculator() {
             <p className="text-lg leading-relaxed">
               With inflation at {data.inflationRate}% per year, in {data.years} years you would 
               need {formatCurrency(results.futureNominal)} to buy
-              what {formatCurrency(data.currentAmount)} can buy today.
+              what {formatCurrency(toNumber(data.currentAmount))} can buy today.
               <br /> <br />
-              In {data.years} years, {formatCurrency(data.currentAmount)} will have the 
+              In {data.years} years, {formatCurrency(toNumber(data.currentAmount))} will have the 
               same purchasing power as {formatCurrency(results.realPurchasingPower)} has today.
               <br /> <br />
               This represents a loss of purchasing power of {results.percentageLost.toFixed(1)}%.

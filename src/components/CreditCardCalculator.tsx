@@ -30,6 +30,7 @@ import {
 import { CalculateButton } from "@/components/ui/calculate-button";
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from "@/lib/calculator-validation";
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreditCardData {
   balance: NumericOrEmpty;
@@ -69,12 +70,11 @@ export function CreditCardCalculator() {
     totalPaid: 0,
   });
 
-  const [schedule, setSchedule] = useState([]);
-  const [chartData, setChartData] = useState([]);
+  const [schedule, setSchedule] = useState<PaymentSchedule[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [error, setError] = useState('');
 
-  const formatCurrencyWholeDollars = (amount: number): string => {
-    return formatCurrency(Math.round(amount), 0, 0);
-  };
+  const formatCurrencyWholeDollars = (amount: number): string => formatCurrency(Math.round(amount));
 
 
 
@@ -84,7 +84,12 @@ export function CreditCardCalculator() {
 
   const calculate = () => {
     const validationError = validateInputs()
-    if (validationError) return
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    setError('')
 
     const balance = toNumber(data!.balance)
     const apr = toNumber(data!.apr)
@@ -112,6 +117,15 @@ export function CreditCardCalculator() {
         ); // Use user-defined minimum payment
       } else {
         payment = fixedPayment;
+      }
+
+
+      if (payment <= interestPayment + 0.01) {
+        setError('Your payment is not enough to cover accrued interest. Increase the payment amount to avoid growing debt.');
+        setResults({ monthsToPayoff: 0, totalInterest: 0, totalPaid: 0 })
+        setSchedule([])
+        setChartData([])
+        return
       }
 
       // Don't pay more than the remaining balance
@@ -280,7 +294,14 @@ export function CreditCardCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <CalculateButton onCalculate={calculate} />
+      <div className="flex flex-col gap-3">
+        <CalculateButton onCalculate={calculate} />
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       {/* Results Section */}
       <Card>

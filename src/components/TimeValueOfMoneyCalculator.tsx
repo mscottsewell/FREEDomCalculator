@@ -33,13 +33,11 @@ export function TimeValueOfMoneyCalculator() {
     solveFor: 'futureValue'
   })
 
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState<number | null>(null)
   const [error, setError] = useState('')
-  const [chartData, setChartData] = useState([])
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
 
-  const formatCurrencyLocal = (amount: number): string => {
-    return formatCurrency(Math.abs(amount), 0, 0)
-  }
+  const formatCurrencyLocal = (amount: number): string => formatCurrency(Math.abs(amount))
 
 
 

@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface CompoundData {
   principal: NumericOrEmpty
@@ -44,7 +45,8 @@ export function CompoundInterestCalculator() {
     totalDeposits: 0
   })
 
-  const [chartData, setChartData] = useState([])
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [error, setError] = useState('')
 
   // Validation using shared utilities
   const validateInputs = () => {
@@ -60,7 +62,13 @@ export function CompoundInterestCalculator() {
   };
 
   const calculate = () => {
-    if (!validateInputs().isValid) return
+    const validation = validateInputs()
+    if (!validation.isValid) {
+      setError(`Please enter a valid value for: ${validation.missingFields.join(', ')}`)
+      return
+    }
+
+    setError('')
 
     const principal = toNumber(data.principal)
     const interestRate = toNumber(data.interestRate)
@@ -82,23 +90,23 @@ export function CompoundInterestCalculator() {
         const monthlyRate = r / 12
         const months = t * 12
         if (monthlyRate === 0) {
-          depositContribution = data.additionalDeposit * months
+          depositContribution = additionalDeposit * months
         } else {
-          depositContribution = data.additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
+          depositContribution = additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
         }
       } else {
         // Annual deposits
         const annualRate = r
         if (annualRate === 0) {
-          depositContribution = data.additionalDeposit * t
+          depositContribution = additionalDeposit * t
         } else {
-          depositContribution = data.additionalDeposit * ((Math.pow(1 + annualRate, t) - 1) / annualRate)
+          depositContribution = additionalDeposit * ((Math.pow(1 + annualRate, t) - 1) / annualRate)
         }
       }
     }
 
     const finalAmount = principalGrowth + depositContribution
-    const totalDeposits = data.principal + (data.depositFrequency === 'monthly' ? data.additionalDeposit * 12 * t : data.additionalDeposit * t)
+    const totalDeposits = principal + (data.depositFrequency === 'monthly' ? additionalDeposit * 12 * t : additionalDeposit * t)
     const totalInterest = finalAmount - totalDeposits
 
     setResults({
@@ -110,30 +118,30 @@ export function CompoundInterestCalculator() {
     // Generate chart data
     const chartPoints: ChartDataPoint[] = []
     for (let year = 0; year <= t; year++) {
-      const principalAtYear = data.principal * Math.pow(1 + r / n, n * year)
+      const principalAtYear = principal * Math.pow(1 + r / n, n * year)
       
       let depositAtYear = 0
-      if (data.additionalDeposit > 0 && year > 0) {
+      if (additionalDeposit > 0 && year > 0) {
         if (data.depositFrequency === 'monthly') {
           const monthlyRate = r / 12
           const months = year * 12
           if (monthlyRate === 0) {
-            depositAtYear = data.additionalDeposit * months
+            depositAtYear = additionalDeposit * months
           } else {
-            depositAtYear = data.additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
+            depositAtYear = additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
           }
         } else {
           const annualRate = r
           if (annualRate === 0) {
-            depositAtYear = data.additionalDeposit * year
+            depositAtYear = additionalDeposit * year
           } else {
-            depositAtYear = data.additionalDeposit * ((Math.pow(1 + annualRate, year) - 1) / annualRate)
+            depositAtYear = additionalDeposit * ((Math.pow(1 + annualRate, year) - 1) / annualRate)
           }
         }
       }
 
       const totalAtYear = principalAtYear + depositAtYear
-      const depositsAtYear = data.principal + (data.depositFrequency === 'monthly' ? data.additionalDeposit * 12 * year : data.additionalDeposit * year)
+      const depositsAtYear = principal + (data.depositFrequency === 'monthly' ? additionalDeposit * 12 * year : additionalDeposit * year)
       const interestAtYear = totalAtYear - depositsAtYear
 
       chartPoints.push({
@@ -232,8 +240,13 @@ export function CompoundInterestCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-3">
         <CalculateButton onCalculate={calculate} />
+        {error && (
+          <Alert variant="destructive" className="w-full">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {/* Results and Chart Section */}

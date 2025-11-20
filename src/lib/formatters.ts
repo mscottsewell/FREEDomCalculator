@@ -61,7 +61,7 @@ export function parseFormattedNumber(value: string): NumericOrEmpty {
  */
 export function formatPercentage(value: NumericOrEmpty): string {
   if (value === '' || value === null || value === undefined) return '';
-  const num = typeof value === 'number' ? value : parseFloat(value.toString());
+  const num = typeof value === 'number' ? value : parseFloat(String(value));
   if (isNaN(num)) return '';
   return `${num}%`;
 }

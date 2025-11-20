@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
@@ -49,10 +50,9 @@ export function MortgageCalculator() {
 
   const [yearlySchedule, setYearlySchedule] = useState<YearlySchedule[]>([])
   const [monthlySchedule, setMonthlySchedule] = useState<MonthlyPayment[]>([])
+  const [error, setError] = useState('')
 
-  const formatCurrencyNoDecimals = (amount: number): string => {
-    return formatCurrency(amount, 0, 0)
-  }
+  const formatCurrencyNoDecimals = (amount: number): string => formatCurrency(amount)
 
 
 
@@ -82,7 +82,12 @@ export function MortgageCalculator() {
 
   const calculate = () => {
     const validationError = validateInputs()
-    if (validationError) return
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    setError('')
 
     const homePrice = toNumber(data!.homePrice)
     const downPaymentPercent = toNumber(data!.downPaymentPercent)
@@ -96,9 +101,10 @@ export function MortgageCalculator() {
     const monthlyRate = interestRate / 100 / 12
     const numberOfPayments = loanTerm * 12
 
-    // Calculate monthly payment using mortgage formula
-    const monthlyPayment = (calculatedLoanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
-                          (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
+    const monthlyPayment = monthlyRate === 0
+      ? calculatedLoanAmount / numberOfPayments
+      : (calculatedLoanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+        (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
 
     let balance = calculatedLoanAmount
     const monthlyPayments: MonthlyPayment[] = []
@@ -106,7 +112,7 @@ export function MortgageCalculator() {
     let totalInterest = 0
 
     for (let month = 1; month <= numberOfPayments; month++) {
-      const interestPayment = balance * monthlyRate
+      const interestPayment = monthlyRate === 0 ? 0 : balance * monthlyRate
       const principalPayment = monthlyPayment - interestPayment
       balance -= principalPayment
       totalInterest += interestPayment
@@ -214,7 +220,14 @@ export function MortgageCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <CalculateButton onCalculate={calculate} />
+      <div className="flex flex-col gap-3">
+        <CalculateButton onCalculate={calculate} />
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       {/* Results Section */}
       <Card>

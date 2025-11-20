@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
@@ -36,6 +37,7 @@ export function AutoLoanCalculator() {
   })
 
   const [schedule, setSchedule] = useState<PaymentSchedule[]>([])
+  const [error, setError] = useState('')
 
   // Helper for currency without decimals
   const formatCurrencyNoDecimals = (amount: number) => formatCurrency(amount, false)
@@ -60,7 +62,12 @@ export function AutoLoanCalculator() {
 
   const calculate = () => {
     const validationError = validateInputs()
-    if (validationError) return
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    setError('')
 
     const loanAmount = toNumber(data!.loanAmount)
     const interestRate = toNumber(data!.interestRate)
@@ -69,16 +76,17 @@ export function AutoLoanCalculator() {
     const monthlyRate = interestRate / 100 / 12
     const numberOfPayments = loanTerm * 12
 
-    // Calculate monthly payment using loan formula
-    const monthlyPayment = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
-                          (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
+    const monthlyPayment = monthlyRate === 0
+      ? loanAmount / numberOfPayments
+      : (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+        (Math.pow(1 + monthlyRate, numberOfPayments) - 1)
 
     let balance = loanAmount
     const paymentHistory: PaymentSchedule[] = []
     let totalInterest = 0
 
     for (let month = 1; month <= numberOfPayments; month++) {
-      const interestPayment = balance * monthlyRate
+      const interestPayment = monthlyRate === 0 ? 0 : balance * monthlyRate
       const principalPayment = monthlyPayment - interestPayment
       balance -= principalPayment
       totalInterest += interestPayment
@@ -161,7 +169,14 @@ export function AutoLoanCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <CalculateButton onCalculate={calculate} />
+      <div className="flex flex-col gap-3">
+        <CalculateButton onCalculate={calculate} />
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       {/* Results & Understanding Section Side by Side */}
       <div className="flex flex-col md:flex-row gap-6">
