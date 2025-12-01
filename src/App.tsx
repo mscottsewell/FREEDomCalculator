@@ -47,7 +47,7 @@ function App() {
               />
             </div>
             <div>
-              <h1 className="text-xl md:text-xl font-bold">
+              <h1 className="font-bold">
                 Mrs. Sewell's Financial FREED-om Calculators
               </h1>
             </div>
@@ -65,7 +65,7 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="flex flex-col items-center gap-1 p-2 h-auto text-xs md:text-sm"
+                  className="flex flex-col items-center gap-1 p-2 h-auto"
                 >
                   <Icon size={24} />
                   <span className="text-center leading-tight font-bold">{calc.name}</span>

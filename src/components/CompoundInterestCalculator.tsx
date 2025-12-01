@@ -254,24 +254,24 @@ export function CompoundInterestCalculator() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Results</CardTitle>
+              <CardTitle>Results</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Final Amount:</span>
-                <span className="text-2xl font-semibold currency-blue">
+                <span className="font-semibold currency-blue">
                   {formatCurrency(results.finalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Total Interest Earned:</span>
-                <span className="text-2xl font-semibold currency-green">
+                <span className="font-semibold currency-green">
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Total Deposits:</span>
-                <span className="text-2xl font-semibold currency-orange">
+                <span className="font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
                 </span>
               </div>
@@ -323,12 +323,12 @@ export function CompoundInterestCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
               <strong>Albert Einstein called compound interest "the eighth wonder of the world."</strong> The 
               earlier you start investing, the more time your money has to grow exponentially.
               Even small amounts invested regularly can become substantial wealth over time due to compounding.

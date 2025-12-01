@@ -182,29 +182,29 @@ export function AutoLoanCalculator() {
       <div className="flex flex-col md:flex-row gap-6">
         <Card className="w-full md:w-1/2">
           <CardHeader>
-            <CardTitle className="text-lg">Loan Summary</CardTitle>
+            <CardTitle>Loan Summary</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Monthly Payment</span>
-              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
+              <span className="font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Total Interest</span>
-              <span className="text-2xl font-bold currency-red text-right">{formatCurrencyNoDecimals(results.totalInterest)}</span>
+              <span className="font-bold currency-red text-right">{formatCurrencyNoDecimals(results.totalInterest)}</span>
             </div>
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground text-left">Total Amount Paid</span>
-              <span className="text-2xl font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.totalPaid)}</span>
+              <span className="font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.totalPaid)}</span>
             </div>
           </CardContent>
         </Card>
         <Card className="w-full md:w-1/2">
           <CardHeader>
-            <CardTitle className="text-lg">Understanding Your Auto Loan</CardTitle>
+            <CardTitle>Understanding Your Auto Loan</CardTitle>
           </CardHeader>
           <CardContent>
-              <p className="text-base leading-relaxed">
+              <p className="leading-relaxed">
                 For your {formatCurrencyNoDecimals(toNumber(data?.loanAmount || 0))} auto loan at {toNumber(data?.interestRate || 0)}% interest for {toNumber(data?.loanTerm || 0)} years, 
                 you'll pay <strong>{formatCurrencyNoDecimals(results.monthlyPayment)}</strong> per month.             
                 <br/><br/>
@@ -255,12 +255,12 @@ export function AutoLoanCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
               <strong>Cars are depreciating assets.</strong> Unlike a home that may appreciate, a car loses value when you drive it off the lot. 
               This makes the interest rate and loan term crucial factors if you borrow money to buy a car. 
               A longer loan term means you will have lower monthly payments but pay significantly more in interest. 

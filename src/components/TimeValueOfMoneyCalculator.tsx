@@ -402,7 +402,7 @@ export function TimeValueOfMoneyCalculator() {
       <div className="flex flex-col md:flex-row gap-6">
         <Card className="w-full md:w-1/3">
           <CardHeader>
-            <CardTitle className="text-xl">
+            <CardTitle>
               Result: {(() => {
                 switch (data!.solveFor) {
                   case 'periods': return 'Periods (N)';
@@ -419,7 +419,7 @@ export function TimeValueOfMoneyCalculator() {
             {error ? (
               <div className="text-destructive font-semibold">{error}</div>
             ) : (
-              <div className="text-3xl font-bold currency-blue">
+              <div className="font-bold currency-blue">
                 {formatResult()}
               </div>
             )}
@@ -427,7 +427,7 @@ export function TimeValueOfMoneyCalculator() {
         </Card>
         <Card className="w-full md:w-2/3">
           <CardContent>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2">
               <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p><br />
               <p><strong>Investment Example:</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1">
@@ -448,7 +448,7 @@ export function TimeValueOfMoneyCalculator() {
       {chartData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Growth Visualization Over Time</CardTitle>
+            <CardTitle>Growth Visualization Over Time</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -514,10 +514,10 @@ export function TimeValueOfMoneyCalculator() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Understanding the Time Value of Money</CardTitle>
+            <CardTitle>Understanding the Time Value of Money</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed">
+            <p className="leading-relaxed">
               The time value of money means a dollar today is worth more than a dollar in the future 
               because it can grow through interest or investment. This concept shows that the earlier 
               you start saving, the less you need to set aside to reach your goals. It helps you 
@@ -532,12 +532,12 @@ export function TimeValueOfMoneyCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
             <strong>Time is your most valuable financial asset.</strong> The time value of money is the foundation of all personal finance decisions. 
             Whether saving for retirement, a house, or any major purchase, understanding that money grows over time can motivate you to make smarter choices. 
             It explains why paying off high-interest debt quickly is crucial and why starting to save early is so powerful. 

@@ -306,11 +306,11 @@ export function CreditCardCalculator() {
       {/* Results Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Payoff Summary</CardTitle>
+          <CardTitle>Payoff Summary</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
+            <div className="font-bold currency-blue">
               {results.monthsToPayoff} months
             </div>
             <div className="text-sm text-muted-foreground">
@@ -318,7 +318,7 @@ export function CreditCardCalculator() {
             </div>
           </div>{" "}
           <div className="text-center">
-            <div className="text-2xl font-bold currency-red">
+            <div className="font-bold currency-red">
               {formatCurrencyWholeDollars(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">
@@ -326,7 +326,7 @@ export function CreditCardCalculator() {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
+            <div className="font-bold currency-blue">
               {formatCurrencyWholeDollars(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">
@@ -504,12 +504,12 @@ export function CreditCardCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
             <strong>
               Credit cards can be wealth destroyers.
             </strong>{" "}

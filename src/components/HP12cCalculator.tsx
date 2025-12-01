@@ -30,12 +30,12 @@ export function HP12cCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 About the HP-12C
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
             <strong>The HP-12C has been the industry standard since 1981.</strong> Its Reverse Polish Notation (RPN) 
             system allows for efficient calculations without parentheses. Many finance professionals prefer it because 
             it matches the way financial problems are naturally solved—step by step. Learning RPN develops stronger 

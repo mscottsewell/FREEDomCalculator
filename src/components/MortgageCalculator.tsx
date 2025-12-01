@@ -232,35 +232,35 @@ export function MortgageCalculator() {
       {/* Results Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Mortgage Summary</CardTitle>
+          <CardTitle>Mortgage Summary</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold currency-orange">
+            <div className="font-bold currency-orange">
               {formatCurrencyNoDecimals(results.downPaymentAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Down Payment</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
+            <div className="font-bold currency-blue">
               {formatCurrencyNoDecimals(results.calculatedLoanAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Loan Amount</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
+            <div className="font-bold currency-blue">
               {formatCurrencyNoDecimals(results.monthlyPayment)}
             </div>
             <div className="text-sm text-muted-foreground">Monthly Payment</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold currency-red">
+            <div className="font-bold currency-red">
               {formatCurrencyNoDecimals(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">Total Interest</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold currency-blue">
+            <div className="font-bold currency-blue">
               {formatCurrencyNoDecimals(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">Total Paid</div>
@@ -271,7 +271,7 @@ export function MortgageCalculator() {
       {/* Understanding Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Understanding Your Mortgage</CardTitle>
+          <CardTitle>Understanding Your Mortgage</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="leading-relaxed">
@@ -359,12 +359,12 @@ export function MortgageCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
               <strong>Your home can be your best investment or your biggest financial mistake.</strong> A mortgage 
               gives you a place to live, providing shelter and stability. It can also potentially help you build wealth 
               over time through real estate appreciation. However, the total interest paid over 30 years often equals 

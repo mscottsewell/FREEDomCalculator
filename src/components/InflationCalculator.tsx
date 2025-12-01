@@ -146,31 +146,31 @@ export function InflationCalculator() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Results</CardTitle>
+            <CardTitle>Results</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Future Nominal Value:</span>
-              <span className="text-2xl font-semibold currency-blue">
+              <span className="font-semibold currency-blue">
                 {formatCurrency(results.futureNominal)}
               </span>
             </div>
             <hr className="border-t-2 border-gray-400 my-4" />
             <div className="flex justify-between">
               <span>Real Purchasing Power:</span>
-              <span className="text-2xl font-semibold currency-green">
+              <span className="font-semibold currency-green">
                 {formatCurrency(results.realPurchasingPower)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Purchasing Power Lost:</span>
-              <span className="text-2xl font-semibold currency-red">
+              <span className="font-semibold currency-red">
                 {formatCurrency(results.powerLost)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Percentage Lost:</span>
-              <span className="text-2xl font-semibold currency-red">
+              <span className="font-semibold currency-red">
                 {results.percentageLost.toFixed(1)}%
               </span>
             </div>
@@ -179,10 +179,10 @@ export function InflationCalculator() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">What This Means</CardTitle>
+            <CardTitle>What This Means</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg leading-relaxed">
+            <p className="leading-relaxed">
               With inflation at {data.inflationRate}% per year, in {data.years} years you would 
               need {formatCurrency(results.futureNominal)} to buy
               what {formatCurrency(toNumber(data.currentAmount))} can buy today.
@@ -228,12 +228,12 @@ export function InflationCalculator() {
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             💡 Key Lesson
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-relaxed font-medium">
+          <p className="leading-relaxed font-medium">
                 <strong>Inflation is the silent wealth killer.</strong> Even at modest rates like 3% annually, inflation significantly erodes your purchasing power over time. 
                 This is why keeping money in low-yield savings accounts or "under the mattress" actually causes you to lose money in real terms. 
                 To preserve and grow wealth, your investments must earn returns that exceed the inflation rate. Understanding inflation's impact 
