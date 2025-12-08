@@ -114,17 +114,6 @@ export function AutoLoanCalculator() {
   }
 
 
-  // Estimate depreciation: 20% first year, 15% each subsequent year
-  let estimatedValue = toNumber(data?.loanAmount || 0);
-  if (toNumber(data?.loanTerm || 0) > 0) {
-    estimatedValue *= 0.8; // 20% loss first year
-    if (toNumber(data?.loanTerm || 0) > 1) {
-      estimatedValue *= Math.pow(0.85, toNumber(data?.loanTerm || 0) - 1); // 15% loss each subsequent year
-    }
-  }
-  // Round down to nearest five hundred
-  estimatedValue = Math.floor(estimatedValue / 500) * 500;
-
   return (
     <div className="space-y-6">
       {/* Input Section */}
