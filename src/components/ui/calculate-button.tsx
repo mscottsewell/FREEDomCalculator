@@ -1,4 +1,4 @@
-import React from 'react';
+import { Lightning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 
 interface CalculateButtonProps {
@@ -14,9 +14,11 @@ export function CalculateButton({
     <Button 
       onClick={onCalculate} 
       disabled={disabled}
-      className="w-full"
+      variant="gradient"
+      className="w-full h-12 font-bold text-base gap-2"
       size="lg"
     >
+      <Lightning size={20} weight="fill" />
       Calculate
     </Button>
   );

@@ -1,0 +1,15 @@
+Build a simplified version of the FREEDom Calculator as a React + TypeScript + Vite app.
+
+Requirements:
+- Use a tabbed layout with 3 calculators: Inflation, Compound Interest, and Auto Loan.
+- Each calculator should have: input fields, a Calculate button, validation messages, and a results card.
+- Use shared helpers for number parsing/formatting (currency and comma-separated input).
+- Persist calculator inputs in localStorage.
+- Keep styling clean and responsive with Tailwind CSS.
+- Use simple chart visualizations (Recharts) where useful, but keep implementation lightweight.
+- Include a top app header and keep components modular (`src/components`, `src/lib`, `src/hooks`).
+
+Deliverables:
+- Working source code
+- `npm install` ready dependencies
+- Scripts for `dev`, `build`, and `typecheck`

@@ -30,6 +30,7 @@ import {
 import { CalculateButton } from "@/components/ui/calculate-button";
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from "@/lib/calculator-validation";
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters';
+import { CHART_COLORS } from '@/lib/chart-colors';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreditCardData {
@@ -310,7 +311,7 @@ export function CreditCardCalculator() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="font-bold currency-blue">
+            <div className="font-semibold currency-blue">
               {results.monthsToPayoff} months
             </div>
             <div className="text-sm text-muted-foreground">
@@ -318,7 +319,7 @@ export function CreditCardCalculator() {
             </div>
           </div>{" "}
           <div className="text-center">
-            <div className="font-bold currency-red">
+            <div className="font-semibold currency-red">
               {formatCurrencyWholeDollars(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">
@@ -326,7 +327,7 @@ export function CreditCardCalculator() {
             </div>
           </div>
           <div className="text-center">
-            <div className="font-bold currency-blue">
+            <div className="font-semibold currency-blue">
               {formatCurrencyWholeDollars(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">
@@ -365,16 +366,16 @@ export function CreditCardCalculator() {
                   type="monotone"
                   dataKey="principal"
                   stackId="1"
-                  stroke="oklch(0.55 0.15 245)"
-                  fill="oklch(0.55 0.15 245)"
+                  stroke={CHART_COLORS.blue}
+                  fill={CHART_COLORS.blue}
                   fillOpacity={0.8}
                 />
                 <Area
                   type="monotone"
                   dataKey="interest"
                   stackId="1"
-                  stroke="oklch(0.60 0.20 15)"
-                  fill="oklch(0.60 0.20 15)"
+                  stroke={CHART_COLORS.red}
+                  fill={CHART_COLORS.red}
                   fillOpacity={0.8}
                 />
               </AreaChart>
@@ -445,7 +446,7 @@ export function CreditCardCalculator() {
             <CardTitle>Monthly Payment Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto max-h-96">
+            <div className="overflow-x-auto max-h-96 pr-2">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -8,6 +8,7 @@ import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CHART_COLORS } from '@/lib/chart-colors'
 
 interface CompoundData {
   principal: NumericOrEmpty
@@ -240,7 +241,7 @@ export function CompoundInterestCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col gap-3">
         <CalculateButton onCalculate={calculate} />
         {error && (
           <Alert variant="destructive" className="w-full">
@@ -256,21 +257,21 @@ export function CompoundInterestCalculator() {
             <CardHeader>
               <CardTitle>Results</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Final Amount:</span>
+            <CardContent className="divide-y divide-border/40">
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Final Amount:</span>
                 <span className="font-semibold currency-blue">
                   {formatCurrency(results.finalAmount)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Total Interest Earned:</span>
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Total Interest Earned:</span>
                 <span className="font-semibold currency-green">
                   {formatCurrency(results.totalInterest)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Total Deposits:</span>
+              <div className="flex justify-between py-3">
+                <span className="text-muted-foreground">Total Deposits:</span>
                 <span className="font-semibold currency-orange">
                   {formatCurrency(results.totalDeposits)}
                 </span>
@@ -300,16 +301,16 @@ export function CompoundInterestCalculator() {
                       type="monotone" 
                       dataKey="principal" 
                       stackId="1"
-                      stroke="oklch(0.70 0.15 50)" 
-                      fill="oklch(0.70 0.15 50)"
+                      stroke={CHART_COLORS.amber} 
+                      fill={CHART_COLORS.amber}
                       name="Principal"
                     />
                     <Area 
                       type="monotone" 
                       dataKey="interest" 
                       stackId="1"
-                      stroke="oklch(0.65 0.18 142)" 
-                      fill="oklch(0.65 0.18 142)"
+                      stroke={CHART_COLORS.emerald} 
+                      fill={CHART_COLORS.emerald}
                       name="Interest"
                     />
                   </AreaChart>

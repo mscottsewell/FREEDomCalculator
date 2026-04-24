@@ -34,41 +34,69 @@ function App() {
   const [activeTab, setActiveTab] = useState('inflation')
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center p-1">
-              <img 
-                src={collegeLogo} 
-                alt="FHU College of Business Logo" 
+    <div className="min-h-screen">
+      {/* Header — sticky fintech gradient */}
+      <header className="sticky top-0 z-40 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, oklch(0.20 0.09 162) 0%, oklch(0.18 0.09 278) 100%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+        <div className="container mx-auto px-4 sm:px-6 py-4 relative">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/15 rounded-2xl flex items-center justify-center p-1.5 sm:p-2 border border-white/20 shadow-lg shrink-0">
+              <img
+                src={collegeLogo}
+                alt="FHU College of Business Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <div>
-              <h1 className="font-bold">
-                Mrs. Sewell's Financial FREED-om Calculators
+            <div className="flex-1 min-w-0">
+              <h1
+                className="text-lg sm:text-2xl font-bold tracking-tight leading-tight"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #ffffff 30%, oklch(0.88 0.15 162))',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                }}
+              >
+                Financial FREED-om Calculators
               </h1>
+              <p className="text-white/50 text-xs sm:text-sm mt-0.5 truncate">
+                Master your money. Build your future. 💸
+              </p>
             </div>
+            <span className="hidden sm:block text-white/30 text-xs shrink-0">
+              by Mrs. Sewell
+            </span>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-8 py-4">
+      <div className="container mx-auto px-4 sm:px-8 py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1 h-auto p-1">
+          <TabsList className="flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start">
             {calculators.map((calc) => {
               const Icon = calc.icon
+              const isActive = activeTab === calc.id
               return (
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="flex flex-col items-center gap-1 p-2 h-auto"
+                  className="flex flex-col items-center gap-1.5 p-3 h-auto shrink-0 min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
-                  <Icon size={24} />
-                  <span className="text-center leading-tight font-bold">{calc.name}</span>
+                  <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
+                  <span className="text-xs text-center leading-tight font-semibold">{calc.name}</span>
                 </TabsTrigger>
               )
             })}
@@ -77,20 +105,22 @@ function App() {
           {calculators.map((calc) => {
             const Component = calc.component
             return (
-              <TabsContent key={calc.id} value={calc.id} className="mt-3">
+              <TabsContent key={calc.id} value={calc.id} className="mt-4">
                 {calc.id === 'hp12c' ? (
                   <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                     <Component />
                   </Suspense>
                 ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <calc.icon size={24} />
+                  <Card className="rounded-2xl border-border/60">
+                    <CardHeader className="border-b border-border/40 pb-4">
+                      <CardTitle className="flex items-center gap-2 text-foreground">
+                        <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                          <calc.icon size={18} weight="fill" />
+                        </span>
                         {calc.name} Calculator
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-5">
                       <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                         <Component />
                       </Suspense>

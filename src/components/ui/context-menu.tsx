@@ -1,5 +1,3 @@
-"use client"
-
 import { ComponentProps } from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import CheckIcon from "lucide-react/dist/esm/icons/check";

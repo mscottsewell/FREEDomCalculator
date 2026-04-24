@@ -6,7 +6,6 @@ import App from './App'
 import { ErrorFallback } from './ErrorFallback'
 
 import "./main.css"
-import "./styles/theme.css"
 import "./index.css"
 
 createRoot(document.getElementById('root')!).render(

@@ -234,33 +234,33 @@ export function MortgageCalculator() {
         <CardHeader>
           <CardTitle>Mortgage Summary</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="text-center">
-            <div className="font-bold currency-orange">
+            <div className="font-semibold currency-orange">
               {formatCurrencyNoDecimals(results.downPaymentAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Down Payment</div>
           </div>
           <div className="text-center">
-            <div className="font-bold currency-blue">
+            <div className="font-semibold currency-blue">
               {formatCurrencyNoDecimals(results.calculatedLoanAmount)}
             </div>
             <div className="text-sm text-muted-foreground">Loan Amount</div>
           </div>
           <div className="text-center">
-            <div className="font-bold currency-blue">
+            <div className="font-semibold currency-blue">
               {formatCurrencyNoDecimals(results.monthlyPayment)}
             </div>
             <div className="text-sm text-muted-foreground">Monthly Payment</div>
           </div>
           <div className="text-center">
-            <div className="font-bold currency-red">
+            <div className="font-semibold currency-red">
               {formatCurrencyNoDecimals(results.totalInterest)}
             </div>
             <div className="text-sm text-muted-foreground">Total Interest</div>
           </div>
           <div className="text-center">
-            <div className="font-bold currency-blue">
+            <div className="font-semibold currency-blue">
               {formatCurrencyNoDecimals(results.totalPaid)}
             </div>
             <div className="text-sm text-muted-foreground">Total Paid</div>

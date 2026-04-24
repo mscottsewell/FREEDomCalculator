@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
+import { CHART_COLORS } from '@/lib/chart-colors'
 
 interface InflationData {
   currentAmount: NumericOrEmpty
@@ -133,7 +134,7 @@ export function InflationCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col gap-3">
         <CalculateButton onCalculate={calculate} />
         {error && (
           <Alert variant="destructive" className="w-full">
@@ -148,28 +149,27 @@ export function InflationCalculator() {
           <CardHeader>
             <CardTitle>Results</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between">
-              <span>Future Nominal Value:</span>
+          <CardContent className="divide-y divide-border/40">
+            <div className="flex justify-between py-3">
+              <span className="text-muted-foreground">Future Nominal Value:</span>
               <span className="font-semibold currency-blue">
                 {formatCurrency(results.futureNominal)}
               </span>
             </div>
-            <hr className="border-t-2 border-gray-400 my-4" />
-            <div className="flex justify-between">
-              <span>Real Purchasing Power:</span>
+            <div className="flex justify-between py-3">
+              <span className="text-muted-foreground">Real Purchasing Power:</span>
               <span className="font-semibold currency-green">
                 {formatCurrency(results.realPurchasingPower)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Purchasing Power Lost:</span>
+            <div className="flex justify-between py-3">
+              <span className="text-muted-foreground">Purchasing Power Lost:</span>
               <span className="font-semibold currency-red">
                 {formatCurrency(results.powerLost)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Percentage Lost:</span>
+            <div className="flex justify-between py-3">
+              <span className="text-muted-foreground">Percentage Lost:</span>
               <span className="font-semibold currency-red">
                 {results.percentageLost.toFixed(1)}%
               </span>
@@ -215,8 +215,8 @@ export function InflationCalculator() {
                 <Area 
                   type="monotone" 
                   dataKey="purchasing_power" 
-                  stroke="oklch(0.60 0.20 15)" 
-                  fill="oklch(0.60 0.20 15)" 
+                  stroke={CHART_COLORS.red} 
+                  fill={CHART_COLORS.red} 
                   fillOpacity={0.6}
                 />
               </AreaChart>

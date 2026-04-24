@@ -173,18 +173,18 @@ export function AutoLoanCalculator() {
           <CardHeader>
             <CardTitle>Loan Summary</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <div className="flex justify-between items-center py-1">
-              <span className="text-muted-foreground text-left">Monthly Payment</span>
-              <span className="font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
+          <CardContent className="divide-y divide-border/40">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-muted-foreground">Monthly Payment</span>
+              <span className="font-semibold currency-blue">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
             </div>
-            <div className="flex justify-between items-center py-1">
-              <span className="text-muted-foreground text-left">Total Interest</span>
-              <span className="font-bold currency-red text-right">{formatCurrencyNoDecimals(results.totalInterest)}</span>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-muted-foreground">Total Interest</span>
+              <span className="font-semibold currency-red">{formatCurrencyNoDecimals(results.totalInterest)}</span>
             </div>
-            <div className="flex justify-between items-center py-1">
-              <span className="text-muted-foreground text-left">Total Amount Paid</span>
-              <span className="font-bold currency-blue text-right">{formatCurrencyNoDecimals(results.totalPaid)}</span>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-muted-foreground">Total Amount Paid</span>
+              <span className="font-semibold currency-blue">{formatCurrencyNoDecimals(results.totalPaid)}</span>
             </div>
           </CardContent>
         </Card>

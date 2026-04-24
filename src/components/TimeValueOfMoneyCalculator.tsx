@@ -7,6 +7,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
+import { CHART_COLORS } from '@/lib/chart-colors'
 
 interface TVMData {
   periods: NumericOrEmpty
@@ -332,7 +333,7 @@ export function TimeValueOfMoneyCalculator() {
             onChange={(e) => updateData('periods', e.target.value === '' ? '' : Number(e.target.value))}
             disabled={isFieldDisabled('periods')}
             placeholder={isFieldDisabled('periods') ? 'Solving for Number of Periods (N)' : ''}
-            className={isFieldDisabled('periods') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
+            className={isFieldDisabled('periods') ? 'input-solving' : ''}
           />
         </div>
 
@@ -347,7 +348,7 @@ export function TimeValueOfMoneyCalculator() {
               onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
               disabled={isFieldDisabled('interestRate')}
               placeholder={isFieldDisabled('interestRate') ? 'Solving For Interest Rate' : ''}
-              className={`${isFieldDisabled('interestRate') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''} pr-8`}
+              className={`${isFieldDisabled('interestRate') ? 'input-solving' : ''} pr-8`}
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm text-muted-foreground">
               %
@@ -364,7 +365,7 @@ export function TimeValueOfMoneyCalculator() {
             onChange={(e) => updateData('presentValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('presentValue')}
             placeholder={isFieldDisabled('presentValue') ? 'Solving For Present Value (PV)' : ''}
-            className={isFieldDisabled('presentValue') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
+            className={isFieldDisabled('presentValue') ? 'input-solving' : ''}
           />
         </div>
 
@@ -377,7 +378,7 @@ export function TimeValueOfMoneyCalculator() {
             onChange={(e) => updateData('payment', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('payment')}
             placeholder={isFieldDisabled('payment') ? 'Solving For Payment (PMT)' : ''}
-            className={isFieldDisabled('payment') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
+            className={isFieldDisabled('payment') ? 'input-solving' : ''}
           />
         </div>
 
@@ -390,7 +391,7 @@ export function TimeValueOfMoneyCalculator() {
             onChange={(e) => updateData('futureValue', parseFormattedNumber(e.target.value))}
             disabled={isFieldDisabled('futureValue')}
             placeholder={isFieldDisabled('futureValue') ? 'Solving For Future Value (FV)' : ''}
-            className={isFieldDisabled('futureValue') ? 'bg-gray-700 text-white placeholder:text-white placeholder:italic' : ''}
+            className={isFieldDisabled('futureValue') ? 'input-solving' : ''}
           />
         </div>
       </div>
@@ -419,7 +420,7 @@ export function TimeValueOfMoneyCalculator() {
             {error ? (
               <div className="text-destructive font-semibold">{error}</div>
             ) : (
-              <div className="font-bold currency-blue">
+              <div className="font-semibold currency-blue">
                 {formatResult()}
               </div>
             )}
@@ -451,9 +452,9 @@ export function TimeValueOfMoneyCalculator() {
             <CardTitle>Growth Visualization Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-80 w-full ml-2">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
+                <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="period" 
@@ -476,11 +477,11 @@ export function TimeValueOfMoneyCalculator() {
                         const total = principal + interest;
                         
                         return (
-                          <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                          <div className="bg-popover p-3 border border-border rounded-lg shadow-lg text-foreground">
                             <p className="font-semibold">{`Period ${label}`}</p>
-                            <p className="text-blue-600">{`Principal: $${principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
-                            <p className="text-green-600">{`Interest Earned: $${interest.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
-                            <p className="font-bold border-t pt-1 mt-1">{`Total: $${total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
+                            <p className="currency-blue">{`Principal: $${principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
+                            <p className="currency-green">{`Interest Earned: $${interest.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
+                            <p className="font-semibold border-t border-border pt-1 mt-1">{`Total: $${total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
                           </div>
                         );
                       }
@@ -491,8 +492,8 @@ export function TimeValueOfMoneyCalculator() {
                     type="monotone" 
                     dataKey="principal" 
                     stackId="1"
-                    stroke="#2563eb" 
-                    fill="#3b82f6" 
+                    stroke={CHART_COLORS.blue} 
+                    fill={CHART_COLORS.blue} 
                     fillOpacity={0.8}
                     name="principal"
                   />
@@ -500,8 +501,8 @@ export function TimeValueOfMoneyCalculator() {
                     type="monotone" 
                     dataKey="interest" 
                     stackId="1"
-                    stroke="#16a34a" 
-                    fill="#22c55e" 
+                    stroke={CHART_COLORS.emerald} 
+                    fill={CHART_COLORS.emerald}
                     fillOpacity={0.8}
                     name="interest"
                   />
