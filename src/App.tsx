@@ -20,54 +20,51 @@ const AutoLoanCalculator = lazy(() => import('@/components/AutoLoanCalculator').
 const MortgageCalculator = lazy(() => import('@/components/MortgageCalculator').then(m => ({ default: m.MortgageCalculator })))
 const HP12cCalculator = lazy(() => import('@/components/HP12cCalculator').then(m => ({ default: m.HP12cCalculator })))
 
-const calculators = [
-  { id: 'inflation', name: 'Inflation', shortName: 'Inflation', icon: TrendUp, component: InflationCalculator },
-  { id: 'compound', name: 'Compound Interest', shortName: 'Compound', icon: Calculator, component: CompoundInterestCalculator },
-  { id: 'timevalue', name: 'Time Value of Money', shortName: 'TVM', icon: Timer, component: TimeValueOfMoneyCalculator },
-  { id: 'creditcard', name: 'Credit Card', shortName: 'Credit', icon: CreditCard, component: CreditCardCalculator },
-  { id: 'autoloan', name: 'Auto Loan', shortName: 'Auto Loan', icon: Car, component: AutoLoanCalculator },
-  { id: 'mortgage', name: 'Mortgage', shortName: 'Mortgage', icon: House, component: MortgageCalculator },
-  { id: 'hp12c', name: 'HP-12C', shortName: 'HP-12C', icon: Calculator, component: HP12cCalculator }
+type CalculatorConfig = {
+  id: string
+  labels: {
+    short: string
+    full: string
+  }
+  icon: typeof Calculator
+  component: typeof InflationCalculator
+}
+
+const calculators: CalculatorConfig[] = [
+  { id: 'inflation', labels: { short: 'Inflation', full: 'Inflation' }, icon: TrendUp, component: InflationCalculator },
+  { id: 'compound', labels: { short: 'Compound', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
+  { id: 'timevalue', labels: { short: 'TVM', full: 'Time Value of Money' }, icon: Timer, component: TimeValueOfMoneyCalculator },
+  { id: 'creditcard', labels: { short: 'Credit', full: 'Credit Card' }, icon: CreditCard, component: CreditCardCalculator },
+  { id: 'autoloan', labels: { short: 'Auto Loan', full: 'Auto Loan' }, icon: Car, component: AutoLoanCalculator },
+  { id: 'mortgage', labels: { short: 'Mortgage', full: 'Mortgage' }, icon: House, component: MortgageCalculator },
+  { id: 'hp12c', labels: { short: 'HP-12C', full: 'HP-12C' }, icon: Calculator, component: HP12cCalculator }
 ]
 
 function App() {
   const [activeTab, setActiveTab] = useState('inflation')
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="app-shell">
       {/* Header — sticky fintech gradient */}
-      <header className="sticky top-0 z-40 overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(180deg, oklch(0.30 0.15 162) 0%, oklch(0.16 0.09 162) 100%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        />
-        <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-4 md:px-5 lg:px-6 py-4 relative">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
+      <header className="app-header">
+        <div className="app-shell-inner app-header-inner">
+          <div className="app-brand-row">
+            <div className="app-logo-wrap">
               <img
                 src={collegeLogo}
                 alt="FHU Bell Tower"
-                className="w-full h-full object-contain"
+                className="app-logo-image"
               />
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold tracking-tight leading-tight text-white">
+            <div className="app-title-block">
+              <h1 className="app-title">
                 Financial FREED-om Calculators
               </h1>
-              <p className="text-white/75 text-xs sm:text-sm mt-0.5 truncate">
+              <p className="app-subtitle">
                 Master your money. Build your future. <span>💸</span>
               </p>
             </div>
-            <span className="hidden sm:block text-white/90 text-sm shrink-0 font-medium">
+            <span className="app-byline">
               Amy Sewell, CFP®
             </span>
           </div>
@@ -75,9 +72,9 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="mx-auto w-full max-w-[1600px] flex-1 px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-4">
+      <main className="app-shell-inner app-main">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="top-nav-tabs flex xl:grid xl:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
+          <TabsList className="top-nav-tabs">
             {calculators.map((calc) => {
               const Icon = calc.icon
               const isActive = activeTab === calc.id
@@ -85,11 +82,11 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] lg:min-w-[92px] xl:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="top-nav-tab"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="hidden lg:block xl:hidden text-xs text-center leading-tight font-semibold">{calc.shortName}</span>
-                  <span className="hidden xl:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
+                  <span className="top-nav-label-short">{calc.labels.short}</span>
+                  <span className="top-nav-label-full">{calc.labels.full}</span>
                 </TabsTrigger>
               )
             })}
@@ -102,26 +99,20 @@ function App() {
               <TabsContent key={calc.id} value={calc.id} className="mt-0">
                 {calc.id === 'hp12c' ? (
                   <>
-                    <div
-                      className="lg:hidden flex items-center gap-2 px-1 pb-1"
-                      style={{ color: 'oklch(0.24 0.12 162)' }}
-                    >
+                    <div className="mobile-tab-title">
                       <Icon size={18} weight="fill" />
-                      <span className="text-sm font-semibold">{calc.name}</span>
+                      <span>{calc.labels.full}</span>
                     </div>
                     <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                       <Component />
                     </Suspense>
                   </>
                 ) : (
-                  <Card className="rounded-lg border-border/60">
-                    <CardContent className="-mt-2 pt-0 md:mt-0 md:pt-0">
-                      <div
-                        className="lg:hidden flex items-center gap-2 pb-1"
-                        style={{ color: 'oklch(0.24 0.12 162)' }}
-                      >
+                  <Card className="app-tab-card">
+                    <CardContent className="app-tab-card-content">
+                      <div className="mobile-tab-title">
                         <Icon size={18} weight="fill" />
-                        <span className="text-sm font-semibold">{calc.name}</span>
+                        <span>{calc.labels.full}</span>
                       </div>
                       <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                         <Component />
@@ -133,9 +124,9 @@ function App() {
             )
           })}
         </Tabs>
-      </div>
-      <footer className="border-t border-border/50 mt-4">
-        <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-4 md:px-5 lg:px-6 py-3 text-center text-xs text-muted-foreground">
+      </main>
+      <footer className="app-footer">
+        <div className="app-shell-inner app-footer-inner">
           AmyCalc.com - Amy Sewell, &copy;2026
         </div>
       </footer>
