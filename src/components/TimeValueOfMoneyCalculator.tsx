@@ -404,25 +404,53 @@ export function TimeValueOfMoneyCalculator() {
         <Card className="w-full md:w-1/3">
           <CardHeader>
             <CardTitle>
-              Result: {(() => {
+              {(() => {
                 switch (data!.solveFor) {
                   case 'periods': return 'Periods (N)';
                   case 'interestRate': return 'Interest Rate (%)';
                   case 'presentValue': return 'Present Value (PV)';
                   case 'payment': return 'Payment (PMT)';
                   case 'futureValue': return 'Future Value (FV)';
-                  default: return '';
+                  default: return 'Result';
                 }
               })()}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-1">
             {error ? (
               <div className="text-destructive font-semibold">{error}</div>
             ) : (
-              <div className="font-semibold currency-blue">
-                {formatResult()}
-              </div>
+              <>
+                <div className="text-2xl font-semibold pb-2">
+                  {formatResult()}
+                </div>
+                {chartData.length > 0 && (() => {
+                  const last = chartData[chartData.length - 1]
+                  const totalPrincipal = last.principal
+                  const totalInterest = last.interest
+                  const totalFV = totalPrincipal + totalInterest
+                  return (
+                    <div className="divide-y divide-border/40 border-t border-border/40">
+                      <div className="py-2 flex justify-between items-baseline">
+                        <span className="text-xs text-muted-foreground">Total Principal</span>
+                        <span className="font-semibold text-sm" style={{ color: CHART_COLORS.blue }}>
+                          {formatCurrencyLocal(totalPrincipal)}
+                        </span>
+                      </div>
+                      <div className="py-2 flex justify-between items-baseline">
+                        <span className="text-xs text-muted-foreground">Interest Earned</span>
+                        <span className="font-semibold text-sm" style={{ color: CHART_COLORS.emerald }}>
+                          {formatCurrencyLocal(totalInterest)}
+                        </span>
+                      </div>
+                      <div className="py-2 flex justify-between items-baseline">
+                        <span className="text-xs text-muted-foreground">Total Future Value</span>
+                        <span className="font-semibold">{formatCurrencyLocal(totalFV)}</span>
+                      </div>
+                    </div>
+                  )
+                })()}
+              </>
             )}
           </CardContent>
         </Card>
@@ -472,15 +500,15 @@ export function TimeValueOfMoneyCalculator() {
                     labelFormatter={(period) => `Period ${period}`}
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
-                        const principal = payload.find(p => p.dataKey === 'principal')?.value || 0;
-                        const interest = payload.find(p => p.dataKey === 'interest')?.value || 0;
+                        const principal = payload.find(p => p.dataKey === 'principal')?.value as number || 0;
+                        const interest = payload.find(p => p.dataKey === 'interest')?.value as number || 0;
                         const total = principal + interest;
                         
                         return (
                           <div className="bg-popover p-3 border border-border rounded-lg shadow-lg text-foreground">
-                            <p className="font-semibold">{`Period ${label}`}</p>
-                            <p className="currency-blue">{`Principal: $${principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
-                            <p className="currency-green">{`Interest Earned: $${interest.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
+                            <p className="font-semibold mb-1">{`Period ${label}`}</p>
+                            <p style={{ color: CHART_COLORS.blue }}>{`Principal: $${principal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
+                            <p style={{ color: CHART_COLORS.emerald }}>{`Interest Earned: $${interest.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
                             <p className="font-semibold border-t border-border pt-1 mt-1">{`Total: $${total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</p>
                           </div>
                         );
@@ -488,6 +516,7 @@ export function TimeValueOfMoneyCalculator() {
                       return null;
                     }}
                   />
+                  <Legend />
                   <Area 
                     type="monotone" 
                     dataKey="principal" 
@@ -495,7 +524,7 @@ export function TimeValueOfMoneyCalculator() {
                     stroke={CHART_COLORS.blue} 
                     fill={CHART_COLORS.blue} 
                     fillOpacity={0.8}
-                    name="principal"
+                    name="Principal"
                   />
                   <Area 
                     type="monotone" 
@@ -504,7 +533,7 @@ export function TimeValueOfMoneyCalculator() {
                     stroke={CHART_COLORS.emerald} 
                     fill={CHART_COLORS.emerald}
                     fillOpacity={0.8}
-                    name="interest"
+                    name="Interest Earned"
                   />
                 </AreaChart>
               </ResponsiveContainer>
