@@ -75,8 +75,8 @@ function App() {
                 Master your money. Build your future. <span className="opacity-100 text-white/80">💸</span>
               </p>
             </div>
-            <span className="hidden sm:block text-white/70 text-xs shrink-0">
-              by Mrs. Sewell
+            <span className="hidden sm:block text-white/90 text-sm shrink-0 font-medium">
+              Amy Sewell, CFP®
             </span>
           </div>
         </div>
