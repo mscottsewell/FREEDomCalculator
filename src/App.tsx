@@ -75,7 +75,7 @@ function App() {
                 Master your money. Build your future. 💸
               </p>
             </div>
-            <span className="hidden sm:block text-white/30 text-xs shrink-0">
+            <span className="hidden sm:block text-white/70 text-xs shrink-0">
               by Mrs. Sewell
             </span>
           </div>
