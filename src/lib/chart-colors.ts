@@ -4,9 +4,9 @@
  * props stable across renders and avoids DOM reads on every paint.
  */
 export const CHART_COLORS = {
-  emerald: 'oklch(0.64 0.18 162)',   // chart-1 — growth, positive
-  blue:    'oklch(0.60 0.20 240)',   // chart-2 — neutral / informational
-  amber:   'oklch(0.78 0.18 78)',    // chart-3 — caution / principal
-  red:     'oklch(0.57 0.22 27)',    // chart-4 — loss / interest cost
-  violet:  'oklch(0.52 0.16 20)',    // chart-5 — maroon
+  emerald: 'oklch(0.72 0.13 72)',    // chart-1 — gold, growth/primary
+  blue:    'oklch(0.52 0.16 20)',    // chart-2 — maroon, brand
+  amber:   'oklch(0.70 0.17 55)',    // chart-3 — amber, principal
+  red:     'oklch(0.57 0.22 27)',    // chart-4 — red, loss/cost
+  violet:  'oklch(0.58 0.14 185)',   // chart-5 — teal, supplemental
 } as const;

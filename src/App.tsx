@@ -63,7 +63,7 @@ function App() {
               <h1
                 className="text-lg sm:text-2xl font-bold tracking-tight leading-tight"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, #ffffff 30%, oklch(0.88 0.15 162))',
+                  backgroundImage: 'linear-gradient(90deg, #ffffff 30%, oklch(0.88 0.12 68))',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   color: 'transparent',

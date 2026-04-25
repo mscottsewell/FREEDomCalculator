@@ -12,39 +12,39 @@
 }
 
 :root {
-  /* Gen Z Fintech Theme — vibrant, modern, college-friendly */
-  --background: oklch(0.974 0.006 254);     /* cool light blue-gray */
-  --foreground: oklch(0.13 0.018 255);      /* near-black */
+  /* FHU Heritage Theme — collegiate maroon & gold on warm ivory */
+  --background: oklch(0.975 0.008 65);      /* warm ivory */
+  --foreground: oklch(0.14 0.015 35);       /* warm near-black */
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.018 255);
+  --card-foreground: oklch(0.14 0.015 35);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.018 255);
+  --popover-foreground: oklch(0.14 0.015 35);
 
-  --primary: oklch(0.64 0.18 162);          /* vibrant emerald — money & growth */
+  --primary: oklch(0.44 0.14 20);           /* FHU maroon */
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.95 0.010 255);       /* cool light gray */
-  --secondary-foreground: oklch(0.25 0.018 255);
+  --secondary: oklch(0.94 0.012 55);        /* warm light tan */
+  --secondary-foreground: oklch(0.25 0.015 35);
 
-  --accent: oklch(0.40 0.13 20);            /* FHU maroon */
-  --accent-foreground: oklch(0.99 0 0);
+  --accent: oklch(0.62 0.14 68);            /* warm gold */
+  --accent-foreground: oklch(0.12 0.015 35);
 
   --destructive: oklch(0.57 0.22 27);
   --destructive-foreground: oklch(1 0 0);
 
-  --muted: oklch(0.95 0.010 255);
-  --muted-foreground: oklch(0.52 0.015 255);
-  --border: oklch(0.90 0.010 255);
-  --input: oklch(0.94 0.008 255);
-  --ring: oklch(0.64 0.18 162);
+  --muted: oklch(0.94 0.012 55);
+  --muted-foreground: oklch(0.50 0.015 45);
+  --border: oklch(0.87 0.015 55);
+  --input: oklch(0.93 0.010 55);
+  --ring: oklch(0.44 0.14 20);
 
-  /* Fintech chart palette */
-  --chart-1: oklch(0.64 0.18 162);          /* emerald */
-  --chart-2: oklch(0.60 0.20 240);          /* electric blue */
-  --chart-3: oklch(0.78 0.18 78);           /* amber */
+  /* Warm collegiate chart palette */
+  --chart-1: oklch(0.72 0.13 72);           /* gold */
+  --chart-2: oklch(0.52 0.16 20);           /* maroon */
+  --chart-3: oklch(0.70 0.17 55);           /* amber */
   --chart-4: oklch(0.57 0.22 27);           /* red */
-  --chart-5: oklch(0.52 0.16 20);           /* maroon */
+  --chart-5: oklch(0.58 0.14 185);          /* teal */
 
   --radius: 0.875rem;
 }
@@ -84,10 +84,10 @@
   --radius-full: 9999px;
 }
 
-/* Currency color classes — fintech palette */
-.currency-green  { color: oklch(0.58 0.18 162); }  /* emerald */
-.currency-blue   { color: oklch(0.55 0.20 240); }  /* electric blue */
-.currency-orange { color: oklch(0.72 0.18 78);  }  /* amber */
+/* Currency color classes — warm collegiate palette */
+.currency-green  { color: oklch(0.50 0.16 162); }  /* forest green — positive */
+.currency-blue   { color: oklch(0.52 0.14 185); }  /* teal — informational */
+.currency-orange { color: oklch(0.65 0.17 55);  }  /* amber */
 .currency-red    { color: oklch(0.57 0.22 27);  }  /* red */
 
 /* Table styling */
@@ -96,28 +96,28 @@
   font-weight: 600;
 }
 
-/* Gradient CTA button */
+/* Gradient CTA button — maroon to deep maroon */
 .btn-gradient {
-  background: linear-gradient(135deg, oklch(0.64 0.18 162) 0%, oklch(0.52 0.16 20) 100%);
+  background: linear-gradient(135deg, oklch(0.52 0.16 20) 0%, oklch(0.36 0.12 20) 100%);
   border: none;
   transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 .btn-gradient:hover:not(:disabled) {
-  filter: brightness(1.08);
+  filter: brightness(1.10);
 }
 
 /* Subtle dot-grid page background */
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(circle, oklch(0.75 0.015 255 / 0.45) 1px, transparent 1px);
+    radial-gradient(circle, oklch(0.82 0.012 55 / 0.50) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
 /* Polished card shadows */
 [data-slot="card"] {
-  box-shadow: 0 1px 3px oklch(0.13 0.018 255 / 0.06),
-              0 4px 16px oklch(0.13 0.018 255 / 0.06);
+  box-shadow: 0 1px 3px oklch(0.14 0.015 35 / 0.06),
+              0 4px 16px oklch(0.14 0.015 35 / 0.06);
 }
 
 /* Hide scrollbar on tab list (horizontal scroll on mobile) */
