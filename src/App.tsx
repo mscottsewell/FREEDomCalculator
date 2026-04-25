@@ -60,15 +60,7 @@ function App() {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h1
-                className="text-lg sm:text-2xl font-bold tracking-tight leading-tight"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #ffffff 30%, oklch(0.88 0.12 68))',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
+              <h1 className="text-lg sm:text-2xl font-bold tracking-tight leading-tight text-white">
                 Financial FREED-om Calculators
               </h1>
               <p className="text-white/75 text-xs sm:text-sm mt-0.5 truncate">
@@ -93,10 +85,10 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] min-[480px]:min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] md:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="hidden min-[480px]:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
+                  <span className="hidden md:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
                 </TabsTrigger>
               )
             })}
@@ -104,15 +96,26 @@ function App() {
 
           {calculators.map((calc) => {
             const Component = calc.component
+            const Icon = calc.icon
             return (
               <TabsContent key={calc.id} value={calc.id} className="mt-2">
                 {calc.id === 'hp12c' ? (
-                  <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
-                    <Component />
-                  </Suspense>
+                  <>
+                    <div className="md:hidden flex items-center gap-2 px-1 pb-3 text-foreground">
+                      <Icon size={18} weight="fill" />
+                      <span className="text-sm font-semibold">{calc.name}</span>
+                    </div>
+                    <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
+                      <Component />
+                    </Suspense>
+                  </>
                 ) : (
                   <Card className="rounded-lg border-border/60">
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-3 md:pt-0">
+                      <div className="md:hidden flex items-center gap-2 pb-3 text-foreground">
+                        <Icon size={18} weight="fill" />
+                        <span className="text-sm font-semibold">{calc.name}</span>
+                      </div>
                       <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                         <Component />
                       </Suspense>
