@@ -223,9 +223,9 @@ export function CreditCardCalculator() {
   }, {} as Record<number, any>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Input Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label htmlFor="balance">Current Balance ($)</Label>
           <Input
@@ -309,7 +309,7 @@ export function CreditCardCalculator() {
         <CardHeader>
           <CardTitle>Payoff Summary</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-3 sm:grid-cols-3 gap-4">
           <div className="text-center">
             <div className="font-semibold currency-blue">
               {results.monthsToPayoff} months
@@ -343,7 +343,7 @@ export function CreditCardCalculator() {
           <CardTitle>Payment Breakdown Over Time</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-80 w-full ml-2">
+          <div className="h-60 sm:h-80 w-full ml-0 sm:ml-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}

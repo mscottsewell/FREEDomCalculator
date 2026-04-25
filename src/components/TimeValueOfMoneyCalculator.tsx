@@ -305,9 +305,9 @@ export function TimeValueOfMoneyCalculator() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Input Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="solve-for">Solve For</Label>
           <Select value={data!.solveFor} onValueChange={(value) => updateData('solveFor', value)}>
@@ -452,7 +452,7 @@ export function TimeValueOfMoneyCalculator() {
             <CardTitle>Growth Visualization Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80 w-full ml-2">
+            <div className="h-64 sm:h-80 w-full ml-0 sm:ml-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />

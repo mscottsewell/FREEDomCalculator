@@ -115,9 +115,9 @@ export function AutoLoanCalculator() {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Input Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="loan-amount">Loan Amount ($)</Label>
           <Input
@@ -168,7 +168,7 @@ export function AutoLoanCalculator() {
       </div>
 
       {/* Results & Understanding Section Side by Side */}
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col sm:flex-row gap-6">
         <Card className="w-full md:w-1/2">
           <CardHeader>
             <CardTitle>Loan Summary</CardTitle>

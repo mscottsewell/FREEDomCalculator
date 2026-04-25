@@ -83,7 +83,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-8 py-5">
+      <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start">
             {calculators.map((calc) => {
@@ -93,7 +93,7 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="flex flex-col items-center gap-1.5 p-3 h-auto shrink-0 min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="flex flex-col items-center gap-1.5 p-2 sm:p-3 h-auto shrink-0 min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
                   <span className="text-xs text-center leading-tight font-semibold">{calc.name}</span>
