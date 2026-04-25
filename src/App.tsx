@@ -85,7 +85,7 @@ function App() {
       {/* Main Content */}
       <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start">
+          <TabsList className="flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
             {calculators.map((calc) => {
               const Icon = calc.icon
               const isActive = activeTab === calc.id
@@ -93,10 +93,10 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="flex flex-col items-center gap-1.5 p-2 sm:p-3 h-auto shrink-0 min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] min-[480px]:min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-xs text-center leading-tight font-semibold">{calc.name}</span>
+                  <span className="hidden min-[480px]:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
                 </TabsTrigger>
               )
             })}
@@ -105,14 +105,14 @@ function App() {
           {calculators.map((calc) => {
             const Component = calc.component
             return (
-              <TabsContent key={calc.id} value={calc.id} className="mt-4">
+              <TabsContent key={calc.id} value={calc.id} className="mt-2">
                 {calc.id === 'hp12c' ? (
                   <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                     <Component />
                   </Suspense>
                 ) : (
-                  <Card className="rounded-2xl border-border/60">
-                    <CardContent className="pt-5">
+                  <Card className="rounded-lg border-border/60">
+                    <CardContent className="pt-0">
                       <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                         <Component />
                       </Suspense>
