@@ -383,7 +383,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   padding-inline: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.125rem;
   color: oklch(0.24 0.12 162);
   font-size: 0.875rem;
   font-weight: 600;
@@ -392,10 +392,11 @@ body {
 .app-tab-card {
   border-color: color-mix(in oklch, var(--border) 60%, transparent);
   border-radius: 0.5rem;
+  padding-top: 0.375rem;
 }
 
 .app-tab-card-content {
-  margin-top: -0.5rem;
+  margin-top: 0;
   padding-top: 0;
 }
 
