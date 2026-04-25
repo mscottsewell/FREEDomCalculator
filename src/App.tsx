@@ -34,7 +34,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('inflation')
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {/* Header — sticky fintech gradient */}
       <header className="sticky top-0 z-40 overflow-hidden">
         <div
@@ -75,7 +75,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
+      <div className="container mx-auto w-full flex-1 px-3 sm:px-6 py-3 sm:py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="top-nav-tabs flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
             {calculators.map((calc) => {
@@ -133,6 +133,11 @@ function App() {
           })}
         </Tabs>
       </div>
+      <footer className="border-t border-border/50 mt-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 text-center text-xs text-muted-foreground">
+          AmyCalc.com - Amy Sewell, &copy;2026
+        </div>
+      </footer>
     </div>
   )
 }
