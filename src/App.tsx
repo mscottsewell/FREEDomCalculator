@@ -21,13 +21,13 @@ const MortgageCalculator = lazy(() => import('@/components/MortgageCalculator').
 const HP12cCalculator = lazy(() => import('@/components/HP12cCalculator').then(m => ({ default: m.HP12cCalculator })))
 
 const calculators = [
-  { id: 'inflation', name: 'Inflation', icon: TrendUp, component: InflationCalculator },
-  { id: 'compound', name: 'Compound Interest', icon: Calculator, component: CompoundInterestCalculator },
-  { id: 'timevalue', name: 'Time Value of Money', icon: Timer, component: TimeValueOfMoneyCalculator },
-  { id: 'creditcard', name: 'Credit Card', icon: CreditCard, component: CreditCardCalculator },
-  { id: 'autoloan', name: 'Auto Loan', icon: Car, component: AutoLoanCalculator },
-  { id: 'mortgage', name: 'Mortgage', icon: House, component: MortgageCalculator },
-  { id: 'hp12c', name: 'HP-12C', icon: Calculator, component: HP12cCalculator }
+  { id: 'inflation', name: 'Inflation', shortName: 'Inflation', icon: TrendUp, component: InflationCalculator },
+  { id: 'compound', name: 'Compound Interest', shortName: 'Compound', icon: Calculator, component: CompoundInterestCalculator },
+  { id: 'timevalue', name: 'Time Value of Money', shortName: 'TVM', icon: Timer, component: TimeValueOfMoneyCalculator },
+  { id: 'creditcard', name: 'Credit Card', shortName: 'Credit', icon: CreditCard, component: CreditCardCalculator },
+  { id: 'autoloan', name: 'Auto Loan', shortName: 'Auto Loan', icon: Car, component: AutoLoanCalculator },
+  { id: 'mortgage', name: 'Mortgage', shortName: 'Mortgage', icon: House, component: MortgageCalculator },
+  { id: 'hp12c', name: 'HP-12C', shortName: 'HP-12C', icon: Calculator, component: HP12cCalculator }
 ]
 
 function App() {
@@ -50,7 +50,7 @@ function App() {
             backgroundSize: '20px 20px',
           }}
         />
-        <div className="container mx-auto px-4 sm:px-6 py-4 relative">
+        <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-4 md:px-5 lg:px-6 py-4 relative">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <img
@@ -75,9 +75,9 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto w-full flex-1 px-3 sm:px-6 py-3 sm:py-5">
+      <div className="mx-auto w-full max-w-[1600px] flex-1 px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="top-nav-tabs flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
+          <TabsList className="top-nav-tabs flex xl:grid xl:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
             {calculators.map((calc) => {
               const Icon = calc.icon
               const isActive = activeTab === calc.id
@@ -85,10 +85,11 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] md:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] lg:min-w-[92px] xl:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="hidden md:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
+                  <span className="hidden lg:block xl:hidden text-xs text-center leading-tight font-semibold">{calc.shortName}</span>
+                  <span className="hidden xl:block text-xs text-center leading-tight font-semibold">{calc.name}</span>
                 </TabsTrigger>
               )
             })}
@@ -102,7 +103,7 @@ function App() {
                 {calc.id === 'hp12c' ? (
                   <>
                     <div
-                      className="md:hidden flex items-center gap-2 px-1 pb-1"
+                      className="lg:hidden flex items-center gap-2 px-1 pb-1"
                       style={{ color: 'oklch(0.24 0.12 162)' }}
                     >
                       <Icon size={18} weight="fill" />
@@ -116,7 +117,7 @@ function App() {
                   <Card className="rounded-lg border-border/60">
                     <CardContent className="-mt-2 pt-0 md:mt-0 md:pt-0">
                       <div
-                        className="md:hidden flex items-center gap-2 pb-1"
+                        className="lg:hidden flex items-center gap-2 pb-1"
                         style={{ color: 'oklch(0.24 0.12 162)' }}
                       >
                         <Icon size={18} weight="fill" />
@@ -134,7 +135,7 @@ function App() {
         </Tabs>
       </div>
       <footer className="border-t border-border/50 mt-4">
-        <div className="container mx-auto px-4 sm:px-6 py-3 text-center text-xs text-muted-foreground">
+        <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-4 md:px-5 lg:px-6 py-3 text-center text-xs text-muted-foreground">
           AmyCalc.com - Amy Sewell, &copy;2026
         </div>
       </footer>
