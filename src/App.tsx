@@ -40,7 +40,7 @@ function App() {
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, oklch(0.20 0.09 162) 0%, oklch(0.20 0.08 20) 100%)',
+            background: 'linear-gradient(180deg, oklch(0.30 0.15 162) 0%, oklch(0.16 0.09 162) 100%)',
           }}
         />
         <div
