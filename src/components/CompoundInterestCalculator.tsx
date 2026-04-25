@@ -301,8 +301,8 @@ export function CompoundInterestCalculator() {
                       type="monotone" 
                       dataKey="principal" 
                       stackId="1"
-                      stroke={CHART_COLORS.amber} 
-                      fill={CHART_COLORS.amber}
+                      stroke={CHART_COLORS.blue} 
+                      fill={CHART_COLORS.blue}
                       name="Principal"
                     />
                     <Area 
