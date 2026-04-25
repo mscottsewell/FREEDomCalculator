@@ -98,10 +98,13 @@ function App() {
             const Component = calc.component
             const Icon = calc.icon
             return (
-              <TabsContent key={calc.id} value={calc.id} className="mt-2">
+              <TabsContent key={calc.id} value={calc.id} className="mt-1">
                 {calc.id === 'hp12c' ? (
                   <>
-                    <div className="md:hidden flex items-center gap-2 px-1 pb-3 text-foreground">
+                    <div
+                      className="md:hidden flex items-center gap-2 px-1 pb-2"
+                      style={{ color: 'oklch(0.24 0.12 162)' }}
+                    >
                       <Icon size={18} weight="fill" />
                       <span className="text-sm font-semibold">{calc.name}</span>
                     </div>
@@ -111,8 +114,11 @@ function App() {
                   </>
                 ) : (
                   <Card className="rounded-lg border-border/60">
-                    <CardContent className="pt-3 md:pt-0">
-                      <div className="md:hidden flex items-center gap-2 pb-3 text-foreground">
+                    <CardContent className="pt-1 md:pt-0">
+                      <div
+                        className="md:hidden flex items-center gap-2 pb-2"
+                        style={{ color: 'oklch(0.24 0.12 162)' }}
+                      >
                         <Icon size={18} weight="fill" />
                         <span className="text-sm font-semibold">{calc.name}</span>
                       </div>
