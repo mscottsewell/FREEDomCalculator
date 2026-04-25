@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { 
   Calculator, 
   TrendUp, 
@@ -112,14 +112,6 @@ function App() {
                   </Suspense>
                 ) : (
                   <Card className="rounded-2xl border-border/60">
-                    <CardHeader className="border-b border-border/40 pb-4">
-                      <CardTitle className="flex items-center gap-2 text-foreground">
-                        <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                          <calc.icon size={18} weight="fill" />
-                        </span>
-                        {calc.name} Calculator
-                      </CardTitle>
-                    </CardHeader>
                     <CardContent className="pt-5">
                       <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
                         <Component />
