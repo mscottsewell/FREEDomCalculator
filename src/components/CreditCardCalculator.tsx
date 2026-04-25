@@ -57,6 +57,22 @@ interface ChartDataPoint {
   interest: number;
 }
 
+/** Returns the number of months to pay off a balance using interest + 1% method. */
+function computeMinimumPaymentMonths(balance: number, apr: number, minimumFloor: number): number {
+  const monthlyRate = apr / 100 / 12;
+  let bal = balance;
+  let months = 0;
+  while (bal > 0.01 && months < 600) {
+    months++;
+    const interest = bal * monthlyRate;
+    const payment = Math.max(minimumFloor, interest + bal * 0.01);
+    if (payment <= interest + 0.01) return 600;
+    bal = Math.max(0, bal - (payment - interest));
+    if (bal <= 0.01) break;
+  }
+  return months;
+}
+
 export function CreditCardCalculator() {
   const [data, setData] = useLocalStorage<CreditCardData>("creditcard-calculator", {
     balance: 5000,
@@ -74,6 +90,7 @@ export function CreditCardCalculator() {
 
   const [schedule, setSchedule] = useState<PaymentSchedule[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [axisMonths, setAxisMonths] = useState(0);
   const [error, setError] = useState('');
 
   const formatCurrencyWholeDollars = (amount: number): string => formatCurrency(Math.round(amount));
@@ -127,6 +144,7 @@ export function CreditCardCalculator() {
         setResults({ monthsToPayoff: 0, totalInterest: 0, totalPaid: 0 })
         setSchedule([])
         setChartData([])
+        setAxisMonths(0)
         return
       }
 
@@ -163,8 +181,19 @@ export function CreditCardCalculator() {
       totalPaid: balance + totalInterest,
     });
 
+    // X-axis always spans the minimum-payment baseline (or the actual run if longer)
+    const baseline = computeMinimumPaymentMonths(balance, apr, toNumber(data!.minimumPayment));
+    const totalAxisMonths = Math.max(baseline, month);
+    setAxisMonths(totalAxisMonths);
+
+    // Pad chart data with zeros so the X-axis fills the full baseline length
+    const paddedChartPoints = [...chartPoints];
+    while (paddedChartPoints.length < totalAxisMonths) {
+      paddedChartPoints.push({ month: paddedChartPoints.length + 1, principal: 0, interest: 0 });
+    }
+
     setSchedule(paymentHistory);
-    setChartData(chartPoints);
+    setChartData(paddedChartPoints);
   };
 
   const validateInputs = (): string | null => {
@@ -351,7 +380,14 @@ export function CreditCardCalculator() {
                 margin={{ left: 20, right: 5, top: 5, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" fontSize={12} />
+                <XAxis
+                  dataKey="month"
+                  type="number"
+                  domain={axisMonths > 0 ? [1, axisMonths] : ['auto', 'auto']}
+                  allowDecimals={false}
+                  interval="preserveStartEnd"
+                  fontSize={12}
+                />
                 <YAxis
                   tickFormatter={(value) => formatCurrency(value)}
                   fontSize={12}
@@ -365,22 +401,22 @@ export function CreditCardCalculator() {
                 />
                 <Legend fontSize={12} />
                 <Area
-                  type="monotone"
+                  type="linear"
+                  dataKey="interest"
+                  stackId="1"
+                  stroke="oklch(0.58 0.26 25)"
+                  fill="oklch(0.58 0.26 25)"
+                  fillOpacity={0.85}
+                  name="Interest"
+                />
+                <Area
+                  type="linear"
                   dataKey="principal"
                   stackId="1"
                   stroke={CHART_COLORS.emerald}
                   fill={CHART_COLORS.emerald}
                   fillOpacity={0.8}
                   name="Principal"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="interest"
-                  stackId="1"
-                  stroke={CHART_COLORS.red}
-                  fill={CHART_COLORS.red}
-                  fillOpacity={0.8}
-                  name="Interest"
                 />
               </AreaChart>
             </ResponsiveContainer>
