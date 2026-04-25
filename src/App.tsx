@@ -32,7 +32,7 @@ type CalculatorConfig = {
 
 const calculators: CalculatorConfig[] = [
   { id: 'inflation', labels: { short: 'Inflation', full: 'Inflation' }, icon: TrendUp, component: InflationCalculator },
-  { id: 'compound', labels: { short: 'Compound', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
+  { id: 'compound', labels: { short: 'Compound Int', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
   { id: 'timevalue', labels: { short: 'TVM', full: 'Time Value of Money' }, icon: Timer, component: TimeValueOfMoneyCalculator },
   { id: 'creditcard', labels: { short: 'Credit', full: 'Credit Card' }, icon: CreditCard, component: CreditCardCalculator },
   { id: 'autoloan', labels: { short: 'Auto Loan', full: 'Auto Loan' }, icon: Car, component: AutoLoanCalculator },
@@ -127,7 +127,7 @@ function App() {
       </main>
       <footer className="app-footer">
         <div className="app-shell-inner app-footer-inner">
-          AmyCalc.com - Amy Sewell, &copy;2026
+          AmyCalc.com - Amy Sewell-CFP®, &copy;2026
         </div>
       </footer>
     </div>

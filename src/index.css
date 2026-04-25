@@ -435,7 +435,7 @@ body {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .top-nav-tab {
     min-width: 92px;
   }
@@ -454,7 +454,7 @@ body {
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1080px) {
   .top-nav-tabs {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
