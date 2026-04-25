@@ -64,7 +64,7 @@ function App() {
                 Financial FREED-om Calculators
               </h1>
               <p className="text-white/75 text-xs sm:text-sm mt-0.5 truncate">
-                Master your money. Build your future. <span className="opacity-100 text-white/80">💸</span>
+                Master your money. Build your future. <span>💸</span>
               </p>
             </div>
             <span className="hidden sm:block text-white/90 text-sm shrink-0 font-medium">
@@ -98,11 +98,11 @@ function App() {
             const Component = calc.component
             const Icon = calc.icon
             return (
-              <TabsContent key={calc.id} value={calc.id} className="mt-1">
+              <TabsContent key={calc.id} value={calc.id} className="mt-0">
                 {calc.id === 'hp12c' ? (
                   <>
                     <div
-                      className="md:hidden flex items-center gap-2 px-1 pb-2"
+                      className="md:hidden flex items-center gap-2 px-1 pb-1"
                       style={{ color: 'oklch(0.24 0.12 162)' }}
                     >
                       <Icon size={18} weight="fill" />
@@ -114,9 +114,9 @@ function App() {
                   </>
                 ) : (
                   <Card className="rounded-lg border-border/60">
-                    <CardContent className="pt-1 md:pt-0">
+                    <CardContent className="-mt-2 pt-0 md:mt-0 md:pt-0">
                       <div
-                        className="md:hidden flex items-center gap-2 pb-2"
+                        className="md:hidden flex items-center gap-2 pb-1"
                         style={{ color: 'oklch(0.24 0.12 162)' }}
                       >
                         <Icon size={18} weight="fill" />
