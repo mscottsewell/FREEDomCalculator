@@ -71,7 +71,7 @@ function App() {
               >
                 Financial FREED-om Calculators
               </h1>
-              <p className="text-white/50 text-xs sm:text-sm mt-0.5 truncate">
+              <p className="text-white/75 text-xs sm:text-sm mt-0.5 truncate">
                 Master your money. Build your future. <span className="opacity-100 text-white/80">💸</span>
               </p>
             </div>
@@ -85,7 +85,7 @@ function App() {
       {/* Main Content */}
       <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
+          <TabsList className="top-nav-tabs flex lg:grid lg:grid-cols-7 gap-1.5 w-full h-auto p-1.5 bg-card border shadow-sm rounded-2xl justify-start overflow-x-auto">
             {calculators.map((calc) => {
               const Icon = calc.icon
               const isActive = activeTab === calc.id
@@ -93,7 +93,7 @@ function App() {
                 <TabsTrigger
                   key={calc.id}
                   value={calc.id}
-                  className="flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] min-[480px]:min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
+                  className="top-nav-tab flex flex-col items-center gap-1 p-2 sm:p-3 h-auto shrink-0 min-w-[44px] min-[480px]:min-w-[72px] sm:min-w-[88px] lg:min-w-0 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-150"
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
                   <span className="hidden min-[480px]:block text-xs text-center leading-tight font-semibold">{calc.name}</span>

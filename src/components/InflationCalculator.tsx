@@ -202,7 +202,7 @@ export function InflationCalculator() {
           <CardTitle>Purchasing Power Over Time</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-60 sm:h-80 w-full ml-2">
+          <div className="h-60 sm:h-80 w-full ml-0 sm:ml-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />

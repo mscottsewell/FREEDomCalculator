@@ -139,6 +139,113 @@ body {
   animation: tab-fade-in 0.18s ease-out both;
 }
 
+/* Top navigation tabs — subtle hover/active motion for a little extra flair */
+.top-nav-tab {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.top-nav-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.18) 0%, transparent 68%);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.top-nav-tab::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--primary) 72%, white);
+  opacity: 0;
+  transform: scaleX(0.45);
+  transform-origin: center;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.top-nav-tab > * {
+  position: relative;
+  z-index: 1;
+}
+
+.top-nav-tab svg,
+.top-nav-tab span {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.top-nav-tab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px oklch(0.14 0.015 35 / 0.08);
+}
+
+.top-nav-tab:hover::before {
+  opacity: 0.55;
+}
+
+.top-nav-tab:hover::after {
+  opacity: 0.65;
+  transform: scaleX(0.82);
+}
+
+.top-nav-tab:hover svg {
+  transform: translateY(-1px) scale(1.04);
+}
+
+.top-nav-tab:hover span {
+  transform: translateY(-0.5px);
+}
+
+.top-nav-tab[data-state="active"] {
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 24px oklch(0.14 0.015 35 / 0.10),
+    0 0 0 1px oklch(1 0 0 / 0.08) inset;
+}
+
+.top-nav-tab[data-state="active"]::before {
+  opacity: 0.28;
+}
+
+.top-nav-tab[data-state="active"]::after {
+  opacity: 1;
+  transform: scaleX(1);
+  background: oklch(0.98 0.01 85);
+}
+
+.top-nav-tab[data-state="active"] svg {
+  transform: translateY(-1px) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav-tab,
+  .top-nav-tab::before,
+  .top-nav-tab::after,
+  .top-nav-tab svg,
+  .top-nav-tab span,
+  [data-slot="tabs-content"][data-state="active"] {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+}
+
 /* Modern uppercase labels */
 [data-slot="label"] {
   font-size: 0.7rem;

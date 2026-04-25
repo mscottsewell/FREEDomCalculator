@@ -339,7 +339,7 @@ export function CreditCardCalculator() {
         <CardHeader>
           <CardTitle>Payoff Summary</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-3 sm:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="text-center">
             <div className="font-semibold currency-blue">
               {results.monthsToPayoff} months
@@ -404,8 +404,8 @@ export function CreditCardCalculator() {
                   type="linear"
                   dataKey="interest"
                   stackId="1"
-                  stroke="oklch(0.58 0.26 25)"
-                  fill="oklch(0.58 0.26 25)"
+                  stroke={CHART_COLORS.red}
+                  fill={CHART_COLORS.red}
                   fillOpacity={0.85}
                   name="Interest"
                 />

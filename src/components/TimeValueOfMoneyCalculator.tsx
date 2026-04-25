@@ -24,6 +24,71 @@ interface ChartDataPoint {
   interest: number
 }
 
+interface ProjectionInputs {
+  periods: number
+  interestRate: number
+  presentValue: number
+  payment: number
+}
+
+interface ProjectionSummary {
+  totalPrincipal: number
+  totalInterest: number
+  totalFutureValue: number
+}
+
+function buildProjectionData({
+  periods,
+  interestRate,
+  presentValue,
+  payment,
+}: ProjectionInputs): { chartData: ChartDataPoint[]; summary: ProjectionSummary | null } {
+  const rate = interestRate / 100
+  const totalPeriods = Math.floor(periods)
+
+  if (totalPeriods <= 0 || rate < 0) {
+    return { chartData: [], summary: null }
+  }
+
+  const chartDataPoints: ChartDataPoint[] = []
+  const chartStep = Math.max(1, Math.ceil(totalPeriods / 120))
+  let principalContribution = Math.abs(presentValue)
+  let totalInterest = 0
+
+  chartDataPoints.push({
+    period: 0,
+    principal: principalContribution,
+    interest: 0,
+  })
+
+  for (let period = 1; period <= totalPeriods; period++) {
+    if (rate === 0) {
+      principalContribution += Math.abs(payment)
+    } else {
+      const currentValue = principalContribution + totalInterest
+      const interestEarned = currentValue * rate
+      totalInterest += interestEarned
+      principalContribution += Math.abs(payment)
+    }
+
+    if (period % chartStep === 0 || period === totalPeriods) {
+      chartDataPoints.push({
+        period,
+        principal: principalContribution,
+        interest: totalInterest,
+      })
+    }
+  }
+
+  const summary = {
+    totalPrincipal: principalContribution,
+    totalInterest,
+    totalFutureValue: principalContribution + totalInterest,
+  }
+
+  return { chartData: chartDataPoints, summary }
+}
+
 export function TimeValueOfMoneyCalculator() {
   const [data, setData] = useState<TVMData>({
     periods: 20,
@@ -37,6 +102,7 @@ export function TimeValueOfMoneyCalculator() {
   const [result, setResult] = useState<number | null>(null)
   const [error, setError] = useState('')
   const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+  const [projectionSummary, setProjectionSummary] = useState<ProjectionSummary | null>(null)
 
   const formatCurrencyLocal = (amount: number): string => formatCurrency(Math.abs(amount))
 
@@ -111,6 +177,8 @@ export function TimeValueOfMoneyCalculator() {
   const calculate = () => {
     setError('')
     setResult(null)
+    setChartData([])
+    setProjectionSummary(null)
 
     const validationError = validateInputs()
     if (validationError) {
@@ -126,6 +194,7 @@ export function TimeValueOfMoneyCalculator() {
       const futureValue = toNumber(data?.futureValue ?? 0)
       const { solveFor } = data!
       const rate = interestRate / 100
+      let solvedValue: number | null = null
 
       switch (solveFor) {
         case 'futureValue': {
@@ -136,7 +205,7 @@ export function TimeValueOfMoneyCalculator() {
             const factor = Math.pow(1 + rate, periods)
             result = -(presentValue * factor + payment * ((factor - 1) / rate))
           }
-          setResult(result)
+          solvedValue = result
           break
         }
 
@@ -148,7 +217,7 @@ export function TimeValueOfMoneyCalculator() {
             const factor = Math.pow(1 + rate, periods)
             result = -(futureValue + payment * ((factor - 1) / rate)) / factor
           }
-          setResult(result)
+          solvedValue = result
           break
         }
 
@@ -160,7 +229,7 @@ export function TimeValueOfMoneyCalculator() {
             const factor = Math.pow(1 + rate, periods)
             result = -(presentValue * factor + futureValue) / ((factor - 1) / rate)
           }
-          setResult(result)
+          solvedValue = result
           break
         }
 
@@ -168,8 +237,9 @@ export function TimeValueOfMoneyCalculator() {
           const result = solveForRate(periods, presentValue, payment, futureValue)
           if (isNaN(result)) {
             setError('Unable to solve for interest rate with given values')
+            return
           } else {
-            setResult(result)
+            solvedValue = result
           }
           break
         }
@@ -178,72 +248,35 @@ export function TimeValueOfMoneyCalculator() {
           const result = solveForPeriods(interestRate, presentValue, payment, futureValue)
           if (isNaN(result) || result < 0) {
             setError('Unable to solve for periods with given values')
+            return
           } else {
-            setResult(result)
+            solvedValue = result
           }
           break
         }
       }
 
-      // Generate chart data after successful calculation
-      generateChartData()
+      if (solvedValue === null) return
+
+      setResult(solvedValue)
+
+      const projectionInputs: ProjectionInputs = {
+        periods,
+        interestRate,
+        presentValue,
+        payment,
+      }
+
+      if (solveFor === 'periods') projectionInputs.periods = solvedValue
+      if (solveFor === 'interestRate') projectionInputs.interestRate = solvedValue
+      if (solveFor === 'presentValue') projectionInputs.presentValue = solvedValue
+      if (solveFor === 'payment') projectionInputs.payment = solvedValue
+
+      const projection = buildProjectionData(projectionInputs)
+      setChartData(projection.chartData)
+      setProjectionSummary(projection.summary)
     } catch (err) {
       setError('Calculation error. Please check your inputs.')
-    }
-  }
-
-  const generateChartData = () => {
-    try {
-      const periods = toNumber(data?.periods ?? 0)
-      const interestRate = toNumber(data?.interestRate ?? 0)
-      const presentValue = toNumber(data?.presentValue ?? 0)
-      const payment = toNumber(data?.payment ?? 0)
-      
-      const rate = interestRate / 100 // Use the rate as entered
-      const totalPeriods = Math.floor(periods) // Use periods as entered
-      
-      if (totalPeriods <= 0 || rate < 0) {
-        setChartData([])
-        return
-      }
-
-      const chartDataPoints: ChartDataPoint[] = []
-      let currentPrincipal = Math.abs(presentValue)
-      let totalInterest = 0
-
-      for (let period = 0; period <= Math.min(totalPeriods, 100); period++) { // Cap at 100 periods for performance
-        if (period === 0) {
-          chartDataPoints.push({
-            period,
-            principal: currentPrincipal,
-            interest: 0
-          })
-        } else if (rate === 0) {
-          // Simple growth without compounding
-          const monthlyPayment = Math.abs(payment)
-          currentPrincipal += monthlyPayment
-          chartDataPoints.push({
-            period,
-            principal: currentPrincipal,
-            interest: totalInterest
-          })
-        } else {
-          // Compound growth
-          const interestEarned = currentPrincipal * rate
-          totalInterest += interestEarned
-          currentPrincipal = currentPrincipal * (1 + rate) + Math.abs(payment)
-          
-          chartDataPoints.push({
-            period,
-            principal: currentPrincipal - totalInterest,
-            interest: totalInterest
-          })
-        }
-      }
-
-      setChartData(chartDataPoints)
-    } catch (err) {
-      setChartData([])
     }
   }
 
@@ -279,6 +312,7 @@ export function TimeValueOfMoneyCalculator() {
       setResult(null);
       setError('');
       setChartData([]);
+      setProjectionSummary(null);
     }
   }
 
@@ -424,32 +458,28 @@ export function TimeValueOfMoneyCalculator() {
                 <div className="text-2xl font-semibold pb-2">
                   {formatResult()}
                 </div>
-                {chartData.length > 0 && (() => {
-                  const last = chartData[chartData.length - 1]
-                  const totalPrincipal = last.principal
-                  const totalInterest = last.interest
-                  const totalFV = totalPrincipal + totalInterest
-                  return (
-                    <div className="divide-y divide-border/40 border-t border-border/40">
-                      <div className="py-2 flex justify-between items-baseline">
-                        <span className="text-xs text-muted-foreground">Total Principal</span>
-                        <span className="font-semibold text-sm" style={{ color: CHART_COLORS.blue }}>
-                          {formatCurrencyLocal(totalPrincipal)}
-                        </span>
-                      </div>
-                      <div className="py-2 flex justify-between items-baseline">
-                        <span className="text-xs text-muted-foreground">Interest Earned</span>
-                        <span className="font-semibold text-sm" style={{ color: CHART_COLORS.emerald }}>
-                          {formatCurrencyLocal(totalInterest)}
-                        </span>
-                      </div>
-                      <div className="py-2 flex justify-between items-baseline">
-                        <span className="text-xs text-muted-foreground">Total Future Value</span>
-                        <span className="font-semibold">{formatCurrencyLocal(totalFV)}</span>
-                      </div>
+                {projectionSummary && (
+                  <div className="divide-y divide-border/40 border-t border-border/40">
+                    <div className="py-2 flex justify-between items-baseline">
+                      <span className="text-xs text-muted-foreground">Total Principal</span>
+                      <span className="font-semibold text-sm" style={{ color: CHART_COLORS.blue }}>
+                        {formatCurrencyLocal(projectionSummary.totalPrincipal)}
+                      </span>
                     </div>
-                  )
-                })()}
+                    <div className="py-2 flex justify-between items-baseline">
+                      <span className="text-xs text-muted-foreground">Interest Earned</span>
+                      <span className="font-semibold text-sm" style={{ color: CHART_COLORS.emerald }}>
+                        {formatCurrencyLocal(projectionSummary.totalInterest)}
+                      </span>
+                    </div>
+                    <div className="py-2 flex justify-between items-baseline">
+                      <span className="text-xs text-muted-foreground">Total Future Value</span>
+                      <span className="font-semibold">
+                        {formatCurrencyLocal(projectionSummary.totalFutureValue)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </CardContent>
