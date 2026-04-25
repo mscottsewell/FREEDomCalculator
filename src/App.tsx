@@ -9,7 +9,7 @@ import {
   Car, 
   House 
 } from '@phosphor-icons/react'
-import collegeLogo from '@/assets/images/FHU_COB.svg'
+import collegeLogo from '@/assets/images/BellTower.svg'
 
 // Lazy load calculator components for better performance
 const InflationCalculator = lazy(() => import('@/components/InflationCalculator').then(m => ({ default: m.InflationCalculator })))
@@ -52,10 +52,10 @@ function App() {
         />
         <div className="container mx-auto px-4 sm:px-6 py-4 relative">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/15 rounded-2xl flex items-center justify-center p-1.5 sm:p-2 border border-white/20 shadow-lg shrink-0">
+            <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <img
                 src={collegeLogo}
-                alt="FHU College of Business Logo"
+                alt="FHU Bell Tower"
                 className="w-full h-full object-contain"
               />
             </div>
