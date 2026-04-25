@@ -25,6 +25,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { CalculateButton } from "@/components/ui/calculate-button";
@@ -362,13 +363,15 @@ export function CreditCardCalculator() {
                   ]}
                   labelFormatter={(label) => `Month ${label}`}
                 />
+                <Legend fontSize={12} />
                 <Area
                   type="monotone"
                   dataKey="principal"
                   stackId="1"
-                  stroke={CHART_COLORS.blue}
-                  fill={CHART_COLORS.blue}
+                  stroke={CHART_COLORS.emerald}
+                  fill={CHART_COLORS.emerald}
                   fillOpacity={0.8}
+                  name="Principal"
                 />
                 <Area
                   type="monotone"
@@ -377,6 +380,7 @@ export function CreditCardCalculator() {
                   stroke={CHART_COLORS.red}
                   fill={CHART_COLORS.red}
                   fillOpacity={0.8}
+                  name="Interest"
                 />
               </AreaChart>
             </ResponsiveContainer>
