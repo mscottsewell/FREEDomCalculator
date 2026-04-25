@@ -8,5 +8,5 @@ export const CHART_COLORS = {
   blue:    'oklch(0.60 0.20 240)',   // chart-2 — neutral / informational
   amber:   'oklch(0.78 0.18 78)',    // chart-3 — caution / principal
   red:     'oklch(0.57 0.22 27)',    // chart-4 — loss / interest cost
-  violet:  'oklch(0.55 0.22 278)',   // chart-5 — accent
+  violet:  'oklch(0.52 0.16 20)',    // chart-5 — maroon
 } as const;

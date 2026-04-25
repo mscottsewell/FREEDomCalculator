@@ -27,7 +27,7 @@
   --secondary: oklch(0.95 0.010 255);       /* cool light gray */
   --secondary-foreground: oklch(0.25 0.018 255);
 
-  --accent: oklch(0.57 0.22 278);           /* electric violet */
+  --accent: oklch(0.40 0.13 20);            /* FHU maroon */
   --accent-foreground: oklch(0.99 0 0);
 
   --destructive: oklch(0.57 0.22 27);
@@ -44,7 +44,7 @@
   --chart-2: oklch(0.60 0.20 240);          /* electric blue */
   --chart-3: oklch(0.78 0.18 78);           /* amber */
   --chart-4: oklch(0.57 0.22 27);           /* red */
-  --chart-5: oklch(0.55 0.22 278);          /* violet */
+  --chart-5: oklch(0.52 0.16 20);           /* maroon */
 
   --radius: 0.875rem;
 }
@@ -98,7 +98,7 @@
 
 /* Gradient CTA button */
 .btn-gradient {
-  background: linear-gradient(135deg, oklch(0.64 0.18 162) 0%, oklch(0.57 0.22 278) 100%);
+  background: linear-gradient(135deg, oklch(0.64 0.18 162) 0%, oklch(0.52 0.16 20) 100%);
   border: none;
   transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
