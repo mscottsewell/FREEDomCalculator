@@ -72,7 +72,7 @@ function App() {
                 Financial FREED-om Calculators
               </h1>
               <p className="text-white/50 text-xs sm:text-sm mt-0.5 truncate">
-                Master your money. Build your future. 💸
+                Master your money. Build your future. <span className="opacity-100 text-white/80">💸</span>
               </p>
             </div>
             <span className="hidden sm:block text-white/70 text-xs shrink-0">
