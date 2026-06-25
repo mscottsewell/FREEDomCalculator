@@ -66,8 +66,7 @@ export default defineConfig({
         ]
       },
       devOptions: {
-        enabled: true,
-        type: 'module'
+        enabled: false
       }
     }),
     {
@@ -78,6 +77,10 @@ export default defineConfig({
     }
   ],
   resolve: {
+    // Force a single copy of React/React-DOM. Without this, a newly-installed
+    // dependency can pull in its own React instance, leaving React's internal
+    // dispatcher null → "Cannot read properties of null (reading 'useState')".
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': resolve(__dirname, 'src'),
     },

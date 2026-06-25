@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) navigator.serviceWorker.register('/FREEDomCalculator/dev-sw.js?dev-sw', { scope: '/FREEDomCalculator/', type: 'classic' })

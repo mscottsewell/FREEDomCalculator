@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import { 
@@ -7,18 +7,27 @@ import {
   Timer, 
   CreditCard, 
   Car, 
-  House 
+  House,
+  Island,
+  Umbrella,
+  CaretLeft,
+  CaretRight
 } from '@phosphor-icons/react'
 import collegeLogo from '@/assets/images/BellTower.svg'
 
-// Lazy load calculator components for better performance
-const InflationCalculator = lazy(() => import('@/components/InflationCalculator').then(m => ({ default: m.InflationCalculator })))
-const CompoundInterestCalculator = lazy(() => import('@/components/CompoundInterestCalculator').then(m => ({ default: m.CompoundInterestCalculator })))
-const TimeValueOfMoneyCalculator = lazy(() => import('@/components/TimeValueOfMoneyCalculator').then(m => ({ default: m.TimeValueOfMoneyCalculator })))
-const CreditCardCalculator = lazy(() => import('@/components/CreditCardCalculator').then(m => ({ default: m.CreditCardCalculator })))
-const AutoLoanCalculator = lazy(() => import('@/components/AutoLoanCalculator').then(m => ({ default: m.AutoLoanCalculator })))
-const MortgageCalculator = lazy(() => import('@/components/MortgageCalculator').then(m => ({ default: m.MortgageCalculator })))
-const HP12cCalculator = lazy(() => import('@/components/HP12cCalculator').then(m => ({ default: m.HP12cCalculator })))
+// Static imports — all calculators are bundled together. They share heavy deps
+// (recharts) that load once regardless, so code-splitting buys little here, and
+// static imports avoid the "Failed to fetch dynamically imported module" errors
+// that React.lazy() dynamic imports trigger in the WebContainer dev sandbox.
+import { RetirementPlanner } from '@/components/RetirementPlanner'
+import { LifeInsuranceCalculator } from '@/components/LifeInsuranceCalculator'
+import { InflationCalculator } from '@/components/InflationCalculator'
+import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
+import { TimeValueOfMoneyCalculator } from '@/components/TimeValueOfMoneyCalculator'
+import { CreditCardCalculator } from '@/components/CreditCardCalculator'
+import { AutoLoanCalculator } from '@/components/AutoLoanCalculator'
+import { MortgageCalculator } from '@/components/MortgageCalculator'
+import { HP12cCalculator } from '@/components/HP12cCalculator'
 
 type CalculatorConfig = {
   id: string
@@ -31,8 +40,10 @@ type CalculatorConfig = {
 }
 
 const calculators: CalculatorConfig[] = [
+  { id: 'retirement', labels: { short: 'Future You', full: 'Future You' }, icon: Island, component: RetirementPlanner },
+  { id: 'compound', labels: { short: 'Compound', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
   { id: 'inflation', labels: { short: 'Inflation', full: 'Inflation' }, icon: TrendUp, component: InflationCalculator },
-  { id: 'compound', labels: { short: 'Compound Int', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
+  { id: 'insurance', labels: { short: 'Insurance', full: 'Life Insurance' }, icon: Umbrella, component: LifeInsuranceCalculator },
   { id: 'timevalue', labels: { short: 'TVM', full: 'Time Value of Money' }, icon: Timer, component: TimeValueOfMoneyCalculator },
   { id: 'creditcard', labels: { short: 'Credit', full: 'Credit Card' }, icon: CreditCard, component: CreditCardCalculator },
   { id: 'autoloan', labels: { short: 'Auto Loan', full: 'Auto Loan' }, icon: Car, component: AutoLoanCalculator },
@@ -41,7 +52,59 @@ const calculators: CalculatorConfig[] = [
 ]
 
 function App() {
-  const [activeTab, setActiveTab] = useState('inflation')
+  const [activeTab, setActiveTab] = useState('retirement')
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [canLeft, setCanLeft] = useState(false)
+  const [canRight, setCanRight] = useState(false)
+
+  // Recompute whether the tab strip can scroll further left/right.
+  const updateArrows = useCallback(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    const maxScroll = scrollWidth - clientWidth
+    setCanLeft(scrollLeft > 1)
+    setCanRight(scrollLeft < maxScroll - 1)
+  }, [])
+
+  // Wire up scroll + resize listeners, and a ResizeObserver so the arrows stay
+  // correct when the viewport changes or the tab labels show/hide at breakpoints.
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    updateArrows()
+    el.addEventListener('scroll', updateArrows, { passive: true })
+    window.addEventListener('resize', updateArrows)
+    const ro = new ResizeObserver(updateArrows)
+    ro.observe(el)
+    if (el.firstElementChild) ro.observe(el.firstElementChild)
+    return () => {
+      el.removeEventListener('scroll', updateArrows)
+      window.removeEventListener('resize', updateArrows)
+      ro.disconnect()
+    }
+  }, [updateArrows])
+
+  // Keep the selected tab visible — center it within the scroller when it changes.
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const active = el.querySelector<HTMLElement>('[data-state="active"]')
+    if (active) {
+      const elRect = el.getBoundingClientRect()
+      const aRect = active.getBoundingClientRect()
+      const offset = aRect.left - elRect.left - (elRect.width - aRect.width) / 2
+      el.scrollBy({ left: offset, behavior: 'smooth' })
+    }
+    const t = window.setTimeout(updateArrows, 300)
+    return () => window.clearTimeout(t)
+  }, [activeTab, updateArrows])
+
+  const scrollByDir = (dir: -1 | 1) => {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.7), behavior: 'smooth' })
+  }
 
   return (
     <div className="app-shell">
@@ -74,23 +137,57 @@ function App() {
       {/* Main Content */}
       <main className="app-shell-inner app-main">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="top-nav-tabs">
-            {calculators.map((calc) => {
-              const Icon = calc.icon
-              const isActive = activeTab === calc.id
-              return (
-                <TabsTrigger
-                  key={calc.id}
-                  value={calc.id}
-                  className="top-nav-tab"
-                >
-                  <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="top-nav-label-short">{calc.labels.short}</span>
-                  <span className="top-nav-label-full">{calc.labels.full}</span>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
+          <div
+            className="top-nav"
+            data-can-left={canLeft}
+            data-can-right={canRight}
+          >
+            <div className="top-nav-scroller" ref={scrollerRef}>
+              <TabsList className="top-nav-tabs">
+                {calculators.map((calc) => {
+                  const Icon = calc.icon
+                  const isActive = activeTab === calc.id
+                  return (
+                    <TabsTrigger
+                      key={calc.id}
+                      value={calc.id}
+                      className="top-nav-tab"
+                    >
+                      <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
+                      <span className="top-nav-label-short">{calc.labels.short}</span>
+                      <span className="top-nav-label-full">{calc.labels.full}</span>
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+            </div>
+
+            {/* Edge fades — only visible when more tabs lie beyond that edge */}
+            <div className="top-nav-fade top-nav-fade-left" aria-hidden="true" />
+            <div className="top-nav-fade top-nav-fade-right" aria-hidden="true" />
+
+            {/* Scroll arrows — rendered only when scrollable in that direction */}
+            {canLeft && (
+              <button
+                type="button"
+                className="top-nav-arrow top-nav-arrow-left"
+                aria-label="Scroll tabs left"
+                onClick={() => scrollByDir(-1)}
+              >
+                <CaretLeft size={16} weight="bold" />
+              </button>
+            )}
+            {canRight && (
+              <button
+                type="button"
+                className="top-nav-arrow top-nav-arrow-right"
+                aria-label="Scroll tabs right"
+                onClick={() => scrollByDir(1)}
+              >
+                <CaretRight size={16} weight="bold" />
+              </button>
+            )}
+          </div>
 
           {calculators.map((calc) => {
             const Component = calc.component
@@ -103,9 +200,7 @@ function App() {
                       <Icon size={18} weight="fill" />
                       <span>{calc.labels.full}</span>
                     </div>
-                    <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
-                      <Component />
-                    </Suspense>
+                    <Component />
                   </>
                 ) : (
                   <Card className="app-tab-card">
@@ -114,9 +209,7 @@ function App() {
                         <Icon size={18} weight="fill" />
                         <span>{calc.labels.full}</span>
                       </div>
-                      <Suspense fallback={<div className="flex items-center justify-center p-8 text-muted-foreground">Loading calculator...</div>}>
-                        <Component />
-                      </Suspense>
+                      <Component />
                     </CardContent>
                   </Card>
                 )}

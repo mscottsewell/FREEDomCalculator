@@ -90,6 +90,21 @@
 .currency-orange { color: oklch(0.65 0.17 55);  }  /* amber */
 .currency-red    { color: oklch(0.57 0.22 27);  }  /* red */
 
+/* Big hero figures (Retirement & Life Insurance result headlines) */
+.figure-hero {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, oklch(0.50 0.16 20) 0%, oklch(0.62 0.14 68) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 /* Table styling */
 .table-header-shaded {
   background-color: var(--muted);
@@ -253,18 +268,103 @@ body {
 }
 
 /* Top navigation tabs — shell-specific responsive behavior */
-.top-nav-tabs {
-  display: flex;
-  gap: 0.375rem;
-  width: 100%;
-  height: auto;
-  padding: 0.375rem;
-  justify-content: flex-start;
+/* Scrollable top-nav wrapper (holds the scroller + overlay arrows/fades) */
+.top-nav {
+  position: relative;
+}
+
+/* The scroll container — this is the visual "pill bar" frame that stays put */
+.top-nav-scroller {
   overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 1rem;
   box-shadow: 0 1px 3px oklch(0.14 0.015 35 / 0.06);
+}
+.top-nav-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* The flex row of tabs — grows to its content so the scroller can scroll it.
+   Higher specificity ([data-slot] + class) overrides the base TabsList classes. */
+[data-slot="tabs-list"].top-nav-tabs {
+  display: inline-flex;
+  width: max-content;
+  min-width: 100%;
+  height: auto;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  justify-content: flex-start;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  border-radius: 1rem;
+  box-shadow: none;
+}
+
+/* Edge fade hints — fade the tabs under the arrows when more is scrollable */
+.top-nav-fade {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 3rem;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.top-nav[data-can-left="true"] .top-nav-fade-left,
+.top-nav[data-can-right="true"] .top-nav-fade-right {
+  opacity: 1;
+}
+.top-nav-fade-left {
+  left: 1px;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  background: linear-gradient(90deg, var(--card) 35%, transparent);
+}
+.top-nav-fade-right {
+  right: 1px;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  background: linear-gradient(270deg, var(--card) 35%, transparent);
+}
+
+/* Scroll arrow buttons — appear only when there's more to scroll that way */
+.top-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: 0 2px 8px oklch(0.14 0.015 35 / 0.16);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.top-nav-arrow:hover {
+  background: var(--secondary);
+}
+.top-nav-arrow:active {
+  transform: translateY(-50%) scale(0.9);
+}
+.top-nav-arrow-left {
+  left: 0.3rem;
+}
+.top-nav-arrow-right {
+  right: 0.3rem;
 }
 
 .top-nav-tab {
@@ -455,9 +555,11 @@ body {
 }
 
 @media (min-width: 1000px) {
-  .top-nav-tabs {
+  [data-slot="tabs-list"].top-nav-tabs {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
   }
 
   .top-nav-tab {
