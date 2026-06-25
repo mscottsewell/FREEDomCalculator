@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
+import { Car } from '@phosphor-icons/react'
 
 interface AutoLoanData {
   loanAmount: NumericOrEmpty
@@ -115,7 +116,30 @@ export function AutoLoanCalculator() {
 
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6">
+      {/* Hero banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        style={{ background: 'linear-gradient(135deg, oklch(0.40 0.10 195), oklch(0.22 0.07 195))' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
+        />
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <Car size={24} weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Know Before You Owe 🚗</h2>
+            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+              That monthly payment is only half the story. See the full cost of financing a car — and how the
+              loan term quietly changes <em>what you really pay</em>.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Input Section */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">

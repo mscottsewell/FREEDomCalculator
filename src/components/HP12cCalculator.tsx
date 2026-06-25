@@ -4,7 +4,30 @@ import { Button } from '@/components/ui/button'
 
 export function HP12cCalculator() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 sm:space-y-6">
+      {/* Hero banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        style={{ background: 'linear-gradient(135deg, oklch(0.38 0.04 250), oklch(0.20 0.03 250))' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
+        />
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <Calculator size={24} weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">The HP-12C, Reimagined 🧮</h2>
+            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+              The legendary financial calculator that's sat on bankers' desks since 1981. Master the keystrokes
+              right here — <em>no purchase required</em>.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Iframe container with pop-out button */}
       <div className="relative w-full bg-white rounded-lg shadow-lg overflow-hidden" style={{ height: '1000px' }}>
         {/* Pop-out button in upper right corner */}

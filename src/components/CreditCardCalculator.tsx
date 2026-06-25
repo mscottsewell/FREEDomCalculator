@@ -33,6 +33,7 @@ import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from "@/lib/
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters';
 import { CHART_COLORS } from '@/lib/chart-colors';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreditCard } from "@phosphor-icons/react";
 
 interface CreditCardData {
   balance: NumericOrEmpty;
@@ -253,7 +254,30 @@ export function CreditCardCalculator() {
   }, {} as Record<number, any>);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6">
+      {/* Hero banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        style={{ background: 'linear-gradient(135deg, oklch(0.45 0.14 35), oklch(0.24 0.10 35))' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
+        />
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <CreditCard size={24} weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Escape the Debt Trap 💳</h2>
+            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+              Minimum payments are designed to keep you paying for decades. See the true cost of credit card
+              debt — and how fast you can <em>break free</em> by paying more.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Input Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">

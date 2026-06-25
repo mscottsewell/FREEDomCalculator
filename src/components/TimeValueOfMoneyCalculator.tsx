@@ -8,6 +8,7 @@ import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 import { CHART_COLORS } from '@/lib/chart-colors'
+import { Timer } from '@phosphor-icons/react'
 
 interface TVMData {
   periods: NumericOrEmpty
@@ -339,7 +340,30 @@ export function TimeValueOfMoneyCalculator() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6">
+      {/* Hero banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        style={{ background: 'linear-gradient(135deg, oklch(0.40 0.15 300), oklch(0.22 0.10 300))' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-10"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
+        />
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <Timer size={24} weight="fill" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Time Value of Money ⏳</h2>
+            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+              A dollar today is worth more than a dollar tomorrow. Solve for any missing piece — rate, time,
+              payment, or value — and see money's <em>time machine</em> at work.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Input Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
