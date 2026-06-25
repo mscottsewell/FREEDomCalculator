@@ -165,7 +165,7 @@ export function MortgageCalculator() {
     <div className="space-y-5 sm:space-y-6">
       {/* Hero banner */}
       <div
-        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        className="relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white"
         style={{ background: 'linear-gradient(135deg, oklch(0.40 0.13 235), oklch(0.20 0.09 235))' }}
       >
         <div
@@ -173,12 +173,12 @@ export function MortgageCalculator() {
           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
         />
         <div className="relative flex items-start gap-3 sm:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
             <House size={24} weight="fill" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Your Home, By the Numbers 🏡</h2>
-            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+            <h2 className="text-base sm:text-xl font-bold tracking-tight">Your Home, By the Numbers 🏡</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-white/80 max-w-none">
               A mortgage is likely the biggest loan you'll ever take. See your real monthly payment, total
               interest, and how every <em>extra dollar</em> shortens the road home.
             </p>

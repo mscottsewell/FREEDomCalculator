@@ -119,7 +119,7 @@ export function AutoLoanCalculator() {
     <div className="space-y-5 sm:space-y-6">
       {/* Hero banner */}
       <div
-        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        className="relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white"
         style={{ background: 'linear-gradient(135deg, oklch(0.40 0.10 195), oklch(0.22 0.07 195))' }}
       >
         <div
@@ -127,12 +127,12 @@ export function AutoLoanCalculator() {
           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
         />
         <div className="relative flex items-start gap-3 sm:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
             <Car size={24} weight="fill" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Know Before You Owe 🚗</h2>
-            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+            <h2 className="text-base sm:text-xl font-bold tracking-tight">Know Before You Owe 🚗</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-white/80 max-w-none">
               That monthly payment is only half the story. See the full cost of financing a car — and how the
               loan term quietly changes <em>what you really pay</em>.
             </p>

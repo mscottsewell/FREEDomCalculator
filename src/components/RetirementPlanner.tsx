@@ -210,7 +210,7 @@ export function RetirementPlanner() {
     <div className="space-y-5 sm:space-y-6">
       {/* Hero banner */}
       <div
-        className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white"
+        className="relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white"
         style={{ background: 'linear-gradient(135deg, oklch(0.32 0.15 162), oklch(0.16 0.09 162))' }}
       >
         <div
@@ -218,12 +218,12 @@ export function RetirementPlanner() {
           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
         />
         <div className="relative flex items-start gap-3 sm:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
             <Island size={24} weight="fill" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-2xl font-bold tracking-tight">Meet Future You 👋</h2>
-            <p className="mt-1 text-sm sm:text-base text-white/80 max-w-2xl">
+            <h2 className="text-base sm:text-xl font-bold tracking-tight">Meet Future You 👋</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-white/80 max-w-none">
               Your biggest money advantage isn’t a hot stock — it’s <strong>time</strong>. See what investing a
               little, starting <em>right now</em>, snowballs into by the time you kick back and retire.
             </p>
