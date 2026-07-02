@@ -23,11 +23,14 @@ export function formatNumberWithCommas(value: NumericOrEmpty | string): string {
   return _commas.format(num);
 }
 
-export function parseFormattedNumber(value: string): NumericOrEmpty {
+// A partially-typed negative ("-" or "-.") is preserved so text inputs that
+// accept negatives (e.g. TVM cash flows) let the user type the sign first.
+export function parseFormattedNumber(value: string): NumericOrEmpty | '-' | '-.' {
   if (value === '' || value === null || value === undefined) return '';
   const cleanValue = value.replace(/,/g, '').trim();
   if (cleanValue === '') return '';
-  if (cleanValue === '-' || cleanValue === '-.') return cleanValue as any;
+  if (cleanValue === '-') return '-';
+  if (cleanValue === '-.') return '-.';
   const num = parseFloat(cleanValue);
   return isNaN(num) ? '' : num;
 }

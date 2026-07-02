@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -152,15 +153,22 @@ const actionSteps = [
   },
 ]
 
+const isRetirementData = (v: unknown): v is RetirementData =>
+  typeof v === 'object' && v !== null &&
+  ['currentAge', 'retirementAge', 'currentSavings', 'monthlyContribution', 'annualReturn', 'annualIncrease'].every(k => {
+    const x = (v as Record<string, unknown>)[k]
+    return x === '' || typeof x === 'number'
+  })
+
 export function RetirementPlanner() {
-  const [data, setData] = useState<RetirementData>({
+  const [data, setData] = useLocalStorage<RetirementData>('retirement-planner', {
     currentAge: 20,
     retirementAge: 65,
     currentSavings: 1000,
     monthlyContribution: 200,
     annualReturn: 8,
     annualIncrease: 2,
-  })
+  }, isRetirementData)
   const [results, setResults] = useState<Results | null>(null)
   const [chart, setChart] = useState<ChartPoint[]>([])
   const [error, setError] = useState('')
@@ -203,7 +211,7 @@ export function RetirementPlanner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  const update = (field: keyof RetirementData, value: NumericOrEmpty) =>
+  const update = (field: keyof RetirementData, value: NumericOrEmpty | string) =>
     setData((c) => ({ ...c, [field]: value }))
 
   return (
@@ -409,7 +417,11 @@ export function RetirementPlanner() {
               <CardTitle>Watch it snowball</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 sm:h-80 w-full">
+              <div
+                className="h-64 sm:h-80 w-full"
+                role="img"
+                aria-label={results ? `Retirement savings chart reaching ${formatCurrency(results.nestEgg)}` : 'Retirement savings projection chart'}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={chart} margin={{ left: 10, right: 5, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />

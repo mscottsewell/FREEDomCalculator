@@ -47,23 +47,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
       },
       devOptions: {
         enabled: false
@@ -83,6 +67,19 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       '@': resolve(__dirname, 'src'),
+    },
+  },
+  build: {
+    // Split the large, rarely-changing vendor libraries into their own chunks so
+    // returning users keep them cached when app code changes. This is a pure
+    // build-output split — no dynamic imports — so the static-import decision in
+    // App.tsx (WebContainer constraint) is preserved.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          recharts: ['recharts'],
+        },
+      },
     },
   },
 });

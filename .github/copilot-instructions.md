@@ -13,16 +13,16 @@
 
 ## High-level architecture
 - `src/main.tsx` is the app bootstrap: React `StrictMode` + `react-error-boundary` around `<App />`, with shared CSS imports.
-- `src/App.tsx` is the shell/router-like layer: it defines calculator metadata (id/name/icon/component), renders tab navigation, and lazy-loads calculators with `Suspense`.
+- `src/App.tsx` is the shell/router-like layer: it defines calculator metadata (id/labels/icon/component), renders tab navigation, and **statically imports** every calculator. Lazy-loading via `React.lazy()`/`Suspense` was intentionally removed — dynamic imports fail in the WebContainer dev sandbox ("Failed to fetch dynamically imported module"), and the calculators share `recharts` (loaded once regardless), so code-splitting buys little. Keep the static-import pattern.
 - Each calculator in `src/components/*Calculator.tsx` is a self-contained feature module (inputs, validation, compute logic, explanatory content, and chart/table output) rather than splitting logic into separate service layers.
 - Shared calculator plumbing is centralized in:
   - `src/lib/calculator-validation.ts` for `NumericOrEmpty`, numeric guards, and field-name formatting.
   - `src/lib/formatters.ts` for currency/comma parsing/formatting used by text inputs and result display.
   - `src/components/ui/calculate-button.tsx` for the common Calculate CTA.
-- Persistence is local-state-first: `src/hooks/useLocalStorage.ts` is used by calculators that should keep inputs between sessions (not all calculators use it).
+- Persistence is local-state-first: `src/hooks/useLocalStorage.ts` backs every calculator with inputs (each uses a unique key and an optional shape-guard validator; HP-12C has no inputs to persist).
 - Build/deploy is Vite + GitHub Pages:
   - `vite.config.ts` sets `base: '/FREEDomCalculator/'`, `@` alias -> `src`, PWA manifest/workbox config, and writes `dist/.nojekyll` on build.
-  - `.github/workflows/deploy.yml` is the active Node build/deploy pipeline uploading `dist` to Pages.
+  - `.github/workflows/deploy.yml` is the canonical Node build/deploy pipeline uploading `dist` to Pages. `npm run deploy` (`gh-pages -d dist`) is a manual fallback for publishing from a local build.
 
 ## Key repository conventions
 - Use `@/...` imports (configured in `tsconfig.json` + `vite.config.ts`) instead of long relative paths.

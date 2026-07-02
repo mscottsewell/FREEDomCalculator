@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,15 +32,41 @@ const compoundingOptions = [
   { value: 12, label: 'Monthly' }
 ]
 
+/**
+ * Future value of a stream of equal deposits made `periodsPerYear` times a year
+ * for `t` years, accumulating at the rate implied by nominal annual rate `r`
+ * compounded `n` times a year. Using the equivalent per-deposit rate makes the
+ * compounding-frequency selector affect the deposit math, not just the principal.
+ */
+function depositFutureValue(
+  deposit: number, r: number, n: number, t: number, periodsPerYear: number
+): number {
+  const totalPeriods = periodsPerYear * t
+  if (totalPeriods <= 0) return 0
+  if (r === 0) return deposit * totalPeriods
+  const effPeriodRate = Math.pow(1 + r / n, n / periodsPerYear) - 1
+  if (effPeriodRate === 0) return deposit * totalPeriods
+  return deposit * ((Math.pow(1 + effPeriodRate, totalPeriods) - 1) / effPeriodRate)
+}
+
+const isCompoundData = (v: unknown): v is CompoundData => {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  const numOk = (x: unknown) => x === '' || typeof x === 'number'
+  return numOk(o.principal) && numOk(o.interestRate) && numOk(o.years) &&
+    typeof o.compoundingFrequency === 'number' && numOk(o.additionalDeposit) &&
+    (o.depositFrequency === 'monthly' || o.depositFrequency === 'annually')
+}
+
 export function CompoundInterestCalculator() {
-  const [data, setData] = useState<CompoundData>({
+  const [data, setData] = useLocalStorage<CompoundData>('compound-calculator', {
     principal: 5000,
     interestRate: 8,
     years: 20,
     compoundingFrequency: 1,
     additionalDeposit: 500,
     depositFrequency: 'monthly'
-  })
+  }, isCompoundData)
 
   const [results, setResults] = useState({
     finalAmount: 0,
@@ -80,36 +107,20 @@ export function CompoundInterestCalculator() {
     const r = interestRate / 100
     const n = data.compoundingFrequency
     const t = years
-    
+    const periodsPerYear = data.depositFrequency === 'monthly' ? 12 : 1
+
     // Calculate compound interest on principal
     const principalGrowth = principal * Math.pow(1 + r / n, n * t)
-    
-    // Calculate additional deposits
-    let depositContribution = 0
-    if (additionalDeposit > 0) {
-      if (data.depositFrequency === 'monthly') {
-        // Monthly deposits compounded
-        const monthlyRate = r / 12
-        const months = t * 12
-        if (monthlyRate === 0) {
-          depositContribution = additionalDeposit * months
-        } else {
-          depositContribution = additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
-        }
-      } else {
-        // Annual deposits
-        const annualRate = r
-        if (annualRate === 0) {
-          depositContribution = additionalDeposit * t
-        } else {
-          depositContribution = additionalDeposit * ((Math.pow(1 + annualRate, t) - 1) / annualRate)
-        }
-      }
-    }
+
+    // Deposits accumulate at the equivalent rate implied by the selected
+    // compounding frequency.
+    const depositContribution = additionalDeposit > 0
+      ? depositFutureValue(additionalDeposit, r, n, t, periodsPerYear)
+      : 0
 
     const finalAmount = principalGrowth + depositContribution
-    const totalDeposits = principal + (data.depositFrequency === 'monthly' ? additionalDeposit * 12 * t : additionalDeposit * t)
-    const totalInterest = finalAmount - totalDeposits
+    const totalDeposits = principal + additionalDeposit * periodsPerYear * t
+    const totalInterest = Math.max(0, finalAmount - totalDeposits)
 
     setResults({
       finalAmount,
@@ -121,29 +132,13 @@ export function CompoundInterestCalculator() {
     const chartPoints: ChartDataPoint[] = []
     for (let year = 0; year <= t; year++) {
       const principalAtYear = principal * Math.pow(1 + r / n, n * year)
-      
-      let depositAtYear = 0
-      if (additionalDeposit > 0 && year > 0) {
-        if (data.depositFrequency === 'monthly') {
-          const monthlyRate = r / 12
-          const months = year * 12
-          if (monthlyRate === 0) {
-            depositAtYear = additionalDeposit * months
-          } else {
-            depositAtYear = additionalDeposit * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
-          }
-        } else {
-          const annualRate = r
-          if (annualRate === 0) {
-            depositAtYear = additionalDeposit * year
-          } else {
-            depositAtYear = additionalDeposit * ((Math.pow(1 + annualRate, year) - 1) / annualRate)
-          }
-        }
-      }
+
+      const depositAtYear = additionalDeposit > 0 && year > 0
+        ? depositFutureValue(additionalDeposit, r, n, year, periodsPerYear)
+        : 0
 
       const totalAtYear = principalAtYear + depositAtYear
-      const depositsAtYear = principal + (data.depositFrequency === 'monthly' ? additionalDeposit * 12 * year : additionalDeposit * year)
+      const depositsAtYear = principal + additionalDeposit * periodsPerYear * year
       const interestAtYear = totalAtYear - depositsAtYear
 
       chartPoints.push({
@@ -310,7 +305,11 @@ export function CompoundInterestCalculator() {
               <CardTitle>Growth Visualization</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-60 sm:h-80 w-full ml-0 sm:ml-2">
+              <div
+                className="h-60 sm:h-80 w-full ml-0 sm:ml-2"
+                role="img"
+                aria-label={`Compound growth chart: balance reaching ${formatCurrency(results.finalAmount)} over ${toNumber(data.years)} years`}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />

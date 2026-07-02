@@ -16,6 +16,13 @@ interface AutoLoanData {
   loanTerm: NumericOrEmpty
 }
 
+const isAutoLoanData = (v: unknown): v is AutoLoanData =>
+  typeof v === 'object' && v !== null &&
+  ['loanAmount', 'interestRate', 'loanTerm'].every(k => {
+    const x = (v as Record<string, unknown>)[k]
+    return x === '' || typeof x === 'number'
+  })
+
 interface PaymentSchedule {
   month: number
   payment: number
@@ -29,7 +36,7 @@ export function AutoLoanCalculator() {
     loanAmount: 40000,
     interestRate: 8,
     loanTerm: 7
-  })
+  }, isAutoLoanData)
 
   const [results, setResults] = useState({
     monthlyPayment: 0,
@@ -46,13 +53,13 @@ export function AutoLoanCalculator() {
   const formatCurrencyWithDecimals = (amount: number) => formatCurrency(amount, true)
 
   const validateInputs = (): string | null => {
-    if (!isValidNumber(data?.loanAmount)) return "Please enter a valid loan amount"
-    if (!isValidNumber(data?.interestRate)) return "Please enter a valid interest rate"
-    if (!isValidNumber(data?.loanTerm)) return "Please enter a valid loan term"
+    if (!isValidNumber(data.loanAmount)) return "Please enter a valid loan amount"
+    if (!isValidNumber(data.interestRate)) return "Please enter a valid interest rate"
+    if (!isValidNumber(data.loanTerm)) return "Please enter a valid loan term"
 
-    const amount = toNumber(data!.loanAmount)
-    const rate = toNumber(data!.interestRate)
-    const term = toNumber(data!.loanTerm)
+    const amount = toNumber(data.loanAmount)
+    const rate = toNumber(data.interestRate)
+    const term = toNumber(data.loanTerm)
 
     if (amount <= 0) return "Loan amount must be greater than 0"
     if (rate < 0) return "Interest rate cannot be negative"
@@ -70,9 +77,9 @@ export function AutoLoanCalculator() {
 
     setError('')
 
-    const loanAmount = toNumber(data!.loanAmount)
-    const interestRate = toNumber(data!.interestRate)
-    const loanTerm = toNumber(data!.loanTerm)
+    const loanAmount = toNumber(data.loanAmount)
+    const interestRate = toNumber(data.interestRate)
+    const loanTerm = toNumber(data.loanTerm)
 
     const monthlyRate = interestRate / 100 / 12
     const numberOfPayments = loanTerm * 12
@@ -110,8 +117,8 @@ export function AutoLoanCalculator() {
     setSchedule(paymentHistory)
   }
 
-  const updateData = (field: keyof AutoLoanData, value: NumericOrEmpty) => {
-    setData(current => ({ ...current!, [field]: value }))
+  const updateData = (field: keyof AutoLoanData, value: NumericOrEmpty | string) => {
+    setData(current => ({ ...current, [field]: value }))
   }
 
 
@@ -147,7 +154,7 @@ export function AutoLoanCalculator() {
           <Input
             id="loan-amount"
             type="text"
-            value={formatNumberWithCommas(data?.loanAmount ?? '')}
+            value={formatNumberWithCommas(data.loanAmount)}
             onChange={(e) => {
               const parsedValue = parseFormattedNumber(e.target.value)
               updateData('loanAmount', parsedValue)
@@ -161,7 +168,7 @@ export function AutoLoanCalculator() {
               id="interest-rate"
               type="number"
               step="0.01"
-              value={data?.interestRate ?? ''}
+              value={data.interestRate}
               onChange={(e) => updateData('interestRate', e.target.value === '' ? '' : Number(e.target.value))}
               className="pr-8"
             />
@@ -175,7 +182,7 @@ export function AutoLoanCalculator() {
           <Input
             id="loan-term"
             type="number"
-            value={data?.loanTerm ?? ''}
+            value={data.loanTerm}
             onChange={(e) => updateData('loanTerm', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
@@ -218,13 +225,13 @@ export function AutoLoanCalculator() {
           </CardHeader>
           <CardContent>
               <p className="leading-relaxed">
-                For your {formatCurrencyNoDecimals(toNumber(data?.loanAmount || 0))} auto loan at {toNumber(data?.interestRate || 0)}% interest for {toNumber(data?.loanTerm || 0)} years, 
+                For your {formatCurrencyNoDecimals(toNumber(data.loanAmount || 0))} auto loan at {toNumber(data.interestRate || 0)}% interest for {toNumber(data.loanTerm || 0)} years, 
                 you'll pay <strong>{formatCurrencyNoDecimals(results.monthlyPayment)}</strong> per month.             
                 <br/><br/>
                 Over the life of the loan, you'll pay a total of <strong>{formatCurrencyNoDecimals(results.totalInterest)}</strong> in interest, 
                 making your total cost <strong>{formatCurrencyNoDecimals(results.totalPaid)}</strong>. 
                 <br/><br/>
-                The interest adds <strong>{((results.totalInterest / toNumber(data?.loanAmount || 1)) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
+                The interest adds <strong>{((results.totalInterest / toNumber(data.loanAmount || 1)) * 100).toFixed(1)}%</strong> to the cost of your vehicle.
             </p>
           </CardContent>
         </Card>

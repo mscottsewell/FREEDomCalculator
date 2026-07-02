@@ -32,7 +32,7 @@ export function HP12cCalculator() {
       <div className="relative w-full bg-white rounded-lg shadow-lg overflow-hidden" style={{ height: '1000px' }}>
         {/* Pop-out button in upper right corner */}
         <Button
-          onClick={() => window.open('https://mscottsewell.github.io/HP12c/', '_blank')}
+          onClick={() => window.open('https://mscottsewell.github.io/HP12c/', '_blank', 'noopener,noreferrer')}
           className="absolute top-2 right-2 z-10 flex items-center gap-2"
           variant="secondary"
           size="sm"
@@ -46,6 +46,7 @@ export function HP12cCalculator() {
           className="absolute top-0 left-0 w-full h-full border-0"
           title="HP-12C Financial Calculator Simulator"
           allow="fullscreen"
+          sandbox="allow-scripts allow-same-origin"
           loading="lazy"
         />
       </div>

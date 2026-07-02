@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { CalculateButton } from '@/components/ui/calculate-button'
-import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName } from '@/lib/calculator-validation'
+import { NumericOrEmpty, isValidNumber, toNumber, formatFieldName, validateCalculatorInputs } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 import { CHART_COLORS } from '@/lib/chart-colors'
 import { TrendUp } from '@phosphor-icons/react'
@@ -21,12 +22,19 @@ interface ChartDataPoint {
   purchasing_power: number
 }
 
+const isInflationData = (v: unknown): v is InflationData =>
+  typeof v === 'object' && v !== null &&
+  ['currentAmount', 'inflationRate', 'years'].every(k => {
+    const x = (v as Record<string, unknown>)[k]
+    return x === '' || typeof x === 'number'
+  })
+
 export function InflationCalculator() {
-  const [data, setData] = useState<InflationData>({
+  const [data, setData] = useLocalStorage<InflationData>('inflation-calculator', {
     currentAmount: 10000,
     inflationRate: 3,
     years: 20
-  })
+  }, isInflationData)
 
   const [results, setResults] = useState({
     futureNominal: 0,
@@ -38,20 +46,29 @@ export function InflationCalculator() {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([])
   const [error, setError] = useState('')
 
-  // Validation using shared utilities
-  const validateInputs = () => {
-    const requiredFields = ['currentAmount', 'inflationRate', 'years'];
-    const missingFields = requiredFields.filter(field => !isValidNumber(data[field as keyof InflationData]));
-    return {
-      isValid: missingFields.length === 0,
-      missingFields: missingFields.map(formatFieldName)
-    };
-  };
+  // Validation using shared utilities. currentAmount and years must be > 0;
+  // the inflation rate may be negative (deflation) but not <= -100%.
+  const validateInputs = (): string | null => {
+    const positiveErrors = validateCalculatorInputs(
+      { currentAmount: data.currentAmount, years: data.years },
+      ['currentAmount', 'years']
+    ).map(formatFieldName)
+    if (positiveErrors.length > 0) {
+      return `Please enter a valid positive value for: ${positiveErrors.join(', ')}`
+    }
+    if (!isValidNumber(data.inflationRate)) {
+      return 'Please enter a valid inflation rate'
+    }
+    if (toNumber(data.inflationRate) <= -100) {
+      return 'Inflation rate must be greater than -100%'
+    }
+    return null
+  }
 
   const calculate = () => {
-    const validation = validateInputs()
-    if (!validation.isValid) {
-      setError(`Please enter a valid value for: ${validation.missingFields.join(', ')}`)
+    const validationError = validateInputs()
+    if (validationError) {
+      setError(validationError)
       return
     }
 
@@ -87,7 +104,7 @@ export function InflationCalculator() {
     setChartData(chartPoints)
   }
 
-  const updateData = (field: keyof InflationData, value: NumericOrEmpty) => {
+  const updateData = (field: keyof InflationData, value: NumericOrEmpty | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
 
@@ -226,7 +243,11 @@ export function InflationCalculator() {
           <CardTitle>Purchasing Power Over Time</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-60 sm:h-80 w-full ml-0 sm:ml-2">
+          <div
+            className="h-60 sm:h-80 w-full ml-0 sm:ml-2"
+            role="img"
+            aria-label={`Inflation chart: purchasing power declining to ${formatCurrency(results.realPurchasingPower)} over ${toNumber(data.years)} years`}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />

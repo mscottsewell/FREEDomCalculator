@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -90,15 +91,24 @@ function buildProjectionData({
   return { chartData: chartDataPoints, summary }
 }
 
+const isTVMData = (v: unknown): v is TVMData => {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  const numOk = (x: unknown) => x === '' || typeof x === 'number'
+  const solves = ['periods', 'interestRate', 'presentValue', 'payment', 'futureValue']
+  return solves.every(k => numOk(o[k])) &&
+    typeof o.solveFor === 'string' && solves.includes(o.solveFor)
+}
+
 export function TimeValueOfMoneyCalculator() {
-  const [data, setData] = useState<TVMData>({
+  const [data, setData] = useLocalStorage<TVMData>('tvm-calculator', {
     periods: 20,
     interestRate: 8,
     presentValue: -5000,
     payment: -6000,
     futureValue: 1000000,
     solveFor: 'futureValue'
-  })
+  }, isTVMData)
 
   const [result, setResult] = useState<number | null>(null)
   const [error, setError] = useState('')
@@ -141,6 +151,13 @@ export function TimeValueOfMoneyCalculator() {
       if (rate < -0.99) rate = -0.99 // Prevent rate from going below -100%
     }
 
+    // Loop exhausted without converging — verify the residual at the final
+    // iterate and reject a non-solution instead of returning a misleading rate.
+    if (rate !== 0) {
+      const factor = Math.pow(1 + rate, n)
+      const residual = pv * factor + pmt * ((factor - 1) / rate) + fv
+      if (!isFinite(residual) || Math.abs(residual) > 0.01) return NaN
+    }
     return rate * 100
   }
 
@@ -172,6 +189,10 @@ export function TimeValueOfMoneyCalculator() {
       if (n < 0) n = 0.1 // Keep periods positive
     }
 
+    // Verify convergence before returning; reject a non-solution.
+    const factor = Math.pow(1 + r, n)
+    const residual = pv * factor + pmt * ((factor - 1) / r) + fv
+    if (!isFinite(residual) || Math.abs(residual) > 0.01) return NaN
     return n
   }
 
@@ -188,12 +209,12 @@ export function TimeValueOfMoneyCalculator() {
     }
 
     try {
-      const periods = toNumber(data?.periods ?? 0)
-      const interestRate = toNumber(data?.interestRate ?? 0)
-      const presentValue = toNumber(data?.presentValue ?? 0)
-      const payment = toNumber(data?.payment ?? 0)
-      const futureValue = toNumber(data?.futureValue ?? 0)
-      const { solveFor } = data!
+      const periods = toNumber(data.periods)
+      const interestRate = toNumber(data.interestRate)
+      const presentValue = toNumber(data.presentValue)
+      const payment = toNumber(data.payment)
+      const futureValue = toNumber(data.futureValue)
+      const { solveFor } = data
       const rate = interestRate / 100
       let solvedValue: number | null = null
 
@@ -237,7 +258,7 @@ export function TimeValueOfMoneyCalculator() {
         case 'interestRate': {
           const result = solveForRate(periods, presentValue, payment, futureValue)
           if (isNaN(result)) {
-            setError('Unable to solve for interest rate with given values')
+            setError('No solution found for these inputs — check your cash-flow signs (money out is negative, money in is positive).')
             return
           } else {
             solvedValue = result
@@ -248,7 +269,7 @@ export function TimeValueOfMoneyCalculator() {
         case 'periods': {
           const result = solveForPeriods(interestRate, presentValue, payment, futureValue)
           if (isNaN(result) || result < 0) {
-            setError('Unable to solve for periods with given values')
+            setError('No solution found for these inputs — check your cash-flow signs (money out is negative, money in is positive).')
             return
           } else {
             solvedValue = result
@@ -283,10 +304,10 @@ export function TimeValueOfMoneyCalculator() {
 
   const validateInputs = (): string | null => {
     const requiredFields = ['periods', 'interestRate', 'presentValue', 'payment', 'futureValue'] as const
-    const fieldsToValidate = requiredFields.filter(field => field !== data?.solveFor)
+    const fieldsToValidate = requiredFields.filter(field => field !== data.solveFor)
 
     for (const field of fieldsToValidate) {
-      const value = data?.[field]
+      const value = data[field]
       if (!isValidNumber(value)) {
         return `Please enter a valid ${formatFieldName(field)}`
       }
@@ -320,7 +341,7 @@ export function TimeValueOfMoneyCalculator() {
   const formatResult = () => {
     if (result === null) return 'N/A'
     
-    switch (data!.solveFor) {
+    switch (data.solveFor) {
       case 'interestRate':
         return `${result.toFixed(2)}%`
       case 'periods':
@@ -331,12 +352,12 @@ export function TimeValueOfMoneyCalculator() {
   }
 
   const getInputValue = (field: keyof TVMData) => {
-    if (data!.solveFor === field) return ''
-    return data![field]
+    if (data.solveFor === field) return ''
+    return data[field]
   }
 
   const isFieldDisabled = (field: keyof TVMData) => {
-    return data!.solveFor === field
+    return data.solveFor === field
   }
 
   return (
@@ -368,7 +389,7 @@ export function TimeValueOfMoneyCalculator() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="solve-for">Solve For</Label>
-          <Select value={data!.solveFor} onValueChange={(value) => updateData('solveFor', value)}>
+          <Select value={data.solveFor} onValueChange={(value) => updateData('solveFor', value)}>
             <SelectTrigger id="solve-for">
               <SelectValue />
             </SelectTrigger>
@@ -463,7 +484,7 @@ export function TimeValueOfMoneyCalculator() {
           <CardHeader>
             <CardTitle>
               {(() => {
-                switch (data!.solveFor) {
+                switch (data.solveFor) {
                   case 'periods': return 'Periods (N)';
                   case 'interestRate': return 'Interest Rate (%)';
                   case 'presentValue': return 'Present Value (PV)';
@@ -534,7 +555,11 @@ export function TimeValueOfMoneyCalculator() {
             <CardTitle>Growth Visualization Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-80 w-full ml-0 sm:ml-2">
+            <div
+              className="h-64 sm:h-80 w-full ml-0 sm:ml-2"
+              role="img"
+              aria-label={projectionSummary ? `Projection chart reaching ${formatCurrency(projectionSummary.totalFutureValue)}` : 'Time value of money projection chart'}
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />

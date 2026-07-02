@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -162,8 +163,16 @@ const comparisonRows: { label: string; term: string; whole: string; termGood: bo
   },
 ]
 
+const isInsuranceData = (v: unknown): v is InsuranceData => {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  const numOk = (x: unknown) => x === '' || typeof x === 'number'
+  return ['age', 'coverage', 'termPremium', 'wholePremium', 'investReturn', 'years'].every(k => numOk(o[k])) &&
+    (o.gender === 'male' || o.gender === 'female')
+}
+
 export function LifeInsuranceCalculator() {
-  const [data, setData] = useState<InsuranceData>({
+  const [data, setData] = useLocalStorage<InsuranceData>('insurance-calculator', {
     age: 20,
     coverage: 500000,
     termPremium: 25,
@@ -171,7 +180,7 @@ export function LifeInsuranceCalculator() {
     investReturn: 8,
     years: 30,
     gender: 'female',
-  })
+  }, isInsuranceData)
   const [autoEstimate, setAutoEstimate] = useState(true)
   const [results, setResults] = useState<Results | null>(null)
   const [chart, setChart] = useState<ChartPoint[]>([])
@@ -226,7 +235,7 @@ export function LifeInsuranceCalculator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  const update = <K extends keyof InsuranceData>(field: K, value: InsuranceData[K]) =>
+  const update = <K extends keyof InsuranceData>(field: K, value: InsuranceData[K] | '-' | '-.') =>
     setData((c) => ({ ...c, [field]: value }))
 
   return (
@@ -500,7 +509,11 @@ export function LifeInsuranceCalculator() {
               <CardTitle>Your “invest the difference” pot grows</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 sm:h-80 w-full">
+              <div
+                className="h-64 sm:h-80 w-full"
+                role="img"
+                aria-label={results ? `Buy-term-and-invest chart reaching ${formatCurrency(results.buyTermInvestPot)}` : 'Buy-term-and-invest growth chart'}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chart} margin={{ left: 10, right: 5, top: 5, bottom: 5 }}>
                     <defs>

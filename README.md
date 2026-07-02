@@ -71,7 +71,7 @@ This calculator suite can be installed as a Progressive Web App (PWA) on your de
 
 ## Calculators
 
-The application includes six comprehensive financial calculators:
+The application includes nine comprehensive financial calculators:
 
 ### 1. **Inflation Calculator**
 Calculate the impact of inflation on purchasing power over time. Understand how the value of money changes and plan accordingly for future expenses.
@@ -135,7 +135,7 @@ Plan for homeownership by calculating mortgage payments and understanding the lo
 - **Charts:** Recharts for data visualization
 - **Styling:** Tailwind CSS
 - **Icons:** Phosphor Icons
-- **State Management:** React hooks with GitHub Spark KV store for persistence
+- **State Management:** React hooks with `localStorage` persistence (via the `useLocalStorage` hook)
 - **Deployment:** GitHub Pages
 
 ## Getting Started

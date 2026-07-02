@@ -58,6 +58,14 @@ interface ChartDataPoint {
   interest: number;
 }
 
+const isCreditCardData = (v: unknown): v is CreditCardData => {
+  if (typeof v !== 'object' || v === null) return false;
+  const o = v as Record<string, unknown>;
+  const numOk = (x: unknown) => x === '' || typeof x === 'number';
+  return numOk(o.balance) && numOk(o.apr) && numOk(o.fixedPayment) && numOk(o.minimumPayment) &&
+    (o.paymentType === 'minimum' || o.paymentType === 'fixed');
+};
+
 /** Returns the number of months to pay off a balance using interest + 1% method. */
 function computeMinimumPaymentMonths(balance: number, apr: number, minimumFloor: number): number {
   const monthlyRate = apr / 100 / 12;
@@ -81,7 +89,7 @@ export function CreditCardCalculator() {
     paymentType: "minimum",
     fixedPayment: 150,
     minimumPayment: 15,
-  });
+  }, isCreditCardData);
 
   const [results, setResults] = useState({
     monthsToPayoff: 0,
@@ -111,10 +119,10 @@ export function CreditCardCalculator() {
 
     setError('')
 
-    const balance = toNumber(data!.balance)
-    const apr = toNumber(data!.apr)
-    const fixedPayment = toNumber(data!.fixedPayment)
-    const minimumPayment = toNumber(data!.minimumPayment)
+    const balance = toNumber(data.balance)
+    const apr = toNumber(data.apr)
+    const fixedPayment = toNumber(data.fixedPayment)
+    const minimumPayment = toNumber(data.minimumPayment)
 
     const monthlyRate = apr / 100 / 12;
     let currentBalance = balance;
@@ -129,7 +137,7 @@ export function CreditCardCalculator() {
       const interestPayment = currentBalance * monthlyRate;
 
       let payment: number;
-      if (data!.paymentType === "minimum") {
+      if (data.paymentType === "minimum") {
         // Interest + 1% of balance (minimum payment calculation)
         payment = Math.max(
           minimumPayment,
@@ -176,6 +184,11 @@ export function CreditCardCalculator() {
       if (currentBalance <= 0.01) break;
     }
 
+    if (currentBalance > 0.01) {
+      // Loop hit the 50-year safety cap without reaching a zero balance.
+      setError("This balance won't be paid off within 50 years at this payment. Showing the first 50 years only.");
+    }
+
     setResults({
       monthsToPayoff: month,
       totalInterest,
@@ -183,7 +196,7 @@ export function CreditCardCalculator() {
     });
 
     // X-axis always spans the minimum-payment baseline (or the actual run if longer)
-    const baseline = computeMinimumPaymentMonths(balance, apr, toNumber(data!.minimumPayment));
+    const baseline = computeMinimumPaymentMonths(balance, apr, toNumber(data.minimumPayment));
     const totalAxisMonths = Math.max(baseline, month);
     setAxisMonths(totalAxisMonths);
 
@@ -198,39 +211,30 @@ export function CreditCardCalculator() {
   };
 
   const validateInputs = (): string | null => {
-    if (!isValidNumber(data?.balance)) return "Please enter a valid balance"
-    if (!isValidNumber(data?.apr)) return "Please enter a valid APR"
+    if (!isValidNumber(data.balance)) return "Please enter a valid balance"
+    if (!isValidNumber(data.apr)) return "Please enter a valid APR"
     
-    const balance = toNumber(data!.balance)
-    const apr = toNumber(data!.apr)
+    const balance = toNumber(data.balance)
+    const apr = toNumber(data.apr)
     
     if (balance <= 0) return "Balance must be greater than 0"
     if (apr < 0) return "APR cannot be negative"
     
-    if (data?.paymentType === "fixed") {
-      if (!isValidNumber(data?.fixedPayment)) return "Please enter a valid fixed payment amount"
-      const fixedPayment = toNumber(data!.fixedPayment)
+    if (data.paymentType === "fixed") {
+      if (!isValidNumber(data.fixedPayment)) return "Please enter a valid fixed payment amount"
+      const fixedPayment = toNumber(data.fixedPayment)
       if (fixedPayment <= 0) return "Fixed payment must be greater than 0"
     } else {
-      if (!isValidNumber(data?.minimumPayment)) return "Please enter a valid minimum payment percentage"
-      const minimumPayment = toNumber(data!.minimumPayment)
-      if (minimumPayment <= 0) return "Minimum payment percentage must be greater than 0"
+      if (!isValidNumber(data.minimumPayment)) return "Please enter a valid minimum payment"
+      const minimumPayment = toNumber(data.minimumPayment)
+      if (minimumPayment <= 0) return "Minimum payment must be greater than 0"
     }
 
     return null
   }
 
   const updateData = (field: keyof CreditCardData, value: NumericOrEmpty | string) => {
-    setData((current) => {
-      const safeCurrent = current || {
-        balance: 5000,
-        apr: 22.99,
-        paymentType: "minimum",
-        fixedPayment: 150,
-        minimumPayment: 25,
-      };
-      return { ...safeCurrent, [field]: value };
-    });
+    setData((current) => ({ ...current, [field]: value }));
   };
 
   // Group schedule by year for better display
@@ -285,7 +289,7 @@ export function CreditCardCalculator() {
           <Input
             id="balance"
             type="text"
-            value={formatNumberWithCommas(data!.balance)}
+            value={formatNumberWithCommas(data.balance)}
             onChange={(e) => updateData("balance", parseFormattedNumber(e.target.value))}
           />
         </div>
@@ -296,7 +300,7 @@ export function CreditCardCalculator() {
               id="apr"
               type="number"
               step="0.01"
-              value={data!.apr}
+              value={data.apr}
               onChange={(e) => updateData("apr", e.target.value === '' ? '' : Number(e.target.value))}
               className="pr-8"
             />
@@ -308,7 +312,7 @@ export function CreditCardCalculator() {
         <div className="space-y-2">
           <Label htmlFor="payment-type">Payment Method</Label>
           <Select
-            value={data!.paymentType}
+            value={data.paymentType}
             onValueChange={(value) => updateData("paymentType", value)}
           >
             <SelectTrigger id="payment-type" className="w-full">
@@ -320,20 +324,20 @@ export function CreditCardCalculator() {
             </SelectContent>
           </Select>
         </div>
-        {data!.paymentType === "minimum" && (
+        {data.paymentType === "minimum" && (
           <div className="space-y-2">
             <Label htmlFor="minimum-payment">Minimum Payment ($)</Label>
             <Input
               id="minimum-payment"
               type="text"
-              value={formatNumberWithCommas(data!.minimumPayment)}
+              value={formatNumberWithCommas(data.minimumPayment)}
               onChange={(e) =>
                 updateData("minimumPayment", parseFormattedNumber(e.target.value))
               }
             />
           </div>
         )}
-        {data!.paymentType === "fixed" && (
+        {data.paymentType === "fixed" && (
           <div className="space-y-2">
             <Label htmlFor="fixed-payment">Fixed Payment ($)</Label>
             <Input
@@ -397,7 +401,11 @@ export function CreditCardCalculator() {
           <CardTitle>Payment Breakdown Over Time</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-60 sm:h-80 w-full ml-0 sm:ml-2">
+          <div
+            className="h-60 sm:h-80 w-full ml-0 sm:ml-2"
+            role="img"
+            aria-label={`Credit card payoff chart over ${results.monthsToPayoff} months with ${formatCurrencyWholeDollars(results.totalInterest)} total interest`}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
