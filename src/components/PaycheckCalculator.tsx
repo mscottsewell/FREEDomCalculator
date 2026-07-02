@@ -34,6 +34,9 @@ interface PaycheckData {
   filingStatus: FilingStatus
   stateCode: string
   retirement401kPercent: NumericOrEmpty
+  roth401kPercent: NumericOrEmpty
+  hsaMonthly: NumericOrEmpty
+  fsaMonthly: NumericOrEmpty
   healthPremiumMonthly: NumericOrEmpty
   additionalWithholding: NumericOrEmpty
 }
@@ -47,6 +50,9 @@ const DEFAULTS: PaycheckData = {
   filingStatus: 'single',
   stateCode: 'TN',
   retirement401kPercent: 5,
+  roth401kPercent: 0,
+  hsaMonthly: 0,
+  fsaMonthly: 0,
   healthPremiumMonthly: 0,
   additionalWithholding: 0,
 }
@@ -83,13 +89,17 @@ interface PaycheckResults {
   computed: boolean
   grossAnnual: number
   k401Annual: number
+  roth401Annual: number
+  hsaAnnual: number
+  fsaAnnual: number
   premiumAnnual: number
-  preTaxAnnual: number
+  savingsAnnual: number
   federalTax: number
   socialSec: number
   medicare: number
   stateTax: number
   totalTax: number
+  withholdAnnual: number
   netAnnual: number
   periodsPerYear: number
   additionalPerPeriod: number
@@ -102,8 +112,9 @@ interface PaycheckResults {
 }
 
 const EMPTY_RESULTS: PaycheckResults = {
-  computed: false, grossAnnual: 0, k401Annual: 0, premiumAnnual: 0, preTaxAnnual: 0,
-  federalTax: 0, socialSec: 0, medicare: 0, stateTax: 0, totalTax: 0, netAnnual: 0,
+  computed: false, grossAnnual: 0, k401Annual: 0, roth401Annual: 0, hsaAnnual: 0,
+  fsaAnnual: 0, premiumAnnual: 0, savingsAnnual: 0, federalTax: 0, socialSec: 0,
+  medicare: 0, stateTax: 0, totalTax: 0, withholdAnnual: 0, netAnnual: 0,
   periodsPerYear: 26, additionalPerPeriod: 0, netPerPeriodCash: 0, effectiveRate: 0,
   monthlyTakeHome: 0, k401Capped: false, stateName: '', stateTier: 'none',
 }
@@ -118,7 +129,9 @@ const isPaycheckData = (v: unknown): v is PaycheckData => {
     (['annual', 'monthly', 'semimonthly', 'biweekly', 'weekly'] as const).includes(o.payFrequency as PayFrequency) &&
     (['single', 'marriedJoint', 'headOfHousehold'] as const).includes(o.filingStatus as FilingStatus) &&
     typeof o.stateCode === 'string' && o.stateCode in STATE_TAX &&
-    numOk(o.retirement401kPercent) && numOk(o.healthPremiumMonthly) && numOk(o.additionalWithholding)
+    numOk(o.retirement401kPercent) && numOk(o.roth401kPercent) &&
+    numOk(o.hsaMonthly) && numOk(o.fsaMonthly) &&
+    numOk(o.healthPremiumMonthly) && numOk(o.additionalWithholding)
   )
 }
 
@@ -157,6 +170,19 @@ export function PaycheckCalculator() {
       setError('401(k) contribution must be between 0% and 100%')
       return
     }
+    if (isValidNumber(data.roth401kPercent) &&
+      (data.roth401kPercent < 0 || data.roth401kPercent > 100)) {
+      setError('Roth 401(k) contribution must be between 0% and 100%')
+      return
+    }
+    if (isValidNumber(data.hsaMonthly) && data.hsaMonthly < 0) {
+      setError('HSA contribution can\u2019t be negative')
+      return
+    }
+    if (isValidNumber(data.fsaMonthly) && data.fsaMonthly < 0) {
+      setError('FSA contribution can\u2019t be negative')
+      return
+    }
     if (isValidNumber(data.healthPremiumMonthly) && data.healthPremiumMonthly < 0) {
       setError('Health premium can\u2019t be negative')
       return
@@ -166,29 +192,40 @@ export function PaycheckCalculator() {
       return
     }
 
-    // ── Gross and pre-tax pipeline (exact order per §4.1) ─────────────────────
+    // ── Gross and pre-tax pipeline ────────────────────────────────────────────
     const grossAnnual = data.payMode === 'salary'
       ? toNumber(data.annualSalary)
       : toNumber(data.hourlyRate) * toNumber(data.hoursPerWeek) * 52
 
-    const rawK401 = grossAnnual * toNumber(data.retirement401kPercent) / 100
-    const k401Annual = Math.min(rawK401, LIMIT_401K)
-    const k401Capped = rawK401 > LIMIT_401K
-    const premiumAnnual = toNumber(data.healthPremiumMonthly) * 12
-    const preTaxAnnual = k401Annual + premiumAnnual
+    // Traditional + Roth 401(k) share the same $24,500 elective-deferral limit.
+    // If the combined contributions exceed it, scale both down proportionally.
+    const tradRaw = grossAnnual * toNumber(data.retirement401kPercent) / 100
+    const rothRaw = grossAnnual * toNumber(data.roth401kPercent) / 100
+    const totalDeferralRaw = tradRaw + rothRaw
+    const k401Capped = totalDeferralRaw > LIMIT_401K
+    const deferralScale = k401Capped && totalDeferralRaw > 0 ? LIMIT_401K / totalDeferralRaw : 1
+    const k401Annual = tradRaw * deferralScale   // traditional (pre-tax for income tax)
+    const roth401Annual = rothRaw * deferralScale // Roth (after-tax)
 
-    // Cross-field: pre-tax deductions must be less than gross (rule 5, blocking).
-    if (preTaxAnnual >= grossAnnual) {
+    const hsaAnnual = toNumber(data.hsaMonthly) * 12
+    const fsaAnnual = toNumber(data.fsaMonthly) * 12
+    const premiumAnnual = toNumber(data.healthPremiumMonthly) * 12
+
+    // Pre-tax deductions that lower federal/state taxable income.
+    const incomeTaxPreTax = k401Annual + premiumAnnual + hsaAnnual + fsaAnnual
+    // FICA-exempt (Section 125 / HSA) deductions — traditional 401(k) is NOT exempt.
+    const ficaExempt = premiumAnnual + hsaAnnual + fsaAnnual
+
+    // Cross-field: pre-tax deductions must be less than gross.
+    if (incomeTaxPreTax >= grossAnnual) {
       setError('Pre-tax deductions can\u2019t exceed your gross pay')
       return
     }
 
-    setError('')
-
     const status = data.filingStatus
-    const ficaWages = grossAnnual - premiumAnnual
-    const fedTaxable = Math.max(0, grossAnnual - preTaxAnnual - STANDARD_DEDUCTION[status])
-    const stateTaxable = Math.max(0, grossAnnual - preTaxAnnual)
+    const ficaWages = grossAnnual - ficaExempt
+    const fedTaxable = Math.max(0, grossAnnual - incomeTaxPreTax - STANDARD_DEDUCTION[status])
+    const stateTaxable = Math.max(0, grossAnnual - incomeTaxPreTax)
 
     const federalTax = federalIncomeTax(fedTaxable, status)
     const socialSec = socialSecurityTax(ficaWages)
@@ -199,36 +236,45 @@ export function PaycheckCalculator() {
     const periodsPerYear = PERIODS_PER_YEAR[data.payFrequency]
     const additionalPerPeriod = toNumber(data.additionalWithholding)
     const withholdAnnual = additionalPerPeriod * periodsPerYear
-    const netAnnual = grossAnnual - preTaxAnnual - totalTax
-    const netPerPeriodCash = (netAnnual - withholdAnnual) / periodsPerYear
+
+    // Savings = every retirement/health-savings contribution (pre- and after-tax).
+    const savingsAnnual = k401Annual + roth401Annual + hsaAnnual + fsaAnnual
+    // Take-home cash: gross minus pre-tax deductions, taxes, Roth, and extra withholding.
+    const netAnnual = grossAnnual - incomeTaxPreTax - totalTax - roth401Annual - withholdAnnual
+
+    if (netAnnual < 0) {
+      setError('Your contributions and taxes exceed your gross pay \u2014 lower a deduction.')
+      return
+    }
+
+    setError('')
+
+    const netPerPeriodCash = netAnnual / periodsPerYear
     const effectiveRate = totalTax / grossAnnual
     const monthlyTakeHome = netAnnual / 12
 
     const stateInfo = STATE_TAX[data.stateCode]
 
     setResults({
-      computed: true, grossAnnual, k401Annual, premiumAnnual, preTaxAnnual,
-      federalTax, socialSec, medicare, stateTax, totalTax, netAnnual,
-      periodsPerYear, additionalPerPeriod, netPerPeriodCash, effectiveRate,
-      monthlyTakeHome, k401Capped, stateName: stateInfo.name, stateTier: stateInfo.tier,
+      computed: true, grossAnnual, k401Annual, roth401Annual, hsaAnnual, fsaAnnual,
+      premiumAnnual, savingsAnnual, federalTax, socialSec, medicare, stateTax, totalTax,
+      withholdAnnual, netAnnual, periodsPerYear, additionalPerPeriod, netPerPeriodCash,
+      effectiveRate, monthlyTakeHome, k401Capped, stateName: stateInfo.name, stateTier: stateInfo.tier,
     })
   }
 
   const periodNoun = FREQUENCY_NOUN[data.payFrequency]
   const per = (annual: number) => results.periodsPerYear > 0 ? annual / results.periodsPerYear : 0
 
-  // Donut slices — omit zero-value slices; each carries its own color so
-  // adjacent slices always differ (only 5 palette colors exist).
+  // Donut sections — five distinct semantic groups, each with its own color so
+  // categories never share a color. Together they sum to gross annual pay.
   const chartData = results.computed
     ? [
-        { name: 'Net take-home', value: results.netAnnual, color: CHART_COLORS.emerald },
-        { name: 'Federal tax', value: results.federalTax, color: CHART_COLORS.blue },
-        { name: 'Social Security', value: results.socialSec, color: CHART_COLORS.amber },
-        { name: 'Medicare', value: results.medicare, color: CHART_COLORS.red },
-        { name: 'State tax', value: results.stateTax, color: CHART_COLORS.violet },
-        { name: '401(k)', value: results.k401Annual, color: CHART_COLORS.blue },
-        { name: 'Health premiums', value: results.premiumAnnual, color: CHART_COLORS.amber },
-        { name: 'Additional withholding', value: results.additionalPerPeriod * results.periodsPerYear, color: CHART_COLORS.red },
+        { name: 'Take home', value: results.netAnnual, color: CHART_COLORS.emerald },
+        { name: 'Taxes', value: results.federalTax + results.stateTax + results.withholdAnnual, color: CHART_COLORS.red },
+        { name: 'Medicare & Social Security', value: results.medicare + results.socialSec, color: CHART_COLORS.amber },
+        { name: 'Savings', value: results.savingsAnnual, color: CHART_COLORS.blue },
+        { name: 'Insurance', value: results.premiumAnnual, color: CHART_COLORS.violet },
       ].filter(slice => slice.value > 0)
     : []
 
@@ -370,6 +416,43 @@ export function PaycheckCalculator() {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="roth-401k">Roth 401(k) Contribution (%)</Label>
+          <div className="relative">
+            <Input
+              id="roth-401k"
+              type="number"
+              step="1"
+              value={data.roth401kPercent}
+              onChange={(e) => updateData('roth401kPercent', e.target.value === '' ? '' : Number(e.target.value))}
+              className="pr-8"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-sm text-muted-foreground">
+              %
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="hsa-monthly">HSA Contribution ($/month)</Label>
+          <Input
+            id="hsa-monthly"
+            type="text"
+            value={formatNumberWithCommas(data.hsaMonthly)}
+            onChange={(e) => updateData('hsaMonthly', parseFormattedNumber(e.target.value))}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="fsa-monthly">FSA Contribution ($/month)</Label>
+          <Input
+            id="fsa-monthly"
+            type="text"
+            value={formatNumberWithCommas(data.fsaMonthly)}
+            onChange={(e) => updateData('fsaMonthly', parseFormattedNumber(e.target.value))}
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="health-premium">Health Premium ($/month)</Label>
           <Input
             id="health-premium"
@@ -402,171 +485,171 @@ export function PaycheckCalculator() {
 
       {results.computed && (
         <>
-          {/* Results and Chart Section */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              {/* Card 1 — Your Paycheck (per selected period, with cents) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Paycheck</CardTitle>
-                  <p className="text-sm text-muted-foreground">Per {periodNoun}</p>
-                </CardHeader>
-                <CardContent className="divide-y divide-border/40">
+          {/* Your Paycheck + The Big Picture, side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1 — Your Paycheck (per selected period, with cents) */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Paycheck</CardTitle>
+                <p className="text-sm text-muted-foreground">Per {periodNoun}</p>
+              </CardHeader>
+              <CardContent className="divide-y divide-border/40">
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Gross pay:</span>
+                  <span className="font-semibold currency-blue">{formatCurrency(per(results.grossAnnual), true)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">401(k) contribution:</span>
+                  <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.k401Annual), true)}</span>
+                </div>
+                {results.roth401Annual > 0 && (
                   <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Gross pay:</span>
-                    <span className="font-semibold currency-blue">{formatCurrency(per(results.grossAnnual), true)}</span>
+                    <span className="text-muted-foreground">Roth 401(k) contribution:</span>
+                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.roth401Annual), true)}</span>
                   </div>
+                )}
+                {results.hsaAnnual > 0 && (
                   <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">401(k) contribution:</span>
-                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.k401Annual), true)}</span>
+                    <span className="text-muted-foreground">HSA contribution:</span>
+                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.hsaAnnual), true)}</span>
                   </div>
+                )}
+                {results.fsaAnnual > 0 && (
                   <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Health premium:</span>
-                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.premiumAnnual), true)}</span>
+                    <span className="text-muted-foreground">FSA contribution:</span>
+                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.fsaAnnual), true)}</span>
                   </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Federal income tax:</span>
-                    <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.federalTax), true)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Social Security (6.2%):</span>
-                    <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.socialSec), true)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Medicare (1.45%+):</span>
-                    <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.medicare), true)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">State income tax ({results.stateName}):</span>
-                    {results.stateTier === 'none' ? (
-                      <span className="font-semibold currency-green">$0 &mdash; no income tax 🎉</span>
-                    ) : (
-                      <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.stateTax), true)}</span>
-                    )}
-                  </div>
-                  {results.additionalPerPeriod > 0 && (
-                    <div className="flex justify-between py-3">
-                      <span className="text-muted-foreground">Additional withholding:</span>
-                      <span className="font-semibold currency-red">&minus;{formatCurrency(results.additionalPerPeriod, true)}</span>
-                    </div>
+                )}
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Health premium:</span>
+                  <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.premiumAnnual), true)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Federal income tax:</span>
+                  <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.federalTax), true)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Social Security (6.2%):</span>
+                  <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.socialSec), true)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Medicare (1.45%+):</span>
+                  <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.medicare), true)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">State income tax ({results.stateName}):</span>
+                  {results.stateTier === 'none' ? (
+                    <span className="font-semibold currency-green">$0 &mdash; no income tax 🎉</span>
+                  ) : (
+                    <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.stateTax), true)}</span>
                   )}
+                </div>
+                {results.additionalPerPeriod > 0 && (
                   <div className="flex justify-between py-3">
-                    <span className="font-medium">Net take-home:</span>
-                    <span className="font-bold currency-green">{formatCurrency(results.netPerPeriodCash, true)}</span>
+                    <span className="text-muted-foreground">Additional withholding:</span>
+                    <span className="font-semibold currency-red">&minus;{formatCurrency(results.additionalPerPeriod, true)}</span>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+                <div className="flex justify-between py-3">
+                  <span className="font-medium">Net take-home:</span>
+                  <span className="font-bold currency-green">{formatCurrency(results.netPerPeriodCash, true)}</span>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Card 2 — The Big Picture (annualized, whole dollars) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>The Big Picture</CardTitle>
-                  <p className="text-sm text-muted-foreground">Annualized</p>
-                </CardHeader>
-                <CardContent className="divide-y divide-border/40">
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Gross annual income:</span>
-                    <span className="font-semibold currency-blue">{formatCurrency(results.grossAnnual)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Total taxes:</span>
-                    <span className="font-semibold currency-red">{formatCurrency(results.totalTax)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Total pre-tax savings/benefits:</span>
-                    <span className="font-semibold currency-orange">{formatCurrency(results.preTaxAnnual)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Net annual take-home:</span>
-                    <span className="font-semibold currency-green">{formatCurrency(results.netAnnual)}</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="font-medium">Effective tax rate:</span>
-                    <span className="font-bold currency-red">{(results.effectiveRate * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Monthly take-home:</span>
-                    <span className="font-semibold currency-green">{formatCurrency(monthly)}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="md:col-span-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Where Every Dollar Goes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    className="h-60 sm:h-80 w-full"
-                    role="img"
-                    aria-label={`Paycheck breakdown: ${formatCurrency(results.netAnnual)} take-home from ${formatCurrency(results.grossAnnual)} gross`}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={chartData}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius="55%"
-                          outerRadius="80%"
-                          paddingAngle={1}
-                        >
-                          {chartData.map((slice) => (
-                            <Cell key={slice.name} fill={slice.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(v: number, name: string) => [formatCurrency(v), name]} />
-                        <Legend fontSize={12} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  {results.stateTier === 'approx' && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {results.stateName} uses graduated brackets &mdash; this is a simplified estimate.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            {/* Card 2 — The Big Picture (annualized, whole dollars) */}
+            <Card>
+              <CardHeader>
+                <CardTitle>The Big Picture</CardTitle>
+                <p className="text-sm text-muted-foreground">Annualized</p>
+              </CardHeader>
+              <CardContent className="divide-y divide-border/40">
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Gross annual income:</span>
+                  <span className="font-semibold currency-blue">{formatCurrency(results.grossAnnual)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Total taxes:</span>
+                  <span className="font-semibold currency-red">{formatCurrency(results.totalTax)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Total savings (401k, Roth, HSA, FSA):</span>
+                  <span className="font-semibold currency-orange">{formatCurrency(results.savingsAnnual)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Insurance premiums:</span>
+                  <span className="font-semibold currency-orange">{formatCurrency(results.premiumAnnual)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Net annual take-home:</span>
+                  <span className="font-semibold currency-green">{formatCurrency(results.netAnnual)}</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="font-medium">Effective tax rate:</span>
+                  <span className="font-bold currency-red">{(results.effectiveRate * 100).toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between py-3">
+                  <span className="text-muted-foreground">Monthly take-home:</span>
+                  <span className="font-semibold currency-green">{formatCurrency(monthly)}</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Where Every Dollar Goes — full-width chart with data labels */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Where Every Dollar Goes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div
+                className="h-80 sm:h-96 w-full"
+                role="img"
+                aria-label={`Paycheck breakdown: ${formatCurrency(results.netAnnual)} take-home from ${formatCurrency(results.grossAnnual)} gross`}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="45%"
+                      outerRadius="70%"
+                      paddingAngle={1}
+                      labelLine
+                      label={(entry: { name?: string; value?: number; percent?: number }) =>
+                        `${entry.name}: ${formatCurrency(entry.value ?? 0)} (${Math.round((entry.percent ?? 0) * 100)}%)`
+                      }
+                    >
+                      {chartData.map((slice) => (
+                        <Cell key={slice.name} fill={slice.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v: number, name: string) => [formatCurrency(v), name]} />
+                    <Legend fontSize={12} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {results.stateTier === 'approx' && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {results.stateName} uses graduated brackets &mdash; this is a simplified estimate.
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Non-blocking 401(k) cap warning */}
           {results.k401Capped && (
             <Alert className="w-full">
               <AlertDescription>
-                Heads up: your 401(k) contribution exceeds the 2026 IRS limit of {formatCurrency(LIMIT_401K)} &mdash;
-                payroll would stop it there. We&rsquo;ve capped it in this estimate.
+                Heads up: your combined 401(k) and Roth 401(k) contributions exceed the 2026 IRS elective-deferral
+                limit of {formatCurrency(LIMIT_401K)} &mdash; payroll would stop them there. We&rsquo;ve capped them
+                in this estimate.
               </AlertDescription>
             </Alert>
           )}
-
-          {/* Monthly budget snapshot — 50/30/20 rule */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Budget Snapshot</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                A common starting rule of thumb &mdash; adjust to your life.
-              </p>
-            </CardHeader>
-            <CardContent className="divide-y divide-border/40">
-              <div className="flex justify-between py-3">
-                <span className="text-muted-foreground">Needs (50%):</span>
-                <span className="font-semibold">{formatCurrency(monthly * 0.5)}</span>
-              </div>
-              <div className="flex justify-between py-3">
-                <span className="text-muted-foreground">Wants (30%):</span>
-                <span className="font-semibold">{formatCurrency(monthly * 0.3)}</span>
-              </div>
-              <div className="flex justify-between py-3">
-                <span className="text-muted-foreground">Savings &amp; debt (20%):</span>
-                <span className="font-semibold">{formatCurrency(monthly * 0.2)}</span>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Disclaimer */}
           <p className="text-xs text-muted-foreground leading-relaxed">
