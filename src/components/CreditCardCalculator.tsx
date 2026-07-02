@@ -343,7 +343,7 @@ export function CreditCardCalculator() {
             <Input
               id="fixed-payment"
               type="text"
-              value={formatNumberWithCommas(data!.fixedPayment)}
+              value={formatNumberWithCommas(data.fixedPayment)}
               onChange={(e) =>
                 updateData("fixedPayment", parseFormattedNumber(e.target.value))
               }
