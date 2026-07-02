@@ -10,6 +10,7 @@ import {
   House,
   Island,
   Umbrella,
+  Wallet,
   CaretLeft,
   CaretRight
 } from '@phosphor-icons/react'
@@ -20,6 +21,7 @@ import collegeLogo from '@/assets/images/BellTower.svg'
 // static imports avoid the "Failed to fetch dynamically imported module" errors
 // that React.lazy() dynamic imports trigger in the WebContainer dev sandbox.
 import { RetirementPlanner } from '@/components/RetirementPlanner'
+import { PaycheckCalculator } from '@/components/PaycheckCalculator'
 import { LifeInsuranceCalculator } from '@/components/LifeInsuranceCalculator'
 import { InflationCalculator } from '@/components/InflationCalculator'
 import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
@@ -41,6 +43,7 @@ type CalculatorConfig = {
 
 const calculators: CalculatorConfig[] = [
   { id: 'retirement', labels: { short: 'Future You', full: 'Future You' }, icon: Island, component: RetirementPlanner },
+  { id: 'paycheck', labels: { short: 'Paycheck', full: 'Paycheck Estimator' }, icon: Wallet, component: PaycheckCalculator },
   { id: 'compound', labels: { short: 'Compound', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
   { id: 'inflation', labels: { short: 'Inflation', full: 'Inflation' }, icon: TrendUp, component: InflationCalculator },
   { id: 'insurance', labels: { short: 'Insurance', full: 'Life Insurance' }, icon: Umbrella, component: LifeInsuranceCalculator },
