@@ -270,11 +270,11 @@ export function PaycheckCalculator() {
   // categories never share a color. Together they sum to gross annual pay.
   const chartData = results.computed
     ? [
-        { name: 'Take home', value: results.netAnnual, color: CHART_COLORS.emerald },
-        { name: 'Taxes', value: results.federalTax + results.stateTax + results.withholdAnnual, color: CHART_COLORS.red },
-        { name: 'Medicare & Social Security', value: results.medicare + results.socialSec, color: CHART_COLORS.amber },
-        { name: 'Savings', value: results.savingsAnnual, color: CHART_COLORS.blue },
-        { name: 'Insurance', value: results.premiumAnnual, color: CHART_COLORS.violet },
+        { name: 'Take home',               value: results.netAnnual,                                             color: 'oklch(0.60 0.18 145)' },
+        { name: 'Taxes',                      value: results.federalTax + results.stateTax + results.withholdAnnual, color: CHART_COLORS.red },
+        { name: 'Medicare & Social Security', value: results.medicare + results.socialSec,                        color: CHART_COLORS.amber },
+        { name: 'Savings',                    value: results.savingsAnnual,                                        color: CHART_COLORS.blue },
+        { name: 'Insurance',                  value: results.premiumAnnual,                                        color: 'oklch(0.55 0.19 290)' },
       ].filter(slice => slice.value > 0)
     : []
 
@@ -573,9 +573,33 @@ export function PaycheckCalculator() {
                   <span className="font-semibold currency-red">{formatCurrency(results.totalTax)}</span>
                 </div>
                 <div className="flex justify-between py-3">
-                  <span className="text-muted-foreground">Total savings (401k, Roth, HSA, FSA):</span>
+                  <span className="font-medium">Total savings:</span>
                   <span className="font-semibold currency-orange">{formatCurrency(results.savingsAnnual)}</span>
                 </div>
+                {results.k401Annual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">Traditional 401(k):</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.k401Annual)}</span>
+                  </div>
+                )}
+                {results.roth401Annual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">Roth 401(k):</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.roth401Annual)}</span>
+                  </div>
+                )}
+                {results.hsaAnnual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">HSA:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.hsaAnnual)}</span>
+                  </div>
+                )}
+                {results.fsaAnnual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">FSA:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.fsaAnnual)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between py-3">
                   <span className="text-muted-foreground">Insurance premiums:</span>
                   <span className="font-semibold currency-orange">{formatCurrency(results.premiumAnnual)}</span>
@@ -613,14 +637,14 @@ export function PaycheckCalculator() {
                       data={chartData}
                       dataKey="value"
                       nameKey="name"
-                      cx="50%"
+                      cx="38%"
                       cy="50%"
-                      innerRadius="45%"
-                      outerRadius="70%"
+                      innerRadius="40%"
+                      outerRadius="65%"
                       paddingAngle={1}
                       labelLine
                       label={(entry: { name?: string; value?: number; percent?: number }) =>
-                        `${entry.name}: ${formatCurrency(entry.value ?? 0)} (${Math.round((entry.percent ?? 0) * 100)}%)`
+                        `${formatCurrency(entry.value ?? 0)} (${Math.round((entry.percent ?? 0) * 100)}%)`
                       }
                     >
                       {chartData.map((slice) => (
@@ -628,7 +652,7 @@ export function PaycheckCalculator() {
                       ))}
                     </Pie>
                     <Tooltip formatter={(v: number, name: string) => [formatCurrency(v), name]} />
-                    <Legend fontSize={12} />
+                    <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingLeft: '1.5rem', fontSize: '0.8125rem' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
