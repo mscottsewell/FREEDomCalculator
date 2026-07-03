@@ -22,12 +22,19 @@
  *    published February 17, 2026; data as of January 1, 2026).
  *    Progressive states are approximated by a single flat rate (see StateTaxInfo);
  *    this is an ESTIMATE ONLY and each such state is flagged in the UI.
+ *  • Child Tax Credit ($2,200/child under 17) & Credit for Other Dependents
+ *    ($500), with the 5%-of-AGI phase-out above $200k ($400k joint) — One Big
+ *    Beautiful Bill Act as summarized by the IRS Child Tax Credit page
+ *    (https://www.irs.gov/credits-deductions/individuals/child-tax-credit) and
+ *    the Tax Policy Center (https://taxpolicycenter.org/briefing-book/what-child-tax-credit).
+ *    Modeled here as NON-refundable only (no ACTM refundable portion).
  *
  * Simplifications (must stay documented in the calculator UI):
- *  – Standard deduction only (no itemizing, no credits, no dependents).
+ *  – Standard deduction only (no itemizing; the only credits modeled are the
+ *    child / other-dependent credits — no EITC, education, or care credits).
  *  – No local/city income taxes. No SDI/SUI employee taxes.
  *  – State tax = flat/approximated rate on (gross − pre-tax deductions);
- *    state-specific deductions/exemptions are ignored.
+ *    state-specific deductions/exemptions and state-level dependent credits are ignored.
  */
 export const TAX_YEAR = 2026
 
@@ -67,6 +74,14 @@ export const FICA = {
 }
 
 export const LIMIT_401K = 24_500
+
+// Dependent tax credits (One Big Beautiful Bill Act, tax year 2026).
+export const CHILD_TAX_CREDIT = 2_200      // per qualifying child under 17 (non-refundable portion)
+export const OTHER_DEPENDENT_CREDIT = 500  // per other dependent (permanent, non-refundable)
+// Credits phase out by 5% of AGI (i.e. $50 per $1,000, rounded up) above these thresholds.
+export const DEPENDENT_PHASEOUT_THRESHOLD: Record<FilingStatus, number> = {
+  single: 200_000, marriedJoint: 400_000, headOfHousehold: 200_000,
+}
 
 export type StateTaxTier = 'none' | 'flat' | 'approx'
 export interface StateTaxInfo { name: string; tier: StateTaxTier; rate: number }
@@ -169,4 +184,35 @@ export function stateIncomeTax(stateTaxableIncome: number, stateCode: string): n
   const info = STATE_TAX[stateCode]
   if (!info) return 0
   return info.rate * stateTaxableIncome
+}
+
+/**
+ * Non-refundable dependent credits: $2,200 per child under 17 + $500 per other
+ * dependent, reduced by 5% of AGI (rounded up per $1,000) above the phase-out
+ * threshold, floored at 0. `agi` is approximated by gross annual income here.
+ */
+export function dependentTaxCredits(
+  childrenUnder17: number,
+  otherDependents: number,
+  status: FilingStatus,
+  agi: number,
+): number {
+  const children = Math.max(0, Math.floor(childrenUnder17))
+  const others = Math.max(0, Math.floor(otherDependents))
+  const gross = children * CHILD_TAX_CREDIT + others * OTHER_DEPENDENT_CREDIT
+  if (gross <= 0) return 0
+  const over = Math.max(0, agi - DEPENDENT_PHASEOUT_THRESHOLD[status])
+  const reduction = Math.ceil(over / 1_000) * 50
+  return Math.max(0, gross - reduction)
+}
+
+/** The marginal bracket rate (as a decimal) applied to the top dollar of taxableIncome. */
+export function marginalRate(taxableIncome: number, status: FilingStatus): number {
+  const brackets = FEDERAL_BRACKETS[status]
+  let rate = brackets[0][1]
+  for (const [lower, r] of brackets) {
+    if (taxableIncome > lower) rate = r
+    else break
+  }
+  return rate
 }
