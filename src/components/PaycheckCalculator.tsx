@@ -9,8 +9,8 @@ import { CalculateButton } from '@/components/ui/calculate-button'
 import { NumericOrEmpty, isValidNumber, toNumber } from '@/lib/calculator-validation'
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 import { CHART_COLORS } from '@/lib/chart-colors'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { Wallet, CurrencyDollar, PiggyBank, Users, Receipt } from '@phosphor-icons/react'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { Wallet, CurrencyDollar, PiggyBank, Users, Receipt, ShieldCheck, CaretDown } from '@phosphor-icons/react'
 import {
   FilingStatus,
   STATE_TAX,
@@ -192,6 +192,42 @@ function SectionHeading({ icon: Icon, children }: { icon: typeof Wallet; childre
   )
 }
 
+// Collapsible input group — click the header to expand/collapse. Sections that
+// already hold non-default values start open (computed by the caller).
+function CollapsibleSection({
+  icon: Icon, title, subtitle, defaultOpen = false, children,
+}: {
+  icon: typeof Wallet
+  title: ReactNode
+  subtitle?: string
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <section className="overflow-hidden rounded-xl border border-border/60 bg-card/40">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+      >
+        <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <Icon size={16} weight="bold" className="text-primary" />
+          {title}
+          {subtitle && <span className="font-normal normal-case text-xs text-muted-foreground/80">{subtitle}</span>}
+        </span>
+        <CaretDown
+          size={16}
+          weight="bold"
+          className={`shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && <div className="px-4 pb-4 pt-1">{children}</div>}
+    </section>
+  )
+}
+
 export function PaycheckCalculator() {
   const [data, setData] = useLocalStorage<PaycheckData>('paycheck-calculator', DEFAULTS, isPaycheckData)
   const [results, setResults] = useState<PaycheckResults>(EMPTY_RESULTS)
@@ -351,16 +387,21 @@ export function PaycheckCalculator() {
   const periodNoun = FREQUENCY_NOUN[data.payFrequency]
   const per = (annual: number) => results.periodsPerYear > 0 ? annual / results.periodsPerYear : 0
 
-  // Donut sections — five semantic groups that together sum to gross annual pay.
+  // Donut slices — seven semantic groups that together sum to gross annual pay.
+  // Zero-value groups are dropped so the legend only lists what actually applies.
   const chartData = results.computed
     ? [
-        { name: 'Take home',                  value: results.netAnnual,                                             color: 'oklch(0.60 0.18 145)' },
-        { name: 'Income & extra tax',         value: results.federalTax + results.stateTax + results.withholdAnnual, color: CHART_COLORS.red },
-        { name: 'Medicare & Social Security', value: results.medicare + results.socialSec,                          color: CHART_COLORS.amber },
-        { name: 'Savings',                    value: results.savingsAnnual,                                         color: CHART_COLORS.blue },
-        { name: 'Insurance & other',          value: results.premiumAnnual + results.otherPreTaxAnnual + results.otherAfterTaxAnnual, color: 'oklch(0.55 0.19 290)' },
-      ].filter(slice => slice.value > 0)
+        { name: 'Take-home pay',              value: results.netAnnual,                                                   color: 'oklch(0.60 0.18 145)' },
+        { name: 'Federal income tax',         value: results.federalTax,                                                  color: CHART_COLORS.red },
+        { name: 'State income tax',           value: results.stateTax,                                                    color: 'oklch(0.62 0.19 35)' },
+        { name: 'Social Security & Medicare', value: results.socialSec + results.medicare,                                color: CHART_COLORS.amber },
+        { name: 'Retirement & savings',       value: results.savingsAnnual,                                               color: CHART_COLORS.blue },
+        { name: 'Insurance premiums',         value: results.premiumAnnual,                                               color: 'oklch(0.55 0.19 290)' },
+        { name: 'Other deductions',           value: results.otherPreTaxAnnual + results.otherAfterTaxAnnual + results.withholdAnnual, color: 'oklch(0.62 0.03 260)' },
+      ].filter(slice => slice.value > 0.5)
     : []
+  const chartTotal = chartData.reduce((sum, s) => sum + s.value, 0)
+  const pctOfGross = (v: number) => chartTotal > 0 ? Math.round((v / chartTotal) * 100) : 0
 
   const monthly = results.monthlyTakeHome
 
@@ -410,6 +451,34 @@ export function PaycheckCalculator() {
     </div>
   )
 
+  const selectBlock = (
+    id: string,
+    label: string,
+    value: string,
+    onValueChange: (v: string) => void,
+    items: Array<{ value: string; label: ReactNode }>,
+  ) => (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger id={id}><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {items.map(it => <SelectItem key={it.value} value={it.value}>{it.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+
+  // Sections that already carry non-default values start expanded.
+  const preTaxOpen = [
+    data.retirement401kPercent, data.healthPremiumMonthly, data.dentalMonthly, data.visionMonthly,
+    data.hsaMonthly, data.fsaMonthly, data.otherPreTaxMonthly,
+  ].some(v => toNumber(v) > 0)
+  const dependentsOpen = toNumber(data.childrenUnder17) > 0 || toNumber(data.otherDependents) > 0
+  const exemptionsOpen = toNumber(data.extraFederalDeductions) > 0 || toNumber(data.extraStateDeductions) > 0
+  const afterTaxOpen =
+    toNumber(data.roth401kPercent) > 0 || toNumber(data.otherAfterTaxMonthly) > 0 || toNumber(data.additionalWithholding) > 0
+
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Hero banner */}
@@ -439,119 +508,96 @@ export function PaycheckCalculator() {
       <section className="space-y-3">
         <SectionHeading icon={CurrencyDollar}>Income</SectionHeading>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="pay-mode">Pay Type</Label>
-            <Select value={data.payMode} onValueChange={(value) => updateData('payMode', value)}>
-              <SelectTrigger id="pay-mode"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="salary">Annual salary</SelectItem>
-                <SelectItem value="hourly">Hourly wage</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Pay type + frequency share one block */}
+          <div className="grid grid-cols-2 gap-3">
+            {selectBlock('pay-mode', 'Pay Type', data.payMode, (v) => updateData('payMode', v), [
+              { value: 'salary', label: 'Annual salary' },
+              { value: 'hourly', label: 'Hourly wage' },
+            ])}
+            {selectBlock('pay-frequency', 'Pay Frequency', data.payFrequency, (v) => updateData('payFrequency', v),
+              FREQUENCY_OPTIONS.map(o => ({ value: o.value, label: o.label })))}
           </div>
 
-          {data.payMode === 'salary' && moneyField('annual-salary', 'Annual Salary ($)', 'annualSalary')}
+          {/* Wage input(s) */}
+          {data.payMode === 'salary'
+            ? moneyField('annual-salary', 'Annual Salary ($)', 'annualSalary')
+            : (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="hourly-rate">Hourly Wage ($)</Label>
+                  <Input
+                    id="hourly-rate"
+                    type="number"
+                    step="0.25"
+                    value={data.hourlyRate}
+                    onChange={(e) => updateData('hourlyRate', e.target.value === '' ? '' : Number(e.target.value))}
+                  />
+                </div>
+                {countField('hours-per-week', 'Hours / Week', 'hoursPerWeek')}
+              </div>
+            )}
 
+          {/* Filing status + state share one block */}
+          <div className="grid grid-cols-2 gap-3">
+            {selectBlock('filing-status', 'Filing Status', data.filingStatus, (v) => updateData('filingStatus', v),
+              FILING_OPTIONS.map(o => ({ value: o.value, label: o.label })))}
+            {selectBlock('state-code', 'State', data.stateCode, (v) => updateData('stateCode', v),
+              STATE_OPTIONS.map(o => ({ value: o.code, label: o.name })))}
+          </div>
+
+          {/* Hourly-only extras: weeks + overtime */}
           {data.payMode === 'hourly' && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="hourly-rate">Hourly Wage ($)</Label>
-                <Input
-                  id="hourly-rate"
-                  type="number"
-                  step="0.25"
-                  value={data.hourlyRate}
-                  onChange={(e) => updateData('hourlyRate', e.target.value === '' ? '' : Number(e.target.value))}
-                />
+              <div className="grid grid-cols-2 gap-3">
+                {countField('weeks-per-year', 'Weeks / Year', 'weeksPerYear')}
+                {countField('ot-hours', 'OT Hours / Week', 'overtimeHoursPerWeek')}
               </div>
-              {countField('hours-per-week', 'Hours per Week', 'hoursPerWeek')}
-              {countField('weeks-per-year', 'Weeks per Year', 'weeksPerYear')}
-              {countField('ot-hours', 'OT Hours per Week', 'overtimeHoursPerWeek')}
-              <div className="space-y-2">
-                <Label htmlFor="ot-multiplier">Overtime Multiplier</Label>
-                <Select value={String(data.overtimeMultiplier)} onValueChange={(value) => updateData('overtimeMultiplier', Number(value))}>
-                  <SelectTrigger id="ot-multiplier"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1.5">1.5&times; (time and a half)</SelectItem>
-                    <SelectItem value="2">2&times; (double time)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {selectBlock('ot-multiplier', 'Overtime Multiplier', String(data.overtimeMultiplier),
+                (v) => updateData('overtimeMultiplier', Number(v)), [
+                  { value: '1.5', label: '1.5× (time and a half)' },
+                  { value: '2', label: '2× (double time)' },
+                ])}
             </>
           )}
+        </div>
+      </section>
 
-          <div className="space-y-2">
-            <Label htmlFor="pay-frequency">Pay Frequency</Label>
-            <Select value={data.payFrequency} onValueChange={(value) => updateData('payFrequency', value)}>
-              <SelectTrigger id="pay-frequency"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {FREQUENCY_OPTIONS.map(o => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* ── Collapsible deduction groups ───────────────────────────────────── */}
+      <div className="space-y-3">
+        <CollapsibleSection icon={PiggyBank} title="Pre-Tax Deductions" subtitle="(per month)" defaultOpen={preTaxOpen}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {percentField('retirement-401k', '401(k) Contribution (%)', 'retirement401kPercent')}
+            {moneyField('health-premium', 'Health Insurance ($/mo)', 'healthPremiumMonthly')}
+            {moneyField('dental', 'Dental ($/mo)', 'dentalMonthly')}
+            {moneyField('vision', 'Vision ($/mo)', 'visionMonthly')}
+            {moneyField('hsa-monthly', 'HSA ($/mo)', 'hsaMonthly')}
+            {moneyField('fsa-monthly', 'FSA ($/mo)', 'fsaMonthly')}
+            {moneyField('other-pretax', 'Other Pre-Tax ($/mo)', 'otherPreTaxMonthly')}
           </div>
+        </CollapsibleSection>
 
-          <div className="space-y-2">
-            <Label htmlFor="filing-status">Filing Status</Label>
-            <Select value={data.filingStatus} onValueChange={(value) => updateData('filingStatus', value)}>
-              <SelectTrigger id="filing-status"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {FILING_OPTIONS.map(o => (
-                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <CollapsibleSection icon={Users} title="Dependents (Tax Credits)" defaultOpen={dependentsOpen}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {countField('children', 'Children Under 17', 'childrenUnder17')}
+            {countField('other-deps', 'Other Dependents', 'otherDependents')}
           </div>
+        </CollapsibleSection>
 
-          <div className="space-y-2">
-            <Label htmlFor="state-code">State</Label>
-            <Select value={data.stateCode} onValueChange={(value) => updateData('stateCode', value)}>
-              <SelectTrigger id="state-code"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATE_OPTIONS.map(o => (
-                  <SelectItem key={o.code} value={o.code}>{o.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <CollapsibleSection icon={ShieldCheck} title="Additional Tax Exemptions" subtitle="(per year)" defaultOpen={exemptionsOpen}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {moneyField('extra-fed', 'Extra Federal Deductions ($/yr)', 'extraFederalDeductions')}
+            {moneyField('extra-state', 'Extra State Deductions ($/yr)', 'extraStateDeductions')}
           </div>
-        </div>
-      </section>
+        </CollapsibleSection>
 
-      {/* ── Pre-Tax Deductions ─────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <SectionHeading icon={PiggyBank}>Pre-Tax Deductions <span className="normal-case font-normal">(per month)</span></SectionHeading>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {percentField('retirement-401k', '401(k) Contribution (%)', 'retirement401kPercent')}
-          {moneyField('health-premium', 'Health Insurance ($/mo)', 'healthPremiumMonthly')}
-          {moneyField('dental', 'Dental ($/mo)', 'dentalMonthly')}
-          {moneyField('vision', 'Vision ($/mo)', 'visionMonthly')}
-          {moneyField('hsa-monthly', 'HSA ($/mo)', 'hsaMonthly')}
-          {moneyField('fsa-monthly', 'FSA ($/mo)', 'fsaMonthly')}
-          {moneyField('other-pretax', 'Other Pre-Tax ($/mo)', 'otherPreTaxMonthly')}
-        </div>
-      </section>
-
-      {/* ── Dependents & Adjustments ───────────────────────────────────────── */}
-      <section className="space-y-3">
-        <SectionHeading icon={Users}>Dependents &amp; Adjustments</SectionHeading>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {countField('children', 'Children Under 17', 'childrenUnder17')}
-          {countField('other-deps', 'Other Dependents', 'otherDependents')}
-          {moneyField('extra-fed', 'Extra Federal Deductions ($/yr)', 'extraFederalDeductions')}
-          {moneyField('extra-state', 'Extra State Deductions ($/yr)', 'extraStateDeductions')}
-        </div>
-      </section>
-
-      {/* ── After-Tax Deductions ───────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <SectionHeading icon={Receipt}>After-Tax Deductions</SectionHeading>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {percentField('roth-401k', 'Roth 401(k) Contribution (%)', 'roth401kPercent')}
-          {moneyField('other-aftertax', 'Other After-Tax ($/mo)', 'otherAfterTaxMonthly')}
-          {moneyField('additional-withholding', 'Extra Federal Withholding ($/paycheck)', 'additionalWithholding')}
-        </div>
-      </section>
+        <CollapsibleSection icon={Receipt} title="After-Tax Deductions" defaultOpen={afterTaxOpen}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {percentField('roth-401k', 'Roth 401(k) Contribution (%)', 'roth401kPercent')}
+            {moneyField('other-aftertax', 'Other After-Tax ($/mo)', 'otherAfterTaxMonthly')}
+            {moneyField('additional-withholding', 'Extra Federal Withholding ($/paycheck)', 'additionalWithholding')}
+          </div>
+        </CollapsibleSection>
+      </div>
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
@@ -718,44 +764,65 @@ export function PaycheckCalculator() {
             </CardContent>
           </Card>
 
-          {/* Where Every Dollar Goes — full-width chart with data labels */}
+          {/* Where Every Dollar Goes — donut with a center total + labeled legend */}
           <Card>
             <CardHeader>
               <CardTitle>Where Every Dollar Goes</CardTitle>
+              <p className="text-sm text-muted-foreground">Annual breakdown of your {formatCurrency(results.grossAnnual)} gross</p>
             </CardHeader>
             <CardContent>
               <div
-                className="h-80 sm:h-96 w-full"
+                className="grid gap-4 sm:grid-cols-2 sm:items-center"
                 role="img"
                 aria-label={`Paycheck breakdown: ${formatCurrency(results.netAnnual)} take-home from ${formatCurrency(results.grossAnnual)} gross`}
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="38%"
-                      cy="50%"
-                      innerRadius="40%"
-                      outerRadius="65%"
-                      paddingAngle={1}
-                      labelLine
-                      label={(entry: { name?: string; value?: number; percent?: number }) =>
-                        `${formatCurrency(entry.value ?? 0)} (${Math.round((entry.percent ?? 0) * 100)}%)`
-                      }
-                    >
-                      {chartData.map((slice) => (
-                        <Cell key={slice.name} fill={slice.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: number, name: string) => [formatCurrency(v), name]} />
-                    <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingLeft: '1.5rem', fontSize: '0.8125rem' }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                {/* Donut with take-home total in the center */}
+                <div className="relative mx-auto h-56 w-full max-w-[16rem] sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="64%"
+                        outerRadius="90%"
+                        paddingAngle={1}
+                        stroke="none"
+                      >
+                        {chartData.map((slice) => (
+                          <Cell key={slice.name} fill={slice.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: number, name: string) => [`${formatCurrency(v)} (${pctOfGross(v)}%)`, name]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-[0.7rem] uppercase tracking-wide text-muted-foreground">Take-home</span>
+                    <span className="text-lg sm:text-xl font-bold currency-green">{formatCurrency(results.netAnnual)}</span>
+                    <span className="text-[0.7rem] text-muted-foreground">{pctOfGross(results.netAnnual)}% of gross</span>
+                  </div>
+                </div>
+
+                {/* Labeled legend — category, dollar amount, and share of gross */}
+                <ul className="space-y-1.5">
+                  {chartData.map((slice) => (
+                    <li key={slice.name} className="flex items-center justify-between gap-3 border-b border-border/30 pb-1.5 text-sm last:border-0">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="h-3 w-3 shrink-0 rounded-sm" style={{ background: slice.color }} />
+                        <span className="truncate text-muted-foreground">{slice.name}</span>
+                      </span>
+                      <span className="flex shrink-0 items-baseline gap-2">
+                        <span className="font-semibold tabular-nums">{formatCurrency(slice.value)}</span>
+                        <span className="w-9 text-right text-xs text-muted-foreground tabular-nums">{pctOfGross(slice.value)}%</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
               {results.stateTier === 'approx' && (
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-3 text-xs text-muted-foreground">
                   {results.stateName} uses graduated brackets &mdash; this is a simplified estimate.
                 </p>
               )}
