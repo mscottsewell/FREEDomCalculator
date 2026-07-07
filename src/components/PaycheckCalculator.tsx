@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from 'react'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -60,16 +59,16 @@ interface PaycheckData {
 
 const DEFAULTS: PaycheckData = {
   payMode: 'salary',
-  annualSalary: 55000,
-  hourlyRate: 20,
-  hoursPerWeek: 40,
+  annualSalary: 66000,
+  hourlyRate: '',
+  hoursPerWeek: '',
   weeksPerYear: 52,
   overtimeHoursPerWeek: 0,
   overtimeMultiplier: 1.5,
-  payFrequency: 'biweekly',
+  payFrequency: 'monthly',
   filingStatus: 'single',
   stateCode: 'TN',
-  retirement401kPercent: 5,
+  retirement401kPercent: 10,
   healthPremiumMonthly: 0,
   dentalMonthly: 0,
   visionMonthly: 0,
@@ -229,7 +228,7 @@ function CollapsibleSection({
 }
 
 export function PaycheckCalculator() {
-  const [data, setData] = useLocalStorage<PaycheckData>('paycheck-calculator', DEFAULTS, isPaycheckData)
+  const [data, setData] = useState<PaycheckData>(DEFAULTS)
   const [results, setResults] = useState<PaycheckResults>(EMPTY_RESULTS)
   const [error, setError] = useState('')
 
@@ -369,7 +368,7 @@ export function PaycheckCalculator() {
     setError('')
 
     const netPerPeriodCash = netAnnual / periodsPerYear
-    const effectiveRate = totalTax / grossAnnual
+    const effectiveRate = (federalTax + stateTax) / grossAnnual
     const monthlyTakeHome = netAnnual / 12
 
     const stateInfo = STATE_TAX[data.stateCode]
@@ -659,11 +658,11 @@ export function PaycheckCalculator() {
                   <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.federalTax), true)}</span>
                 </div>
                 <div className="flex justify-between py-3">
-                  <span className="text-muted-foreground">Social Security (6.2%):</span>
+                  <span className="text-muted-foreground">Social Security ({results.grossAnnual > 0 ? (results.socialSec / results.grossAnnual * 100).toFixed(2) : '0.00'}% of gross):</span>
                   <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.socialSec), true)}</span>
                 </div>
                 <div className="flex justify-between py-3">
-                  <span className="text-muted-foreground">Medicare (1.45%+):</span>
+                  <span className="text-muted-foreground">Medicare ({results.grossAnnual > 0 ? (results.medicare / results.grossAnnual * 100).toFixed(2) : '0.00'}% of gross):</span>
                   <span className="font-semibold currency-red">&minus;{formatCurrency(per(results.medicare), true)}</span>
                 </div>
                 <div className="flex justify-between py-3">
