@@ -721,30 +721,30 @@ export function PaycheckCalculator() {
                 )}
                 {results.k401Annual > 0 && (
                   <div className="flex justify-between py-2 pl-4">
-                    <span className="text-muted-foreground text-sm">401(k) contribution:</span>
+                    <span className="text-muted-foreground text-sm italic">401(k) contribution:</span>
                     <span className="text-sm currency-orange">{formatCurrency(results.k401Annual)}</span>
                   </div>
                 )}
                 {results.roth401Annual > 0 && (
                   <div className="flex justify-between py-2 pl-4">
-                    <span className="text-muted-foreground text-sm">Roth 401(k) contribution:</span>
+                    <span className="text-muted-foreground text-sm italic">Roth 401(k) contribution:</span>
                     <span className="text-sm currency-orange">{formatCurrency(results.roth401Annual)}</span>
                   </div>
                 )}
                 {results.hsaAnnual > 0 && (
                   <div className="flex justify-between py-2 pl-4">
-                    <span className="text-muted-foreground text-sm">HSA contribution:</span>
+                    <span className="text-muted-foreground text-sm italic">HSA contribution:</span>
                     <span className="text-sm currency-orange">{formatCurrency(results.hsaAnnual)}</span>
                   </div>
                 )}
                 {results.fsaAnnual > 0 && (
                   <div className="flex justify-between py-2 pl-4">
-                    <span className="text-muted-foreground text-sm">FSA contribution:</span>
+                    <span className="text-muted-foreground text-sm italic">FSA contribution:</span>
                     <span className="text-sm currency-orange">{formatCurrency(results.fsaAnnual)}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-3">
-                  <span className="font-medium">Total savings:</span>
+                  <span className="text-muted-foreground">Total savings:</span>
                   <span className="font-semibold currency-orange">{formatCurrency(results.savingsAnnual)}</span>
                 </div>
                 <div className="flex justify-between py-3">
@@ -752,7 +752,7 @@ export function PaycheckCalculator() {
                   <span className="font-semibold currency-green">{formatCurrency(results.netAnnual)}</span>
                 </div>
                 <div className="flex justify-between py-3">
-                  <span className="font-medium">Effective tax rate:</span>
+                  <span className="text-muted-foreground">Effective tax rate:</span>
                   <span className="font-bold currency-red">{(results.effectiveRate * 100).toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between py-3">
