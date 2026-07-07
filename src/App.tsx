@@ -9,7 +9,6 @@ import {
   Car, 
   House,
   Island,
-  Umbrella,
   Wallet,
   CaretLeft,
   CaretRight
@@ -22,7 +21,6 @@ import collegeLogo from '@/assets/images/BellTower.svg'
 // that React.lazy() dynamic imports trigger in the WebContainer dev sandbox.
 import { RetirementPlanner } from '@/components/RetirementPlanner'
 import { PaycheckCalculator } from '@/components/PaycheckCalculator'
-import { LifeInsuranceCalculator } from '@/components/LifeInsuranceCalculator'
 import { InflationCalculator } from '@/components/InflationCalculator'
 import { CompoundInterestCalculator } from '@/components/CompoundInterestCalculator'
 import { TimeValueOfMoneyCalculator } from '@/components/TimeValueOfMoneyCalculator'
@@ -46,7 +44,6 @@ const calculators: CalculatorConfig[] = [
   { id: 'paycheck', labels: { short: 'Paycheck', full: 'Paycheck Estimator' }, icon: Wallet, component: PaycheckCalculator },
   { id: 'compound', labels: { short: 'Compound', full: 'Compound Interest' }, icon: Calculator, component: CompoundInterestCalculator },
   { id: 'inflation', labels: { short: 'Inflation', full: 'Inflation' }, icon: TrendUp, component: InflationCalculator },
-  { id: 'insurance', labels: { short: 'Insurance', full: 'Life Insurance' }, icon: Umbrella, component: LifeInsuranceCalculator },
   { id: 'timevalue', labels: { short: 'TVM', full: 'Time Value of Money' }, icon: Timer, component: TimeValueOfMoneyCalculator },
   { id: 'creditcard', labels: { short: 'Credit', full: 'Credit Card' }, icon: CreditCard, component: CreditCardCalculator },
   { id: 'autoloan', labels: { short: 'Auto Loan', full: 'Auto Loan' }, icon: Car, component: AutoLoanCalculator },
