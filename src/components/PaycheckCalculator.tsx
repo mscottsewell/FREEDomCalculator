@@ -402,8 +402,6 @@ export function PaycheckCalculator() {
   const chartTotal = chartData.reduce((sum, s) => sum + s.value, 0)
   const pctOfGross = (v: number) => chartTotal > 0 ? Math.round((v / chartTotal) * 100) : 0
 
-  const monthly = results.monthlyTakeHome
-
   // Currency-like text input (monthly $ deduction). Repeated shape → small helper.
   const moneyField = (id: string, label: string, field: keyof PaycheckData) => (
     <div className="space-y-2">
@@ -721,6 +719,30 @@ export function PaycheckCalculator() {
                     </span>
                   </div>
                 )}
+                {results.k401Annual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">401(k) contribution:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.k401Annual)}</span>
+                  </div>
+                )}
+                {results.roth401Annual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">Roth 401(k) contribution:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.roth401Annual)}</span>
+                  </div>
+                )}
+                {results.hsaAnnual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">HSA contribution:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.hsaAnnual)}</span>
+                  </div>
+                )}
+                {results.fsaAnnual > 0 && (
+                  <div className="flex justify-between py-2 pl-4">
+                    <span className="text-muted-foreground text-sm">FSA contribution:</span>
+                    <span className="text-sm currency-orange">{formatCurrency(results.fsaAnnual)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between py-3">
                   <span className="font-medium">Total savings:</span>
                   <span className="font-semibold currency-orange">{formatCurrency(results.savingsAnnual)}</span>
@@ -736,10 +758,6 @@ export function PaycheckCalculator() {
                 <div className="flex justify-between py-3">
                   <span className="text-muted-foreground">Marginal tax bracket:</span>
                   <span className="font-semibold">{(results.marginalRate * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex justify-between py-3">
-                  <span className="text-muted-foreground">Monthly take-home:</span>
-                  <span className="font-semibold currency-green">{formatCurrency(monthly)}</span>
                 </div>
               </CardContent>
             </Card>
