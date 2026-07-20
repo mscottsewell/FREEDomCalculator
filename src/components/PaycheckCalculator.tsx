@@ -494,8 +494,7 @@ export function PaycheckCalculator() {
           <div>
             <h2 className="text-base sm:text-xl font-bold tracking-tight">Your Salary &ne; Your Paycheck 💰</h2>
             <p className="mt-0.5 text-xs sm:text-sm text-white/80 max-w-none">
-              That $55,000 offer letter doesn&rsquo;t mean $4,583 a month in your pocket. See where every dollar
-              actually goes &mdash; before your first payday surprises you.
+              A $66,000 salary doesn't put $5,500 in your pocket each month. See where every dollar actually goes, <em>before</em> you are surprised by your first paycheck.
             </p>
           </div>
         </div>
@@ -785,7 +784,7 @@ export function PaycheckCalculator() {
           <Card>
             <CardHeader>
               <CardTitle>Where Every Dollar Goes</CardTitle>
-              <p className="text-sm text-muted-foreground">Annual breakdown of your {formatCurrency(results.grossAnnual)} gross</p>
+              <p className="text-sm text-muted-foreground">Annual breakdown of your {formatCurrency(results.grossAnnual)} gross salary.</p>
             </CardHeader>
             <CardContent>
               <div
@@ -860,8 +859,7 @@ export function PaycheckCalculator() {
           {/* Disclaimer */}
           <p className="text-xs text-muted-foreground leading-relaxed">
             <em>
-              Estimates for education only. Actual withholding depends on your W-4, tax credits, local/city taxes,
-              benefit plan details, and state rules we simplify here (see the note next to your state). Not tax advice.
+              Not tax advice. Estimates for educational purposes only. Actual withholding depends on your W-4; state and local taxes; benefit plan details; and other factors.
             </em>
           </p>
         </>
@@ -874,14 +872,15 @@ export function PaycheckCalculator() {
         </CardHeader>
         <CardContent>
           <p className="leading-relaxed font-medium">
-            <strong>Your gross salary is not your take-home pay.</strong> Before a dollar reaches your bank account,
-            FICA takes <strong>7.65%</strong> right off the top for almost everyone &mdash; 6.2% for Social Security
-            and 1.45% for Medicare &mdash; and it has no standard deduction, so it applies even at low incomes.
-            Federal income tax is <em>marginal</em>: &ldquo;landing in the 22% bracket&rdquo; does <em>not</em> mean
-            paying 22% on every dollar &mdash; only on the portion above that bracket&rsquo;s threshold, which is why
-            your <em>effective</em> rate is lower. And pre-tax 401(k) dollars lower your taxable income today, so the
-            take-home cost of saving $100 is actually less than $100. <em>Estimates for education only &mdash; not tax
-            advice.</em>
+            <strong>Your gross salary is not the same as your take-home pay.</strong> Before your paycheck reaches 
+            your bank account, your employer must withhold applicable federal, state, and local income taxes, 
+            as well as Social Security and Medicare taxes (FICA). Employee benefit deductions may be taken either 
+            before or after taxes. Pre-tax contributions, such as health insurance premiums, health savings accounts (HSAs), 
+            flexible spending accounts (FSAs), and certain workplace retirement plan contributions, reduce your taxable 
+            income today. As a result, the current cost of saving or contributing $100 is often less than $100. 
+            In contrast, contributions to Roth 401(k) and Roth 403(b) plans are made with after-tax dollars, 
+            but qualified withdrawals in retirement are generally tax-free. 
+            <em>These estimates are for educational purposes only and should not be considered tax advice.</em>
           </p>
         </CardContent>
       </Card>
