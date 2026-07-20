@@ -880,7 +880,7 @@ export function PaycheckCalculator() {
             income today. As a result, the current cost of saving or contributing $100 is often less than $100. 
             In contrast, contributions to Roth 401(k) and Roth 403(b) plans are made with after-tax dollars, 
             but qualified withdrawals in retirement are generally tax-free. 
-            <em>These estimates are for educational purposes only and should not be considered tax advice.</em>
+            <em> These estimates are for educational purposes only and should not be considered tax advice.</em>
           </p>
         </CardContent>
       </Card>
