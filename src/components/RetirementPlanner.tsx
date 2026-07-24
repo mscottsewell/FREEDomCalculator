@@ -326,8 +326,8 @@ export function RetirementPlanner() {
         <>
           {/* Hero result + stat trio */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-          <Card className="overflow-hidden h-full">
-            <CardContent className="py-4 sm:py-5 h-full flex items-center justify-center">
+          <Card className="overflow-hidden h-full py-3 sm:py-4">
+            <CardContent className="py-3 h-full flex items-center justify-center">
               <div className="flex flex-col items-center text-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
                   <Rocket size={14} weight="fill" /> Future You at {toNumber(data.retirementAge)}
@@ -356,8 +356,8 @@ export function RetirementPlanner() {
 
           {/* Stat trio */}
           <div className="grid grid-cols-1 gap-4 h-full justify-between">
-            <Card>
-              <CardContent className="pt-6 flex items-start gap-3">
+            <Card className="py-3">
+              <CardContent className="pt-2 flex items-start gap-3">
                 <PiggyBank size={26} weight="duotone" className="text-muted-foreground shrink-0" />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">You contribute</div>
@@ -366,8 +366,8 @@ export function RetirementPlanner() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="pt-6 flex items-start gap-3">
+            <Card className="py-3">
+              <CardContent className="pt-2 flex items-start gap-3">
                 <TrendUp size={26} weight="duotone" className="shrink-0" style={{ color: CHART_COLORS.emerald }} />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Compound growth</div>
@@ -376,8 +376,8 @@ export function RetirementPlanner() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="pt-6 flex items-start gap-3">
+            <Card className="py-3">
+              <CardContent className="pt-2 flex items-start gap-3">
                 <Coins size={26} weight="duotone" className="shrink-0" style={{ color: CHART_COLORS.blue }} />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Retirement income</div>
