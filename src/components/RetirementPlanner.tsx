@@ -327,7 +327,7 @@ export function RetirementPlanner() {
           {/* Hero result + stat trio */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
           <Card className="overflow-hidden h-full">
-            <CardContent className="pt-6 h-full flex items-center justify-center">
+            <CardContent className="py-4 sm:py-5 h-full flex items-center justify-center">
               <div className="flex flex-col items-center text-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
                   <Rocket size={14} weight="fill" /> Future You at {toNumber(data.retirementAge)}
@@ -355,7 +355,7 @@ export function RetirementPlanner() {
           </Card>
 
           {/* Stat trio */}
-          <div className="grid grid-cols-1 gap-4 content-between">
+          <div className="grid grid-cols-1 gap-4 h-full justify-between">
             <Card>
               <CardContent className="pt-6 flex items-start gap-3">
                 <PiggyBank size={26} weight="duotone" className="text-muted-foreground shrink-0" />
