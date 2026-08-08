@@ -9,7 +9,7 @@ import { NumericOrEmpty, isValidNumber, toNumber } from '@/lib/calculator-valida
 import { formatCurrency, formatNumberWithCommas, parseFormattedNumber } from '@/lib/formatters'
 import { CHART_COLORS } from '@/lib/chart-colors'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import { Wallet, CurrencyDollar, PiggyBank, Users, Receipt, ShieldCheck, CaretDown } from '@phosphor-icons/react'
+import { Wallet, CurrencyDollar, PiggyBank, Receipt, CaretDown } from '@phosphor-icons/react'
 import {
   FilingStatus,
   STATE_TAX,
@@ -19,7 +19,6 @@ import {
   socialSecurityTax,
   medicareTax,
   stateIncomeTax,
-  dependentTaxCredits,
   marginalRate,
 } from '@/lib/paycheck-tax-tables'
 
@@ -45,12 +44,6 @@ interface PaycheckData {
   visionMonthly: NumericOrEmpty
   hsaMonthly: NumericOrEmpty
   fsaMonthly: NumericOrEmpty
-  otherPreTaxMonthly: NumericOrEmpty
-  // Dependents & adjustments
-  childrenUnder17: NumericOrEmpty
-  otherDependents: NumericOrEmpty
-  extraFederalDeductions: NumericOrEmpty
-  extraStateDeductions: NumericOrEmpty
   // After-tax deductions
   roth401kPercent: NumericOrEmpty
   otherAfterTaxMonthly: NumericOrEmpty
@@ -68,18 +61,13 @@ const DEFAULTS: PaycheckData = {
   payFrequency: 'monthly',
   filingStatus: 'single',
   stateCode: 'TN',
-  retirement401kPercent: 10,
-  healthPremiumMonthly: 0,
+  retirement401kPercent: 0,
+  healthPremiumMonthly: 150,
   dentalMonthly: 0,
   visionMonthly: 0,
-  hsaMonthly: 0,
+  hsaMonthly: 300,
   fsaMonthly: 0,
-  otherPreTaxMonthly: 0,
-  childrenUnder17: 0,
-  otherDependents: 0,
-  extraFederalDeductions: 0,
-  extraStateDeductions: 0,
-  roth401kPercent: 0,
+  roth401kPercent: 15,
   otherAfterTaxMonthly: 0,
   additionalWithholding: 0,
 }
@@ -107,14 +95,6 @@ const FILING_OPTIONS: Array<{ value: FilingStatus; label: string }> = [
   { value: 'headOfHousehold', label: 'Head of household' },
 ]
 
-// Multi-frequency net-pay summary rows (independent of the selected pay frequency).
-const NET_PAY_FREQUENCIES: Array<{ label: string; periods: number }> = [
-  { label: 'Weekly', periods: 52 },
-  { label: 'Every 2 weeks', periods: 26 },
-  { label: 'Twice a month', periods: 24 },
-  { label: 'Monthly', periods: 12 },
-]
-
 // State options sorted alphabetically by full name for the Select.
 const STATE_OPTIONS = Object.entries(STATE_TAX)
   .map(([code, info]) => ({ code, name: info.name }))
@@ -128,11 +108,8 @@ interface PaycheckResults {
   hsaAnnual: number
   fsaAnnual: number
   premiumAnnual: number
-  otherPreTaxAnnual: number
   otherAfterTaxAnnual: number
   savingsAnnual: number
-  federalTaxBeforeCredits: number
-  dependentCredits: number
   federalTax: number
   socialSec: number
   medicare: number
@@ -153,8 +130,8 @@ interface PaycheckResults {
 
 const EMPTY_RESULTS: PaycheckResults = {
   computed: false, grossAnnual: 0, k401Annual: 0, roth401Annual: 0, hsaAnnual: 0,
-  fsaAnnual: 0, premiumAnnual: 0, otherPreTaxAnnual: 0, otherAfterTaxAnnual: 0,
-  savingsAnnual: 0, federalTaxBeforeCredits: 0, dependentCredits: 0, federalTax: 0,
+  fsaAnnual: 0, premiumAnnual: 0, otherAfterTaxAnnual: 0,
+  savingsAnnual: 0, federalTax: 0,
   socialSec: 0, medicare: 0, stateTax: 0, totalTax: 0, withholdAnnual: 0, netAnnual: 0,
   periodsPerYear: 26, additionalPerPeriod: 0, netPerPeriodCash: 0, effectiveRate: 0,
   marginalRate: 0, monthlyTakeHome: 0, k401Capped: false, stateName: '', stateTier: 'none',
@@ -174,9 +151,7 @@ const isPaycheckData = (v: unknown): v is PaycheckData => {
     typeof o.stateCode === 'string' && o.stateCode in STATE_TAX &&
     numOk(o.retirement401kPercent) && numOk(o.roth401kPercent) &&
     numOk(o.healthPremiumMonthly) && numOk(o.dentalMonthly) && numOk(o.visionMonthly) &&
-    numOk(o.hsaMonthly) && numOk(o.fsaMonthly) && numOk(o.otherPreTaxMonthly) &&
-    numOk(o.childrenUnder17) && numOk(o.otherDependents) &&
-    numOk(o.extraFederalDeductions) && numOk(o.extraStateDeductions) &&
+    numOk(o.hsaMonthly) && numOk(o.fsaMonthly) &&
     numOk(o.otherAfterTaxMonthly) && numOk(o.additionalWithholding)
   )
 }
@@ -284,11 +259,6 @@ export function PaycheckCalculator() {
       [data.visionMonthly, 'Vision premium'],
       [data.hsaMonthly, 'HSA contribution'],
       [data.fsaMonthly, 'FSA contribution'],
-      [data.otherPreTaxMonthly, 'Other pre-tax deduction'],
-      [data.childrenUnder17, 'Children under 17'],
-      [data.otherDependents, 'Other dependents'],
-      [data.extraFederalDeductions, 'Extra federal deductions'],
-      [data.extraStateDeductions, 'Extra state deductions'],
       [data.otherAfterTaxMonthly, 'Other after-tax deduction'],
       [data.additionalWithholding, 'Additional withholding'],
     ]
@@ -319,15 +289,12 @@ export function PaycheckCalculator() {
     const premiumAnnual = (toNumber(data.healthPremiumMonthly) + toNumber(data.dentalMonthly) + toNumber(data.visionMonthly)) * 12
     const hsaAnnual = toNumber(data.hsaMonthly) * 12
     const fsaAnnual = toNumber(data.fsaMonthly) * 12
-    const otherPreTaxAnnual = toNumber(data.otherPreTaxMonthly) * 12
     const otherAfterTaxAnnual = toNumber(data.otherAfterTaxMonthly) * 12
-    const extraFedDeduction = toNumber(data.extraFederalDeductions)
-    const extraStateDeduction = toNumber(data.extraStateDeductions)
 
     // Pre-tax deductions that lower federal/state taxable income.
-    const incomeTaxPreTax = k401Annual + premiumAnnual + hsaAnnual + fsaAnnual + otherPreTaxAnnual
+    const incomeTaxPreTax = k401Annual + premiumAnnual + hsaAnnual + fsaAnnual
     // FICA-exempt (Section 125 / HSA / commuter) deductions — traditional 401(k) is NOT exempt.
-    const ficaExempt = premiumAnnual + hsaAnnual + fsaAnnual + otherPreTaxAnnual
+    const ficaExempt = premiumAnnual + hsaAnnual + fsaAnnual
 
     // Cross-field: pre-tax deductions must be less than gross.
     if (incomeTaxPreTax >= grossAnnual) {
@@ -337,14 +304,10 @@ export function PaycheckCalculator() {
 
     const status = data.filingStatus
     const ficaWages = grossAnnual - ficaExempt
-    const fedTaxable = Math.max(0, grossAnnual - incomeTaxPreTax - STANDARD_DEDUCTION[status] - extraFedDeduction)
-    const stateTaxable = Math.max(0, grossAnnual - incomeTaxPreTax - extraStateDeduction)
+    const fedTaxable = Math.max(0, grossAnnual - incomeTaxPreTax - STANDARD_DEDUCTION[status])
+    const stateTaxable = Math.max(0, grossAnnual - incomeTaxPreTax)
 
-    const federalTaxBeforeCredits = federalIncomeTax(fedTaxable, status)
-    const dependentCredits = dependentTaxCredits(
-      toNumber(data.childrenUnder17), toNumber(data.otherDependents), status, grossAnnual,
-    )
-    const federalTax = Math.max(0, federalTaxBeforeCredits - dependentCredits)
+    const federalTax = federalIncomeTax(fedTaxable, status)
     const socialSec = socialSecurityTax(ficaWages)
     const medicare = medicareTax(ficaWages, status)
     const stateTax = stateIncomeTax(stateTaxable, data.stateCode)
@@ -375,8 +338,8 @@ export function PaycheckCalculator() {
 
     setResults({
       computed: true, grossAnnual, k401Annual, roth401Annual, hsaAnnual, fsaAnnual,
-      premiumAnnual, otherPreTaxAnnual, otherAfterTaxAnnual, savingsAnnual,
-      federalTaxBeforeCredits, dependentCredits, federalTax, socialSec, medicare,
+      premiumAnnual, otherAfterTaxAnnual, savingsAnnual,
+      federalTax, socialSec, medicare,
       stateTax, totalTax, withholdAnnual, netAnnual, periodsPerYear, additionalPerPeriod,
       netPerPeriodCash, effectiveRate, marginalRate: marginalRate(fedTaxable, status),
       monthlyTakeHome, k401Capped, stateName: stateInfo.name, stateTier: stateInfo.tier,
@@ -396,7 +359,7 @@ export function PaycheckCalculator() {
         { name: 'Social Security & Medicare', value: results.socialSec + results.medicare,                                color: CHART_COLORS.amber },
         { name: 'Retirement & savings',       value: results.savingsAnnual,                                               color: CHART_COLORS.blue },
         { name: 'Insurance premiums',         value: results.premiumAnnual,                                               color: 'oklch(0.55 0.19 290)' },
-        { name: 'Other deductions',           value: results.otherPreTaxAnnual + results.otherAfterTaxAnnual + results.withholdAnnual, color: 'oklch(0.62 0.03 260)' },
+        { name: 'Other deductions',           value: results.otherAfterTaxAnnual + results.withholdAnnual,                color: 'oklch(0.62 0.03 260)' },
       ].filter(slice => slice.value > 0.5)
     : []
   const chartTotal = chartData.reduce((sum, s) => sum + s.value, 0)
@@ -466,15 +429,11 @@ export function PaycheckCalculator() {
     </div>
   )
 
-  // Sections that already carry non-default values start expanded.
+  // Pre-tax opens when deductions are present; after-tax is always expanded.
   const preTaxOpen = [
     data.retirement401kPercent, data.healthPremiumMonthly, data.dentalMonthly, data.visionMonthly,
-    data.hsaMonthly, data.fsaMonthly, data.otherPreTaxMonthly,
+    data.hsaMonthly, data.fsaMonthly,
   ].some(v => toNumber(v) > 0)
-  const dependentsOpen = toNumber(data.childrenUnder17) > 0 || toNumber(data.otherDependents) > 0
-  const exemptionsOpen = toNumber(data.extraFederalDeductions) > 0 || toNumber(data.extraStateDeductions) > 0
-  const afterTaxOpen =
-    toNumber(data.roth401kPercent) > 0 || toNumber(data.otherAfterTaxMonthly) > 0 || toNumber(data.additionalWithholding) > 0
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -568,25 +527,10 @@ export function PaycheckCalculator() {
             {moneyField('vision', 'Vision ($/mo)', 'visionMonthly')}
             {moneyField('hsa-monthly', 'HSA ($/mo)', 'hsaMonthly')}
             {moneyField('fsa-monthly', 'FSA ($/mo)', 'fsaMonthly')}
-            {moneyField('other-pretax', 'Other Pre-Tax ($/mo)', 'otherPreTaxMonthly')}
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection icon={Users} title="Dependents (Tax Credits)" defaultOpen={dependentsOpen}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {countField('children', 'Children Under 17', 'childrenUnder17')}
-            {countField('other-deps', 'Other Dependents', 'otherDependents')}
-          </div>
-        </CollapsibleSection>
-
-        <CollapsibleSection icon={ShieldCheck} title="Additional Tax Exemptions" subtitle="(per year)" defaultOpen={exemptionsOpen}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {moneyField('extra-fed', 'Extra Federal Deductions ($/yr)', 'extraFederalDeductions')}
-            {moneyField('extra-state', 'Extra State Deductions ($/yr)', 'extraStateDeductions')}
-          </div>
-        </CollapsibleSection>
-
-        <CollapsibleSection icon={Receipt} title="After-Tax Deductions" defaultOpen={afterTaxOpen}>
+        <CollapsibleSection icon={Receipt} title="After-Tax Deductions" defaultOpen>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {percentField('roth-401k', 'Roth 401(k) Contribution (%)', 'roth401kPercent')}
             {moneyField('other-aftertax', 'Other After-Tax ($/mo)', 'otherAfterTaxMonthly')}
@@ -642,12 +586,6 @@ export function PaycheckCalculator() {
                   <div className="flex justify-between py-3">
                     <span className="text-muted-foreground">Insurance premiums:</span>
                     <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.premiumAnnual), true)}</span>
-                  </div>
-                )}
-                {results.otherPreTaxAnnual > 0 && (
-                  <div className="flex justify-between py-3">
-                    <span className="text-muted-foreground">Other pre-tax:</span>
-                    <span className="font-semibold currency-orange">&minus;{formatCurrency(per(results.otherPreTaxAnnual), true)}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-3">
@@ -710,14 +648,6 @@ export function PaycheckCalculator() {
                   <span className="text-muted-foreground">Total taxes:</span>
                   <span className="font-semibold currency-red">{formatCurrency(results.totalTax)}</span>
                 </div>
-                {results.dependentCredits > 0 && (
-                  <div className="flex justify-between py-2 pl-4">
-                    <span className="text-muted-foreground text-sm">Dependent tax credits applied:</span>
-                    <span className="text-sm currency-green">
-                      &minus;{formatCurrency(Math.min(results.dependentCredits, results.federalTaxBeforeCredits))}
-                    </span>
-                  </div>
-                )}
                 {results.k401Annual > 0 && (
                   <div className="flex justify-between py-2 pl-4">
                     <span className="text-muted-foreground text-sm italic">401(k) contribution:</span>
@@ -761,24 +691,6 @@ export function PaycheckCalculator() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Net Pay Per Paycheck — same take-home shown across common frequencies */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Net Pay by Pay Frequency</CardTitle>
-              <p className="text-sm text-muted-foreground">Your annual take-home, split different ways</p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {NET_PAY_FREQUENCIES.map(f => (
-                  <div key={f.label} className="rounded-xl border border-border/50 bg-muted/30 p-3 text-center">
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{f.label}</div>
-                    <div className="mt-1 font-bold currency-green">{formatCurrency(results.netAnnual / f.periods, true)}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Where Every Dollar Goes — donut with a center total + labeled legend */}
           <Card>

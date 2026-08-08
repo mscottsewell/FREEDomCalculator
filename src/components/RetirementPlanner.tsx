@@ -39,6 +39,17 @@ interface RetirementData {
   annualIncrease: NumericOrEmpty
 }
 
+const RETIREMENT_STORAGE_KEY = 'retirement-planner-v2'
+
+const RETIREMENT_DEFAULTS: RetirementData = {
+  currentAge: 22,
+  retirementAge: 67,
+  currentSavings: 0,
+  monthlyContribution: 1000,
+  annualReturn: 8,
+  annualIncrease: 2,
+}
+
 interface ChartPoint {
   age: number
   contributions: number
@@ -90,7 +101,7 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   const nestEgg = final.balance
   const totalContributed = final.contributed
   const growth = Math.max(0, nestEgg - totalContributed)
-  const monthlyIncome = (nestEgg * 0.04) / 12
+  const monthlyIncome = (nestEgg * 0.03) / 12
 
   const waitYears = Math.min(10, Math.max(1, years - 1))
   const nestEggWait = simulate(Math.max(0, years - waitYears)).balance
@@ -161,14 +172,11 @@ const isRetirementData = (v: unknown): v is RetirementData =>
   })
 
 export function RetirementPlanner() {
-  const [data, setData] = useLocalStorage<RetirementData>('retirement-planner', {
-    currentAge: 20,
-    retirementAge: 65,
-    currentSavings: 1000,
-    monthlyContribution: 200,
-    annualReturn: 8,
-    annualIncrease: 2,
-  }, isRetirementData)
+  const [data, setData] = useLocalStorage<RetirementData>(
+    RETIREMENT_STORAGE_KEY,
+    RETIREMENT_DEFAULTS,
+    isRetirementData
+  )
   const [results, setResults] = useState<Results | null>(null)
   const [chart, setChart] = useState<ChartPoint[]>([])
   const [error, setError] = useState('')
@@ -270,7 +278,7 @@ export function RetirementPlanner() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="monthly-contribution">Monthly ($)</Label>
+          <Label htmlFor="monthly-contribution">Monthly Retirement Savings ($)</Label>
           <Input
             id="monthly-contribution"
             type="text"
@@ -280,7 +288,7 @@ export function RetirementPlanner() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="annual-increase">Yearly Raise (%)</Label>
+          <Label htmlFor="annual-increase">Yearly Increase in Savings (%)</Label>
           <div className="relative">
             <Input
               id="annual-increase"
@@ -382,7 +390,7 @@ export function RetirementPlanner() {
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Retirement income</div>
                   <div className="text-xl font-bold currency-blue">{formatCurrency(results.monthlyIncome)}/mo</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Spendable at the safe 4% rule</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Based on a 3% annual withdrawal rate</div>
                 </div>
               </CardContent>
             </Card>
@@ -487,9 +495,9 @@ export function RetirementPlanner() {
 
           <p className="text-xs text-muted-foreground leading-relaxed">
             Educational estimate only. Assumes a steady average annual return compounded monthly, with monthly
-            contributions made at month-end that step up by your “yearly raise” percentage at the start of each year;
-            real markets bounce around year to year. The “4% rule” is a common rule-of-thumb for sustainable
-            retirement withdrawals, not a guarantee. This isn’t individualized financial advice.
+            contributions made at month-end that step up by your “yearly increase in savings” percentage at the start of each year;
+            real markets bounce around year to year. The 3% annual withdrawal rate is a conservative
+            retirement-income estimate, not a guarantee. This isn’t individualized financial advice.
           </p>
         </>
       )}
