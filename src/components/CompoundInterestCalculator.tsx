@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -150,6 +151,8 @@ export function CompoundInterestCalculator() {
     setChartData(chartPoints)
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof CompoundData, value: NumericOrEmpty | number | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
@@ -261,7 +264,7 @@ export function CompoundInterestCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive" className="w-full">
             <AlertDescription>{error}</AlertDescription>
@@ -269,8 +272,10 @@ export function CompoundInterestCalculator() {
         )}
       </div>
 
-      {/* Results and Chart Section */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      {hasCalculated && (
+        <>
+        {/* Results and Chart Section */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
@@ -342,7 +347,9 @@ export function CompoundInterestCalculator() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+        </>
+      )}
 
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -201,10 +202,10 @@ export function RetirementPlanner() {
     return null
   }
 
-  const runCalc = (showErrors: boolean) => {
+  const runCalc = () => {
     const v = validate()
     if (v) {
-      if (showErrors) setError(v)
+      setError(v)
       return
     }
     setError('')
@@ -213,11 +214,7 @@ export function RetirementPlanner() {
     setChart(out.chart)
   }
 
-  // Live update so the page is never empty — friendly, no error nagging while typing
-  useEffect(() => {
-    runCalc(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
+  const { requestCalculation } = useCalculationGate(data, runCalc)
 
   const update = (field: keyof RetirementData, value: NumericOrEmpty | string) =>
     setData((c) => ({ ...c, [field]: value }))
@@ -322,7 +319,7 @@ export function RetirementPlanner() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={() => runCalc(true)} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>

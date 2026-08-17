@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -316,6 +317,8 @@ export function TimeValueOfMoneyCalculator() {
     return null
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof TVMData, value: NumericOrEmpty | string) => {
     setData(current => {
       const safeCurrent: TVMData = {
@@ -476,11 +479,12 @@ export function TimeValueOfMoneyCalculator() {
       </div>
 
       {/* Calculate Button */}
-      <CalculateButton onCalculate={calculate} />
+      <CalculateButton onCalculate={requestCalculation} />
 
       {/* Results and Instructions Section Side by Side */}
       <div className="flex flex-col md:flex-row gap-6">
-        <Card className="w-full md:w-1/3">
+        {hasCalculated && (
+          <Card className="w-full md:w-1/3">
           <CardHeader>
             <CardTitle>
               {(() => {
@@ -528,8 +532,9 @@ export function TimeValueOfMoneyCalculator() {
               </>
             )}
           </CardContent>
-        </Card>
-        <Card className="w-full md:w-2/3">
+          </Card>
+        )}
+        <Card className={hasCalculated ? 'w-full md:w-2/3' : 'w-full'}>
           <CardContent>
             <div className="space-y-2">
               <p><strong>Cash Flow Convention:</strong> Use negative values for cash outflows (money you pay) and positive values for cash inflows (money you receive).</p><br />

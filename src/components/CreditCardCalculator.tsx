@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -233,6 +234,8 @@ export function CreditCardCalculator() {
     return null
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof CreditCardData, value: NumericOrEmpty | string) => {
     setData((current) => ({ ...current, [field]: value }));
   };
@@ -354,7 +357,7 @@ export function CreditCardCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -362,8 +365,10 @@ export function CreditCardCalculator() {
         )}
       </div>
 
-      {/* Results Section */}
-      <Card>
+      {hasCalculated && (
+        <>
+        {/* Results Section */}
+        <Card>
         <CardHeader>
           <CardTitle>Payoff Summary</CardTitle>
         </CardHeader>
@@ -393,10 +398,10 @@ export function CreditCardCalculator() {
             </div>
           </div>
         </CardContent>
-      </Card>
+        </Card>
 
-      {/* Chart Section */}
-      <Card>
+        {/* Chart Section */}
+        <Card>
         <CardHeader>
           <CardTitle>Payment Breakdown Over Time</CardTitle>
         </CardHeader>
@@ -454,7 +459,7 @@ export function CreditCardCalculator() {
             </ResponsiveContainer>
           </div>
         </CardContent>
-      </Card>
+        </Card>
 
       {/* Yearly Payment Schedule Table */}
       {schedule.length > 0 && (
@@ -572,6 +577,8 @@ export function CreditCardCalculator() {
             </div>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
 
       {/* Key Lesson Section */}

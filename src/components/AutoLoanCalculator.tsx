@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -117,6 +118,8 @@ export function AutoLoanCalculator() {
     setSchedule(paymentHistory)
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof AutoLoanData, value: NumericOrEmpty | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
@@ -190,7 +193,7 @@ export function AutoLoanCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -198,8 +201,10 @@ export function AutoLoanCalculator() {
         )}
       </div>
 
-      {/* Results & Understanding Section Side by Side */}
-      <div className="flex flex-col sm:flex-row gap-6">
+      {hasCalculated && (
+        <>
+        {/* Results & Understanding Section Side by Side */}
+        <div className="flex flex-col sm:flex-row gap-6">
         <Card className="w-full md:w-1/2">
           <CardHeader>
             <CardTitle>Loan Summary</CardTitle>
@@ -208,7 +213,7 @@ export function AutoLoanCalculator() {
             <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Monthly Payment</span>
               <span className="font-semibold currency-blue">{formatCurrencyNoDecimals(results.monthlyPayment)}</span>
-            </div>
+              </div>
             <div className="flex justify-between items-center py-3">
               <span className="text-muted-foreground">Total Interest</span>
               <span className="font-semibold currency-red">{formatCurrencyNoDecimals(results.totalInterest)}</span>
@@ -270,6 +275,8 @@ export function AutoLoanCalculator() {
             </div>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
 
       {/* Key Lesson Section */}

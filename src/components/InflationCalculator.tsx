@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -104,6 +105,8 @@ export function InflationCalculator() {
     setChartData(chartPoints)
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof InflationData, value: NumericOrEmpty | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
@@ -176,7 +179,7 @@ export function InflationCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive" className="w-full">
             <AlertDescription>{error}</AlertDescription>
@@ -184,8 +187,10 @@ export function InflationCalculator() {
         )}
       </div>
 
-      {/* Results Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {hasCalculated && (
+        <>
+        {/* Results Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Results</CardTitle>
@@ -235,10 +240,10 @@ export function InflationCalculator() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
 
-      {/* Chart Section */}
-      <Card>
+        {/* Chart Section */}
+        <Card>
         <CardHeader>
           <CardTitle>Purchasing Power Over Time</CardTitle>
         </CardHeader>
@@ -268,7 +273,9 @@ export function InflationCalculator() {
             </ResponsiveContainer>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+        </>
+      )}
 
       {/* Key Lesson Section */}
       <Card className="bg-accent/5 border-accent/20">
