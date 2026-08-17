@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -164,6 +165,8 @@ export function MortgageCalculator() {
     setMonthlySchedule(monthlyPayments)
   }
 
+  const { hasCalculated, requestCalculation } = useCalculationGate(data, calculate)
+
   const updateData = (field: keyof MortgageData, value: NumericOrEmpty | string) => {
     setData(current => ({ ...current, [field]: value }))
   }
@@ -252,7 +255,7 @@ export function MortgageCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -260,8 +263,10 @@ export function MortgageCalculator() {
         )}
       </div>
 
-      {/* Results Section */}
-      <Card>
+      {hasCalculated && (
+        <>
+        {/* Results Section */}
+        <Card>
         <CardHeader>
           <CardTitle>Mortgage Summary</CardTitle>
         </CardHeader>
@@ -297,7 +302,7 @@ export function MortgageCalculator() {
             <div className="text-sm text-muted-foreground">Total Paid</div>
           </div>
         </CardContent>
-      </Card>
+        </Card>
 
       {/* Understanding Section */}
       <Card>
@@ -385,6 +390,8 @@ export function MortgageCalculator() {
             </div>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
 
       {/* Key Lesson Section */}

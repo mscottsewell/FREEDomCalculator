@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useCalculationGate } from '@/hooks/useCalculationGate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -346,6 +347,8 @@ export function PaycheckCalculator() {
     })
   }
 
+  const { requestCalculation } = useCalculationGate(data, calculate)
+
   const periodNoun = FREQUENCY_NOUN[data.payFrequency]
   const per = (annual: number) => results.periodsPerYear > 0 ? annual / results.periodsPerYear : 0
 
@@ -541,7 +544,7 @@ export function PaycheckCalculator() {
 
       {/* Calculate Button */}
       <div className="flex flex-col gap-3">
-        <CalculateButton onCalculate={calculate} />
+        <CalculateButton onCalculate={requestCalculation} />
         {error && (
           <Alert variant="destructive" className="w-full">
             <AlertDescription>{error}</AlertDescription>
