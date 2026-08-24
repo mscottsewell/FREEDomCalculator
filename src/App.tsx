@@ -193,7 +193,12 @@ function App() {
             const Component = calc.component
             const Icon = calc.icon
             return (
-              <TabsContent key={calc.id} value={calc.id} className="mt-0">
+              <TabsContent
+                key={calc.id}
+                value={calc.id}
+                forceMount
+                className="mt-0 data-[state=inactive]:hidden"
+              >
                 {calc.id === 'hp12c' ? (
                   <>
                     <div className="mobile-tab-title">
