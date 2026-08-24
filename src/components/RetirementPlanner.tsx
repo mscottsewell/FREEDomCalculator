@@ -63,10 +63,12 @@ interface Results {
   totalContributed: number
   growth: number
   monthlyIncome: number
+  fiveYearWaitYears: number
+  fiveYearContributionDifference: number
+  fiveYearWaitDifference: number
   waitYears: number
-  nestEggWait: number
+  contributionDifference: number
   waitDifference: number
-  headStart: number
   firstMillionAge: number | null
 }
 
@@ -104,10 +106,14 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   const growth = Math.max(0, nestEgg - totalContributed)
   const monthlyIncome = (nestEgg * 0.03) / 12
 
+  const fiveYearWaitYears = Math.min(5, Math.max(1, years - 1))
+  const fiveYearWaiting = simulate(Math.max(0, years - fiveYearWaitYears))
+  const fiveYearContributionDifference = Math.max(0, totalContributed - fiveYearWaiting.contributed)
+  const fiveYearWaitDifference = Math.max(0, nestEgg - fiveYearWaiting.balance)
   const waitYears = Math.min(10, Math.max(1, years - 1))
-  const nestEggWait = simulate(Math.max(0, years - waitYears)).balance
-  const waitDifference = Math.max(0, nestEgg - nestEggWait)
-  const headStart = nestEggWait > 0 ? nestEgg / nestEggWait : 0
+  const waiting = simulate(Math.max(0, years - waitYears))
+  const contributionDifference = Math.max(0, totalContributed - waiting.contributed)
+  const waitDifference = Math.max(0, nestEgg - waiting.balance)
 
   const chart: ChartPoint[] = []
   let firstMillionAge: number | null = null
@@ -126,10 +132,12 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
       totalContributed,
       growth,
       monthlyIncome,
+      fiveYearWaitYears,
+      fiveYearContributionDifference,
+      fiveYearWaitDifference,
       waitYears,
-      nestEggWait,
+      contributionDifference,
       waitDifference,
-      headStart,
       firstMillionAge,
     },
     chart,
@@ -401,19 +409,22 @@ export function RetirementPlanner() {
                 <HourglassHigh size={20} weight="fill" /> The cost of hitting snooze
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <p className="leading-relaxed">
-                Wait just <strong>{results.waitYears} years</strong> to start and you’d retire with about{' '}
-                <strong>{formatCurrency(results.nestEggWait)}</strong> instead — that’s{' '}
-                <strong className="currency-red">{formatCurrency(results.waitDifference)} less</strong> for the exact same
-                monthly amount.
-                {results.headStart > 1 && (
-                  <>
-                    {' '}Starting today gives Future You a{' '}
-                    <strong>{results.headStart.toFixed(1)}×</strong> head start. The best day to start was years ago — the
-                    second best day is today. 💪
-                  </>
-                )}
+                Waiting just <strong>{results.fiveYearWaitYears} years</strong> to begin means you invest{' '}
+                <strong className="currency-orange">
+                  {formatCurrency(results.fiveYearContributionDifference)} fewer dollars
+                </strong>{' '}
+                up front, but end up with{' '}
+                <strong className="currency-red">{formatCurrency(results.fiveYearWaitDifference)} fewer dollars</strong>{' '}
+                in retirement.
+              </p>
+              <p className="leading-relaxed">
+                Waiting <strong>{results.waitYears} years</strong> to begin means you invest{' '}
+                <strong className="currency-orange">{formatCurrency(results.contributionDifference)} fewer dollars</strong>{' '}
+                up front, but end up with{' '}
+                <strong className="currency-red">{formatCurrency(results.waitDifference)} fewer dollars</strong> in
+                retirement.
               </p>
             </CardContent>
           </Card>
