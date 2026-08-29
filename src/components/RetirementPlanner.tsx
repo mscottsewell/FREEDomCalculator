@@ -87,15 +87,20 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
 
   // Month-by-month simulation. The monthly contribution starts at `monthly` and
   // steps up by `g` each full year (e.g. raises). Returns the balance and the
-  // total amount contributed (principal) after `yrs` years. With g = 0 this
-  // exactly reproduces the standard lump-sum + ordinary-annuity formulas.
-  const simulate = (yrs: number, startingMonthly = monthly) => {
+  // total amount contributed (principal) after `yrs` years. Existing savings
+  // always compound for the full period; a delay applies only to new deposits.
+  // With g = 0 this reproduces the standard lump-sum + ordinary-annuity formulas.
+  const simulate = (yrs: number, startingMonthly = monthly, contributionDelayYears = 0) => {
     let balance = currentSavings
     let contributed = currentSavings
     const months = Math.max(0, Math.round(yrs * 12))
+    const contributionDelayMonths = Math.max(0, Math.round(contributionDelayYears * 12))
     for (let m = 0; m < months; m++) {
-      const yearIndex = Math.floor(m / 12)
-      const thisMonthly = startingMonthly * Math.pow(1 + g, yearIndex)
+      const contributionMonth = m - contributionDelayMonths
+      const contributionYear = Math.floor(contributionMonth / 12)
+      const thisMonthly = contributionMonth >= 0
+        ? startingMonthly * Math.pow(1 + g, contributionYear)
+        : 0
       balance = balance * (1 + mRate) + thisMonthly
       contributed += thisMonthly
     }
@@ -110,9 +115,8 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   const monthlyIncomeToday = monthlyIncome / Math.pow(1 + ASSUMED_INFLATION_RATE, years)
 
   const catchUpStartingMonthly = (delayYears: number) => {
-    const remainingYears = Math.max(0, years - delayYears)
-    const savingsOnlyBalance = simulate(remainingYears, 0).balance
-    const oneDollarBalance = simulate(remainingYears, 1).balance
+    const savingsOnlyBalance = simulate(years, 0).balance
+    const oneDollarBalance = simulate(years, 1, delayYears).balance
     const contributionFactor = oneDollarBalance - savingsOnlyBalance
 
     return contributionFactor > 0
@@ -121,7 +125,7 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   }
 
   const waitYears = Math.min(10, Math.max(1, years - 1))
-  const waiting = simulate(Math.max(0, years - waitYears))
+  const waiting = simulate(years, monthly, waitYears)
   const contributionDifference = Math.max(0, totalContributed - waiting.contributed)
   const waitDifference = Math.max(0, nestEgg - waiting.balance)
   const catchUpMonthly = catchUpStartingMonthly(waitYears)
@@ -131,8 +135,7 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   for (let y = 0; y <= years; y++) {
     const { balance, contributed } = simulate(y)
     const gr = Math.max(0, balance - contributed)
-    const elapsed = y - waitYears
-    const waitBalance = elapsed > 0 ? simulate(elapsed).balance : 0
+    const waitBalance = simulate(y, monthly, waitYears).balance
     chart.push({
       age: currentAge + y,
       contributions: contributed,
