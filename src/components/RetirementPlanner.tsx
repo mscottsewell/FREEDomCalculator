@@ -41,6 +41,7 @@ interface RetirementData {
 }
 
 const RETIREMENT_STORAGE_KEY = 'retirement-planner-v2'
+const ASSUMED_INFLATION_RATE = 0.03
 
 const RETIREMENT_DEFAULTS: RetirementData = {
   currentAge: 22,
@@ -59,16 +60,17 @@ interface ChartPoint {
 }
 
 interface Results {
+  retirementAge: number
+  annualIncrease: number
   nestEgg: number
   totalContributed: number
   growth: number
   monthlyIncome: number
-  fiveYearWaitYears: number
-  fiveYearContributionDifference: number
-  fiveYearWaitDifference: number
+  monthlyIncomeToday: number
   waitYears: number
   contributionDifference: number
   waitDifference: number
+  catchUpMonthly: number
   firstMillionAge: number | null
 }
 
@@ -87,13 +89,13 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   // steps up by `g` each full year (e.g. raises). Returns the balance and the
   // total amount contributed (principal) after `yrs` years. With g = 0 this
   // exactly reproduces the standard lump-sum + ordinary-annuity formulas.
-  const simulate = (yrs: number) => {
+  const simulate = (yrs: number, startingMonthly = monthly) => {
     let balance = currentSavings
     let contributed = currentSavings
     const months = Math.max(0, Math.round(yrs * 12))
     for (let m = 0; m < months; m++) {
       const yearIndex = Math.floor(m / 12)
-      const thisMonthly = monthly * Math.pow(1 + g, yearIndex)
+      const thisMonthly = startingMonthly * Math.pow(1 + g, yearIndex)
       balance = balance * (1 + mRate) + thisMonthly
       contributed += thisMonthly
     }
@@ -105,15 +107,24 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
   const totalContributed = final.contributed
   const growth = Math.max(0, nestEgg - totalContributed)
   const monthlyIncome = (nestEgg * 0.03) / 12
+  const monthlyIncomeToday = monthlyIncome / Math.pow(1 + ASSUMED_INFLATION_RATE, years)
 
-  const fiveYearWaitYears = Math.min(5, Math.max(1, years - 1))
-  const fiveYearWaiting = simulate(Math.max(0, years - fiveYearWaitYears))
-  const fiveYearContributionDifference = Math.max(0, totalContributed - fiveYearWaiting.contributed)
-  const fiveYearWaitDifference = Math.max(0, nestEgg - fiveYearWaiting.balance)
+  const catchUpStartingMonthly = (delayYears: number) => {
+    const remainingYears = Math.max(0, years - delayYears)
+    const savingsOnlyBalance = simulate(remainingYears, 0).balance
+    const oneDollarBalance = simulate(remainingYears, 1).balance
+    const contributionFactor = oneDollarBalance - savingsOnlyBalance
+
+    return contributionFactor > 0
+      ? Math.max(0, (nestEgg - savingsOnlyBalance) / contributionFactor)
+      : 0
+  }
+
   const waitYears = Math.min(10, Math.max(1, years - 1))
   const waiting = simulate(Math.max(0, years - waitYears))
   const contributionDifference = Math.max(0, totalContributed - waiting.contributed)
   const waitDifference = Math.max(0, nestEgg - waiting.balance)
+  const catchUpMonthly = catchUpStartingMonthly(waitYears)
 
   const chart: ChartPoint[] = []
   let firstMillionAge: number | null = null
@@ -122,22 +133,28 @@ function project(d: RetirementData): { results: Results; chart: ChartPoint[] } {
     const gr = Math.max(0, balance - contributed)
     const elapsed = y - waitYears
     const waitBalance = elapsed > 0 ? simulate(elapsed).balance : 0
-    chart.push({ age: currentAge + y, contributions: contributed, growth: gr, waitBalance })
+    chart.push({
+      age: currentAge + y,
+      contributions: contributed,
+      growth: gr,
+      waitBalance,
+    })
     if (firstMillionAge === null && balance >= 1_000_000) firstMillionAge = currentAge + y
   }
 
   return {
     results: {
+      retirementAge,
+      annualIncrease: g * 100,
       nestEgg,
       totalContributed,
       growth,
       monthlyIncome,
-      fiveYearWaitYears,
-      fiveYearContributionDifference,
-      fiveYearWaitDifference,
+      monthlyIncomeToday,
       waitYears,
       contributionDifference,
       waitDifference,
+      catchUpMonthly,
       firstMillionAge,
     },
     chart,
@@ -149,6 +166,8 @@ const compactAxis = (v: number) => {
   if (Math.abs(v) >= 1_000) return `$${Math.round(v / 1_000)}k`
   return `$${v}`
 }
+
+const inputGroupClassName = 'flex flex-col justify-end gap-2'
 
 const actionSteps = [
   {
@@ -254,7 +273,7 @@ export function RetirementPlanner() {
 
       {/* Inputs */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="current-age">Current Age</Label>
           <Input
             id="current-age"
@@ -263,7 +282,7 @@ export function RetirementPlanner() {
             onChange={(e) => update('currentAge', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="retirement-age">Retire At</Label>
           <Input
             id="retirement-age"
@@ -272,7 +291,7 @@ export function RetirementPlanner() {
             onChange={(e) => update('retirementAge', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="current-savings">Saved So Far ($)</Label>
           <Input
             id="current-savings"
@@ -282,7 +301,7 @@ export function RetirementPlanner() {
             onChange={(e) => update('currentSavings', parseFormattedNumber(e.target.value))}
           />
         </div>
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="monthly-contribution">Monthly Retirement Savings ($)</Label>
           <Input
             id="monthly-contribution"
@@ -292,7 +311,7 @@ export function RetirementPlanner() {
             onChange={(e) => update('monthlyContribution', parseFormattedNumber(e.target.value))}
           />
         </div>
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="annual-increase">Yearly Increase in Savings (%)</Label>
           <div className="relative">
             <Input
@@ -308,7 +327,7 @@ export function RetirementPlanner() {
             </div>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className={inputGroupClassName}>
           <Label htmlFor="annual-return">Return (%)</Label>
           <div className="relative">
             <Input
@@ -354,8 +373,7 @@ export function RetirementPlanner() {
                     <> (starting at {formatCurrency(toNumber(data.monthlyContribution))}/mo and stepping up{' '}
                     {toNumber(data.annualIncrease)}% a year)</>
                   )} — the other{' '}
-                  <strong className="currency-green">{formatCurrency(results.growth)}</strong> is pure compound growth
-                  doing the heavy lifting. 🚀
+                  <strong className="currency-green">{formatCurrency(results.growth)}</strong> is pure compound growth. 🚀
                 </p>
                 {results.firstMillionAge && (
                   <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent-foreground">
@@ -396,6 +414,10 @@ export function RetirementPlanner() {
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Retirement income</div>
                   <div className="text-xl font-bold currency-blue">{formatCurrency(results.monthlyIncome)}/mo</div>
                   <div className="text-xs text-muted-foreground mt-0.5">Based on a 3% annual withdrawal rate</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Assuming 3% annual inflation, that’s the equivalent of{' '}
+                    <strong>{formatCurrency(results.monthlyIncomeToday)}/mo</strong> in today’s dollars.
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -411,20 +433,15 @@ export function RetirementPlanner() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="leading-relaxed">
-                Waiting just <strong>{results.fiveYearWaitYears} years</strong> to begin means you invest{' '}
-                <strong className="currency-orange">
-                  {formatCurrency(results.fiveYearContributionDifference)} fewer dollars
-                </strong>{' '}
-                up front, but end up with{' '}
-                <strong className="currency-red">{formatCurrency(results.fiveYearWaitDifference)} fewer dollars</strong>{' '}
-                in retirement.
-              </p>
-              <p className="leading-relaxed">
                 Waiting <strong>{results.waitYears} years</strong> to begin means you invest{' '}
                 <strong className="currency-orange">{formatCurrency(results.contributionDifference)} fewer dollars</strong>{' '}
-                up front, but end up with{' '}
+                but end up with{' '}
                 <strong className="currency-red">{formatCurrency(results.waitDifference)} fewer dollars</strong> in
                 retirement.
+                <br />
+                (<span className="text-muted-foreground">To catch up, you’d need to start saving{' '}
+                  <strong>{formatCurrency(results.catchUpMonthly)} every month</strong> and increase that by{' '}
+                  <strong>{results.annualIncrease}% every year until age {results.retirementAge}</strong>.</span>)
               </p>
             </CardContent>
           </Card>
@@ -446,8 +463,46 @@ export function RetirementPlanner() {
                     <XAxis dataKey="age" fontSize={12} tickFormatter={(v) => `${v}`} />
                     <YAxis tickFormatter={compactAxis} fontSize={12} width={48} />
                     <Tooltip
-                      formatter={(value: number, name: string) => [formatCurrency(value), name]}
-                      labelFormatter={(label) => `Age ${label}`}
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload?.length) return null
+
+                        const valueFor = (dataKey: keyof ChartPoint) => {
+                          const value = payload.find((item) => item.dataKey === dataKey)?.value
+                          return typeof value === 'number' ? value : 0
+                        }
+                        const contributions = valueFor('contributions')
+                        const growth = valueFor('growth')
+
+                        const row = (
+                          name: string,
+                          value: number,
+                          options?: { bold?: boolean; color?: string }
+                        ) => (
+                          <div
+                            className={`grid grid-cols-[1fr_auto] gap-x-6 ${options?.bold ? 'font-bold' : ''}`}
+                            style={options?.color ? { color: options.color } : undefined}
+                          >
+                            <span>{name}</span>
+                            <span className="text-right tabular-nums">{formatCurrency(value)}</span>
+                          </div>
+                        )
+
+                        return (
+                          <div className="min-w-64 rounded-lg border border-border bg-popover p-3 text-sm text-foreground shadow-lg">
+                            <div className="grid grid-cols-[1fr_auto] gap-x-6">
+                              <span>Age</span>
+                              <span className="text-right tabular-nums">{label}</span>
+                            </div>
+                            {row('Your contribution', contributions, { color: CHART_COLORS.blue })}
+                            {row('Compound growth', growth, { color: CHART_COLORS.emerald })}
+                            {row('Total account value', contributions + growth, { bold: true })}
+                            <div className="my-2 h-px bg-border/70" role="separator" />
+                            {row('If you wait 10 years', valueFor('waitBalance'), {
+                              color: CHART_COLORS.red,
+                            })}
+                          </div>
+                        )
+                      }}
                     />
                     <Legend fontSize={12} />
                     <Area
