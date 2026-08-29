@@ -411,18 +411,18 @@ export function RetirementPlanner() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="leading-relaxed">
-                Waiting just <strong>{results.fiveYearWaitYears} years</strong> to begin means you invest{' '}
+                Waiting <strong>{results.fiveYearWaitYears} years</strong> to begin means you invest{' '}
                 <strong className="currency-orange">
                   {formatCurrency(results.fiveYearContributionDifference)} fewer dollars
                 </strong>{' '}
-                up front, but end up with{' '}
+                , but end up with{' '}
                 <strong className="currency-red">{formatCurrency(results.fiveYearWaitDifference)} fewer dollars</strong>{' '}
                 in retirement.
               </p>
               <p className="leading-relaxed">
                 Waiting <strong>{results.waitYears} years</strong> to begin means you invest{' '}
                 <strong className="currency-orange">{formatCurrency(results.contributionDifference)} fewer dollars</strong>{' '}
-                up front, but end up with{' '}
+                , but end up with{' '}
                 <strong className="currency-red">{formatCurrency(results.waitDifference)} fewer dollars</strong> in
                 retirement.
               </p>
