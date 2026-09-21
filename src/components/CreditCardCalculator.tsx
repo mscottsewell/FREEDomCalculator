@@ -430,9 +430,9 @@ export function CreditCardCalculator() {
                   fontSize={12}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    formatCurrency(value),
-                    name === "principal" ? "Principal" : "Interest",
+                  formatter={(value, name) => [
+                    formatCurrency(Number(value)),
+                    name,
                   ]}
                   labelFormatter={(label) => `Month ${label}`}
                 />
